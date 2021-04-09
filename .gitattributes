@@ -1,4 +1,4 @@
 *.MAC linguist-detectable=true
-*.MAC linguist-language=MACRO-11
+*.MAC linguist-language=Assembly
 *.MAC text working-tree-encoding=KOI8-R eol=crlf
 *.PAS text working-tree-encoding=KOI8-R eol=crlf

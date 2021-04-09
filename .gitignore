@@ -1,6 +1,7 @@
-/x-*
-/.vscode
-/*.OBJ
-/*.LST
-/*.MAP
-/*.SAV
+x-*
+.vscode
+*.OBJ
+*.LST
+*.MAP
+*.SAV
+/STALK-PASCAL/STALK1.MAC
