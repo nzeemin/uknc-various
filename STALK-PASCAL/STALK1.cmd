@@ -10,7 +10,7 @@ for /F "delims=#" %%E in ('"prompt #$E# & for %%E in (1) do rem"') do set "ESCch
 @if exist STALK1.OBJ del STALK1.OBJ
 @if exist STALK1.SAV del STALK1.SAV
 
-%rt11exe% RU PASDWK.SAV STALK1,STALK1=STALK1.PAS
+%rt11exe% RU PASCAL.SAV STALK1,STALK1=STALK1.PAS
 
 set errdet=
 for /f "delims=" %%a in ('findstr /B "ERRORS DETECTED" STALK1.LST') do set "errdet=%%a"
@@ -36,7 +36,7 @@ if "%errdet%"=="Errors detected:  0" (
   exit /b
 )
 
-%rt11exe% LINK/STACK:1000 STALK1,PASDWK /MAP:STALK1.MAP
+%rt11exe% LINK/STACK:1000 STALK1,PASCAL /MAP:STALK1.MAP
 
 for /f "delims=" %%a in ('findstr /B "Undefined globals" STALK1.MAP') do set "undefg=%%a"
 if "%undefg%"=="" (
