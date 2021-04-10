@@ -450,7 +450,7 @@ case VAR53 of {L20554}
 						if FIL[VAR20,VAR16,VAR4] <> '.' then begin
 							CURSORTO(VAR16,VAR20); {L22112}
 							WRITE(FIL[VAR20,VAR16,VAR4]); {L22126}
-							FIL2[VAR20,VAR16,VAR4]:=FIL[VAR20,VAR16,VAR4] OR 100B; {L22204}
+							FIL2[VAR20,VAR16,VAR4]:=FIL2[VAR20,VAR16,VAR4] OR 100B; {L22204}
 						end;
 					end;
 				end;
@@ -458,9 +458,7 @@ case VAR53 of {L20554}
 			end else begin
 				VAR40:=20; {L22404}
 				WRITELN('Напился - сдай стеклотару!!!!');
-				{TODO}
 			end;
-			{TODO}
 		end else
 			WRITELN('Пить нечего');
 	end;
@@ -614,11 +612,11 @@ if IND[5] >= 0 then begin { В банке есть деньги? }
 	end else
 		exit;
 	{TODO}
-end else begin
+end else
 	WRITELN('А расплачиваться кто будет?');
+{ конец игрового цикла }
 end;
-end; { конец игрового цикла }
 {TODO: расчёт счёта игрока}
 WRITE('Ваш счет -');
-{TODO: вывод VAR16}
+WRITE(VAR16:5);
 END.
