@@ -1,6 +1,7 @@
 PROGRAM STALK;
 {$S+}
 {$A-}
+{$T-}
 type	charptr = ^char;
 type	intptr = ^integer;
 var	DUNGEON: integer; { Номер подземелья }
@@ -45,17 +46,13 @@ var	DUNGEON: integer; { Номер подземелья }
 	V33156:	char;
 	TITLE:	array[0..29] of char;
 
-procedure L01000;
-begin
-	{TODO}
-end;
+function RANDU(var A,B:integer):real; fortran;
 
 function L01046(A,B:integer):integer;
 begin
-	{TODO}
+	L01046:=ROUND(A+(B-A)*RANDU(VAR42,VAR44));
 end;
 
-{$T-}
 procedure READCHAR(addr:charptr); {L01166}
 begin
 {$C
@@ -65,14 +62,14 @@ begin
 	MOVB	R0, @000002(SP)
 }
 end;
-{$T-}
+
 { Поставить курсор на позицию (X*2,Y) }
 procedure CURSORTO(Y,X:integer); {L01216}
 begin
 	WRITE(CHR(33B),CHR(131B));
 	WRITE(CHR(Y+32),CHR(X+X+32));
 end;
-{$T-}
+
 procedure CLEARMSG; {L01320}
 begin
 	CURSORTO(16,0);
@@ -81,22 +78,22 @@ begin
 	end;
 	CURSORTO(17,0);
 end;
-{$T-}
+
 procedure L01460(A,B,C:integer);
 begin
 	{TODO}
 end;
-{$T-}
+
 function L02332(A,B:integer):integer;
 begin
 	{TODO}
 end;
-{$T-}
+
 procedure NELZYA;
 begin
 	WRITELN(' Н е л ь з я ! ! !');
 end;
-{$T-}
+
 procedure L02574(V,Y,X:integer);
 begin
 	{TODO}
@@ -107,12 +104,12 @@ begin
 	end;
 	{TODO}
 end;
-{$T-}
+
 procedure ZAKLYATIE;
 begin
 	WRITELN('На этой штуке заклятие');
 end;
-{$T-}
+
 { Параметр: 'J' - обновить экран; '.' - вверх; '5' - вниз }
 procedure L03362(A:char);
 begin
@@ -163,19 +160,18 @@ begin
 	CLEARMSG;
 	{TODO}
 end;
-{$T-}
+
 procedure L05370(A,B:integer);
 begin
 	{TODO}
 end;
-{$T-}
+
 procedure L05702(A:integer);
 begin
 	{TODO}
 end;
 {$A-}
 {$D-}
-{$T-}
 BEGIN {MAIN}
 TITLE[00]:='(';
 TITLE[01]:='H';

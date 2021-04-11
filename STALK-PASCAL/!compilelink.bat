@@ -5,17 +5,30 @@ rem Define ESCchar to use in ANSI escape sequences
 rem https://stackoverflow.com/questions/2048509/how-to-echo-with-different-colors-in-the-windows-command-line
 for /F "delims=#" %%E in ('"prompt #$E# & for %%E in (1) do rem"') do set "ESCchar=%%E"
 
+@if exist FRANDU.LST del FRANDU.LST
+@if exist FRANDU.OBJ del FRANDU.OBJ
 @if exist STALK1.MAC del STALK1.MAC
 @if exist STALK1.LST del STALK1.LST
 @if exist STALK1.OBJ del STALK1.OBJ
 @if exist STALK1.SAV del STALK1.SAV
 
-%rt11exe% RU PASCAL.SAV STALK1,STALK1=STALK1.PAS
+%rt11exe% MACRO/LIST:DK: FRANDU.MAC
+
+for /f "delims=" %%a in ('findstr /B "Errors detected" FRANDU.LST') do set "errdet=%%a"
+if "%errdet%"=="Errors detected:  0" (
+  echo FRANDU COMPILED SUCCESSFULLY
+) ELSE (
+  findstr /RC:"^[ABDEILMNOPQRTUZ] " FRANDU.LST
+  echo ======= %errdet% =======
+  exit /b
+)
+
+%rt11exe% RU PASCAL STALK1,STALK1=STALK1.PAS
 
 set errdet=
 for /f "delims=" %%a in ('findstr /B "ERRORS DETECTED" STALK1.LST') do set "errdet=%%a"
 if "%errdet%"=="ERRORS DETECTED:  0    " (
-  echo .PAS COMPILED SUCCESSFULLY
+  echo STALK1.PAS COMPILED SUCCESSFULLY
 ) ELSE (
 REM  findstr /RC:"^****** " STALK1.LST
   echo ======= .PAS NOT COMPILED =======
@@ -29,14 +42,14 @@ REM  findstr /RC:"^****** " STALK1.LST
 set errdet=
 for /f "delims=" %%a in ('findstr /B "Errors detected" STALK1.LST') do set "errdet=%%a"
 if "%errdet%"=="Errors detected:  0" (
-  echo COMPILED SUCCESSFULLY
+  echo STALK1.MAC COMPILED SUCCESSFULLY
 ) ELSE (
   findstr /RC:"^[ABDEILMNOPQRTUZ] " STALK1.LST
   echo ======= %errdet% =======
   exit /b
 )
 
-%rt11exe% LINK/STACK:1000 STALK1,PASCAL /MAP:STALK1.MAP
+%rt11exe% LINK/STACK:1000 STALK1,FRANDU,PASCAL /MAP:STALK1.MAP
 
 for /f "delims=" %%a in ('findstr /B "Undefined globals" STALK1.MAP') do set "undefg=%%a"
 if "%undefg%"=="" (
