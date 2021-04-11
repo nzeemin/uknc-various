@@ -21,8 +21,8 @@ var	DUNGEON: integer; { Номер подземелья }
 	VAR34:	integer; { Y }
 	VAR36:	integer; { X }
 	VAR40:	integer;
-	VAR42:	integer;{unused}
-	VAR44:	integer;
+	VAR42:	integer; { Число для генератора случайных чисел }
+	VAR44:	integer; { Число для генератора случайных чисел }
 	VAR46:	char;
 	VAR47:	char; { Фонарь 1 - горит, 0 - не горит }
 	VAR50:	char;
@@ -33,27 +33,29 @@ var	DUNGEON: integer; { Номер подземелья }
 	VAR55:	char;
 	IND:	array[1..5] of integer; { Индикаторы справа: }
 	{ 1 - Рейтинг, 2 - Энергия, 3 - Оружие, 4 - Защита, 5 - В банке денег }
-	FIL:	array[1..32,1..16,0..8] of char;
-	V11070:	charptr; { Указатель на клетку в FIL }
-	V11072:	charptr; { Указатель на клетку в FIL }
-	FIL2:	array[1..32,1..16,0..8] of integer;
-	V33074: intptr; { Указатель на клетку в FIL2 }
-	V33076: intptr; { Указатель на клетку в FIL2 }
-	V33077:	char;
-	RUKSAK:	array[1..6] of char; {033100..033105}
-	V33106: array[1..6] of integer; {033106..033120}
-	V33122: array[1..4] of char; {033122..033125}
+	F:	array[0..8,1..16,1..32] of char;
+	V11070:	charptr; { Указатель на клетку в F }
+	V11072:	charptr; { Указатель на клетку в F }
+	F2:	array[0..8,1..16,1..32] of integer;
+	V33074: intptr; { Указатель на клетку в F2 }
+	V33076: intptr; { Указатель на клетку в F2 }
+	RUKSAK:	array[1..6] of char;	{033100..033105}
+	V33106: array[1..6] of integer;	{033106..033120}
+	V33122: array[1..4] of char;	{033122..033125}
+	V33126:	array[1..4] of integer;	{033126..033134}
+	V33136: array[1..4] of integer;	{033136..033144}
+	V33146: array[1..4] of integer; {033146..033154}
 	V33156:	char;
 	TITLE:	array[0..29] of char;
 
-function RANDU(var A,B:integer):real; fortran;
+function RANDU(var A,B:integer):real; fortran; {L01000}
 
-function L01046(A,B:integer):integer;
+function RANDOM(A,B:integer):integer; {L01046}
 begin
-	L01046:=ROUND(A+(B-A)*RANDU(VAR42,VAR44));
+	RANDOM:=ROUND(A+(B-A)*RANDU(VAR42,VAR44));
 end;
 
-procedure READCHAR(addr:charptr); {L01166}
+procedure READCHAR(var CH:char); {L01166}
 begin
 {$C
 	BIS	#^O010000, @#^O000044
@@ -80,12 +82,30 @@ begin
 end;
 
 procedure L01460(A,B,C:integer);
+var I,J:integer;
 begin
-	{TODO}
+	for I:=-1 TO 1 do begin
+		for J:=-1 TO 1 do begin
+			C:=B+I;
+			B:=C+J;
+			if (F[A,C,B] = '^') and ((F2[A,C,B] and 6) <> 4) then begin
+				CURSORTO(VAR22,VAR24);
+				WRITE('.');
+			end else begin
+				F2[A,VAR22,VAR24]:=F2[A,VAR22,VAR24] or 100B;
+				CURSORTO(VAR22,VAR24);
+				WRITE(F[A,VAR22,VAR24]);
+			end;
+		end;
+	end;
 end;
 
 function L02332(A,B:integer):integer;
+var I:integer;
 begin
+{$C
+	.BLKW	50
+}
 	{TODO}
 end;
 
@@ -95,14 +115,25 @@ begin
 end;
 
 procedure L02574(V,Y,X:integer);
+var FV:char; FV2:integer;
 begin
-	{TODO}
+	FV:=F[V,Y,X];
+	FV2:=F2[V,Y,X];
 	WRITELN('З в е р ь !');
-	{TODO}
-	for VAR20:=1 to 3 do begin
-		{TODO}
+	if (FV2 and 4) <> 0 then begin
+		if (FV <> V33122[1]) and (FV <> V33122[2]) and (FV <> V33122[3]) then begin
+			VAR16:=0;
+			for VAR20:=1 to 3 do begin
+				VAR16:=VAR16+1;
+				if V33122[VAR16] = ' ' then
+					EXIT;
+			end;
+			V33122[VAR16]:=FV;
+			V33126[VAR16]:=FV2;
+			V33136[VAR16]:=Y;
+			V33146[VAR16]:=X;
+		end;
 	end;
-	{TODO}
 end;
 
 procedure ZAKLYATIE;
@@ -119,12 +150,23 @@ begin
 			for VAR16:=1 TO 4 do begin
 				V33122[VAR16]:=' ';
 			end;
-			{TODO}
+			if (A = '.') and (VAR4 <> 0) then begin
+				VAR4:=VAR4-1;
+				IND[2]:=IND[2]-2;
+				IND[1]:=IND[1]+1;
+			end else if VAR4 <> 8 then begin
+				VAR4:=VAR4+1;
+				IND[1]:=IND[1]+3;
+			end else begin
+				V11070:=@F[VAR4,VAR12,VAR14]; {L03644}
+				V33074:=@F2[VAR4,VAR12,VAR14]; {L03716}
+				V11072:=@F[VAR4,VAR6,VAR10]; {L04000}
+				V33074:=@F2[VAR4,VAR6,VAR10]; {L04052}
+			end;
 		end else begin { не на лестнице }
 			WRITELN(' Без лестницы?'); {L04140}
 		end;
 	end;
-	{TODO}
 	WRITE(CHR(3B),CHR(110B),CHR(33)); {L04172}
 	WRITE('J	Подземелье ');
 	WRITE(DUNGEON); { Номер подземелья }
@@ -151,23 +193,31 @@ begin
 	CURSORTO(0,0);
 	for VAR16:=1 to 16 do begin { выводим текущее поле }
 		for VAR20:=1 to 32 do begin
-			if FIL2[VAR20,VAR16,VAR4] & 100B <> 0 then begin
+			if F2[VAR4,VAR16,VAR20] & 100B <> 0 then begin
 				CURSORTO(VAR16,VAR20);
-				WRITE(FIL[VAR20,VAR16,VAR4]);
+				WRITE(F[VAR4,VAR16,VAR20]);
 			end;
 		end;
 	end;
 	CLEARMSG;
-	{TODO}
+{$C
+	.BLKW	13
+}
 end;
 
 procedure L05370(A,B:integer);
 begin
+{$C
+	.BLKW	92
+}
 	{TODO}
 end;
 
 procedure L05702(A:integer);
 begin
+{$C
+	.BLKW	76
+}
 	{TODO}
 end;
 {$A-}
@@ -223,7 +273,7 @@ WRITE('загадайте число. может быть, оно вам при�
 	BR	.-20.			; продолжаем цикл
 	BIC	#^O010100, @#^O000044
 }
-{TODO}
+Readln(VAR42);
 DUNGEON:=1; { Подземелье = 1 }
 {$C
 	BIS	#^O010000, @#^O000044
@@ -232,64 +282,64 @@ DUNGEON:=1; { Подземелье = 1 }
 WRITE(CHR(33B),CHR(110B),CHR(33B),CHR(112B));
 CURSORTO(10,1);
 for VAR4:=0 to 8 do begin { цикл по этажам }
-	VAR22:=L01046(0,88);
+	VAR22:=RANDOM(0,88);
 	for VAR20:=1 to 32 do begin
-		FIL[VAR20,1,VAR4]:='-'; { стенка вверху }
+		F[VAR4,1,VAR20]:='-'; { стенка вверху }
 	end;
 	for VAR16:=2 to 15 do begin
-		FIL[1,VAR16,VAR4]:='!'; { стенка слева }
+		F[VAR4,VAR16,1]:='!'; { стенка слева }
 		for VAR20:=2 to 31 do begin
-			FIL[VAR20,VAR16,VAR4]:='.';
-			FIL2[VAR20,VAR16,VAR4]:=VAR22;
+			F[VAR4,VAR16,VAR20]:='.';
+			F2[VAR4,VAR16,VAR20]:=VAR22;
 		end;
-		FIL[32,VAR16,VAR4]:='!'; { стенка слева }
+		F[VAR4,VAR16,32]:='!'; { стенка слева }
 	end;
 	for VAR20:=1 to 32 do begin
-		FIL[VAR20,16,VAR4]:='-'; { стенка снизу }
+		F[VAR4,16,VAR20]:='-'; { стенка снизу }
 	end;
 end;
 WRITELN('   Для подсказки нажимайте "H" ');
 for VAR4:=1 to 8 do begin { цикл по этажам } {L07652}
-	VAR16:=L01046(2,7); {L07712}
+	VAR16:=RANDOM(2,7); {L07712}
 	while VAR16 < 16 do begin {L07736}
 		VAR22:=2; {L07752}
-		VAR24:=L01046(1,7); {L07760}
+		VAR24:=RANDOM(1,7); {L07760}
 		while VAR24 < 32 do begin {L10004}
 			for VAR20:=VAR22 to VAR24 do begin {L10020}
-				FIL[VAR20,VAR16,VAR4]:='-'; {L10060}
+				F[VAR4,VAR16,VAR20]:='-'; {L10060}
 			end;
-			VAR22:=L01046(1,5)+VAR24; {L10144}
-			VAR24:=L01046(3,10)+VAR24; {L10174}
+			VAR22:=RANDOM(1,5)+VAR24; {L10144}
+			VAR24:=RANDOM(3,10)+VAR24; {L10174}
 		end;
-		VAR16:=L01046(0,7)+VAR16; {L10230}
+		VAR16:=RANDOM(0,7)+VAR16; {L10230}
 	end;
 end;
 WRITE(CHR(15B));
 WRITE('		Темный  коридор ...     ');
 for VAR4:=1 to 8 do begin { цикл по этажам } {L10326}
-	VAR20:=L01046(2,7); {L10366}
+	VAR20:=RANDOM(2,7); {L10366}
 	while VAR20 < 32 do begin {L10412}
 		VAR22:=2; {L10426}
-		VAR24:=L01046(1,7);
+		VAR24:=RANDOM(1,7);
 		while VAR24 < 16 do begin {L10460}
 			for VAR16:=VAR22 to VAR24 do begin {L10474}
-				if FIL[VAR20,VAR16,VAR4] = '.' then begin {L10576}
-					FIL[VAR20,VAR16,VAR4]:='!'; {L10654}
+				if F[VAR4,VAR16,VAR20] = '.' then begin {L10576}
+					F[VAR4,VAR16,VAR20]:='!'; {L10654}
 				end else begin
-					FIL[VAR20,VAR16,VAR4]:='#'; {L10730}
+					F[VAR4,VAR16,VAR20]:='#'; {L10730}
 				end;
 			end;
-			VAR22:=L01046(1,5)+VAR24; {L10752}
-			VAR24:=L01046(2,7)+VAR24; {L11002}
+			VAR22:=RANDOM(1,5)+VAR24; {L10752}
+			VAR24:=RANDOM(2,7)+VAR24; {L11002}
 		end;
-		VAR20:=L01046(2,5)+VAR20; {L11036}
+		VAR20:=RANDOM(2,5)+VAR20; {L11036}
 	end;
 end;
 WRITE(CHR(15B));
 WRITE('		С к е л е т ы . . .   ');
 for VAR20:=1 to DUNGEON do begin {L11136}
 	for VAR16:=32 to 127 do begin {L11174}
-		VAR4:=L01046(0,8);
+		VAR4:=RANDOM(0,8);
 		L05702(VAR16); {L11256}
 	end;
 end;
@@ -323,7 +373,7 @@ if DUNGEON = 1 then begin
 	VAR26:=0; { Количество ходов после того как отдохнул = 0 }
 end;
 for VAR16:=1 to 6 do begin {L11762}
-	V33106[VAR16]:=L01046(0,-1)&175777B; {L12022}
+	V33106[VAR16]:=RANDOM(0,-1)&175777B; {L12022}
 end;
 VAR46:=CHR(0); {L12074}
 for VAR16:=1 to 4 do begin {L12100}
@@ -339,14 +389,14 @@ VAR14:=2; { Позиция X игрока = 2 }
 VAR30:=1;
 while true do begin {L12254}
 { Начало игрового цикла }
-V11070:=@FIL[VAR14,VAR12,VAR4]; {L12266}
-V33074:=@FIL2[VAR14,VAR12,VAR4]; {L12340}
+V11070:=@F[VAR4,VAR12,VAR14]; {L12266}
+V33074:=@F2[VAR4,VAR12,VAR14]; {L12340}
 for VAR16:=-1 to 1 do begin {L12422}
 	for VAR20:=-1 to 1 do begin {L12462}
 		VAR6:=VAR12+VAR16; { новый Y }
 		VAR10:=VAR14+VAR20; { новый X }
-		V11072:=@FIL[VAR10,VAR6,VAR4]; {L12552}
-		V33076:=@FIL2[VAR10,VAR6,VAR4]; {L12624}
+		V11072:=@F[VAR4,VAR6,VAR10]; {L12552}
+		V33076:=@F2[VAR4,VAR6,VAR10]; {L12624}
 		case V11072^ of {L12706}
 		'%':	WRITE('Лестница.');
 		'*':	WRITE('Золото.');
@@ -400,13 +450,12 @@ CURSORTO(10,33); { Рюкзак }
 if V33156 <> CHR(0) then begin {L20406}
 	for VAR16:=1 to 6 do begin
 		WRITE(RUKSAK[VAR16]); {L20460}
-		WRITE(V33077:2);
 	end;
 end;
 V33156:=CHR(0); {L20520}
 CURSORTO(0,0);
 { Ввод символа - команда игрока }
-READCHAR(@VAR53); {L20534}
+READCHAR(VAR53); {L20534}
 CLEARMSG;
 case VAR53 of {L20554}
 '1':	L05370(1,-1);	{ влево-вниз }
@@ -428,9 +477,9 @@ case VAR53 of {L20554}
 			if (V33106[VAR16] AND 6) = 0 then begin {L21122}
 				for VAR16:=2 to 15 do begin
 					for VAR20:=2 to 31 do begin
-						if FIL[VAR20,VAR16,VAR4] <> '.' then begin
+						if F[VAR4,VAR16,VAR20] <> '.' then begin
 							CURSORTO(VAR16,VAR20);
-							VAR53:=FIL[VAR20,VAR16,VAR4]; {L21342}
+							VAR53:=F[VAR4,VAR16,VAR20]; {L21342}
 							{TODO}
 						end;
 					end;
@@ -443,10 +492,10 @@ case VAR53 of {L20554}
 			end else if (V33106[VAR16] AND 6) = 4 then begin
 				for VAR16:=2 to 13 do begin {L21734}
 					for VAR20:=2 to 31 do begin
-						if FIL[VAR20,VAR16,VAR4] <> '.' then begin
+						if F[VAR4,VAR16,VAR20] <> '.' then begin
 							CURSORTO(VAR16,VAR20); {L22112}
-							WRITE(FIL[VAR20,VAR16,VAR4]); {L22126}
-							FIL2[VAR20,VAR16,VAR4]:=FIL2[VAR20,VAR16,VAR4] OR 100B; {L22204}
+							WRITE(F[VAR4,VAR16,VAR20]); {L22126}
+							F2[VAR4,VAR16,VAR20]:=F2[VAR4,VAR16,VAR20] OR 100B; {L22204}
 						end;
 					end;
 				end;
@@ -558,9 +607,9 @@ S - Свистнуть
 T - Взять предмет, на клтором стоишь
 U - Вызвать джинна (только в безнадежном случае!)...
 	Дальше? ');
-		READCHAR(@VAR53);
+		READCHAR(VAR53);
 		if VAR53 = CHR(15B) then begin
-			READCHAR(@VAR53);
+			READCHAR(VAR53);
 		end;
 		WRITE('
 V - Снять кольцо
@@ -582,9 +631,9 @@ Z - Перевести деньги в банк на счет пещеры.
 	Волшебная кирка вынесет вас из "комариной плеши" при ударе ей вниз.
 
 Ну, что, пойдем дальше?');
-		READCHAR(@VAR53);
+		READCHAR(VAR53);
 		if VAR53 = CHR(15B) then begin
-			READCHAR(@VAR53);
+			READCHAR(VAR53);
 		end;
 		L03362('J'); { Обновить экран }
 		IND[1]:=IND[1] - 2; { Рейтинг }
@@ -600,7 +649,7 @@ end; { case of }
 if IND[5] >= 0 then begin { В банке есть деньги? }
 	WRITE('Как, Вы вернулись?! Ну и ну !!!
 А дальше пойдете?');
-	READCHAR(@VAR53);
+	READCHAR(VAR53);
 	if VAR53 = 'Y' then begin
 		DUNGEON:=DUNGEON+1; { следующее подземелье }
 		IND[1]:=IND[1]+50; { Рейтинг }
