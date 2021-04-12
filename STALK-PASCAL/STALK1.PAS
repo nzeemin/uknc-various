@@ -86,9 +86,9 @@ var I,J:integer;
 begin
 	for I:=-1 TO 1 do begin
 		for J:=-1 TO 1 do begin
-			C:=B+I;
-			B:=C+J;
-			if (F[A,C,B] = '^') and ((F2[A,C,B] and 6) <> 4) then begin
+			VAR22:=B+I;
+			VAR24:=C+J;
+			if (F[A,VAR22,VAR24] = '^') and ((F2[A,VAR22,VAR24] and 6) <> 4) then begin
 				CURSORTO(VAR22,VAR24);
 				WRITE('.');
 			end else begin
@@ -100,13 +100,15 @@ begin
 	end;
 end;
 
-function L02332(A,B:integer):integer;
-var I:integer;
+function L02332(A,B:char):integer;
+var K:integer;
 begin
-{$C
-	.BLKW	50
-}
-	{TODO}
+	K:=1; {L02340}
+	while (RUKSAK[K] <> A) and (RUKSAK[K] <> B) and (K < 7) do begin
+		K:=K+1;
+	end;
+	L02332:=K;
+	V33156:=CHR(1);
 end;
 
 procedure NELZYA;
@@ -150,9 +152,9 @@ begin
 			for VAR16:=1 TO 4 do begin
 				V33122[VAR16]:=' ';
 			end;
-			if (A = '.') and (VAR4 <> 0) then begin
-				VAR4:=VAR4-1;
-				IND[2]:=IND[2]-2;
+			if (A = '.') and (VAR4 <> 0) then begin {L03510}
+				VAR4:=VAR4-1; { Этаж вниз } {L03560}
+				IND[2]:=IND[2]-2; { Энергия минус 2 }
 				IND[1]:=IND[1]+1;
 			end else if VAR4 <> 8 then begin
 				VAR4:=VAR4+1;
@@ -163,10 +165,12 @@ begin
 				V11072:=@F[VAR4,VAR6,VAR10]; {L04000}
 				V33074:=@F2[VAR4,VAR6,VAR10]; {L04052}
 			end;
+			{$C	.BLKW	5}{TODO: разобраться с R4}
 		end else begin { не на лестнице }
 			WRITELN(' Без лестницы?'); {L04140}
 		end;
 	end;
+	{$C	.BLKW	8}
 	WRITE(CHR(3B),CHR(110B),CHR(33)); {L04172}
 	WRITE('J	Подземелье ');
 	WRITE(DUNGEON); { Номер подземелья }
@@ -200,23 +204,23 @@ begin
 		end;
 	end;
 	CLEARMSG;
-{$C
-	.BLKW	13
-}
 end;
 
-procedure L05370(A,B:integer);
+procedure L05370(DY,DX:integer);
 begin
-{$C
-	.BLKW	92
-}
-	{TODO}
+	if not (F[VAR4,VAR12+DY,VAR14+DX] in ['!','-']) then begin
+		VAR12:=VAR12+DY; {L05500}
+		VAR14:=VAR14+DX;
+		V11070:=@F[VAR4,VAR12,VAR14];
+		V33074:=@F2[VAR4,VAR12,VAR14];
+	end else
+		NELZYA;
 end;
 
 procedure L05702(A:integer);
 begin
 {$C
-	.BLKW	76
+	.BLKW	72
 }
 	{TODO}
 end;
@@ -470,7 +474,7 @@ case VAR53 of {L20554}
 '0':	VAR26:=0;	{ отдохнуть }
 '.':	L03362('.');	{ вверх по лестнице }
 'Q':	begin { пить }
-		VAR16:=L02332(36,43);
+		VAR16:=L02332('$','+');
 		if VAR16 < 7 then begin
 			RUKSAK[VAR16]:='.';
 			VAR30:=VAR30-1;
@@ -664,4 +668,9 @@ end;
 {TODO: расчёт счёта игрока}
 WRITE('Ваш счет -');
 WRITE(VAR16:5);
+{$C
+	.BLKW	4908
+	.GLOBL	PSHSET
+	.GLOBL	UNSMUL
+}
 END.
