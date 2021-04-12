@@ -208,7 +208,7 @@ end;
 
 procedure L05370(DY,DX:integer);
 begin
-	if not (F[VAR4,VAR12+DY,VAR14+DX] in ['!','-']) then begin
+	if not (F[VAR4,VAR12+DY,VAR14+DX] in ['!','-']) then begin { Если не стенка }
 		VAR12:=VAR12+DY; {L05500}
 		VAR14:=VAR14+DX;
 		V11070:=@F[VAR4,VAR12,VAR14];
@@ -420,9 +420,49 @@ for VAR16:=-1 to 1 do begin {L12422}
 			end;
 		'#':;
 		'(',')': WRITE('Доспехи.');
+		'[',']': WRITE('Оружие.');
+		'?':	WRITE('Свисток.');
+		':',';': WRITE('Еда!!!');
+		'\':	WRITE('"ВП".');
+		'<','>': WRITE('Батареи.');
+		'"','''': begin {L14040}
+				WRITELN('Комариная плешь');
+				{TODO}
+			end;
+		'&':	WRITE('Папирус.');
+		'C','H','J','T': begin {L14300}
+				WRITE(CHR(7)); { bell }
+				WRITELN('Холодная, скользкая рука схватила вас за ногу ...');
+				IND[2]:=IND[2]-RANDOM(2,8); { Энергия уменьшается }
+				V11072^:='.';
+			end;
+		'D','E','F','G','I','K','L','M','N','O','P','Q','R','S','U','V','W','X','Y','Z': begin
+				{TODO}
+				WRITELN('Ну, сейчас он вам покажет...');
+				{TODO}
+			end;
+		'0','2','3','4','5','6','7','8','9','{','}': begin {L15616}
+				{TODO}
+			end;
+		'!','-','.':; { Стенки и пустая клетка } {L16046}
+		'b':	WRITELN('Надпись "Здесь был Вася"(здесь Вася и остался)'); {L16046}
+		'c':	WRITELN('Груда камней.');
 		{TODO}
+		'q':	WRITELN('Кладбище снусмумриков.'); {L17026}
 		'~':	WRITE('Черт-те что.');
-		{TODO}
+		'1','A','B': WRITELN('Бродячий торговый автомат');
+		'|':	WRITELN('Пережаренный зелюк.');
+		'`':	WRITELN('Мышелот (в собственном соку)');
+		'@':	begin {L17200}
+				WRITE('Призрак.');
+				VAR22:=L02332('.','.');
+				if VAR22 < 7 then
+					VAR30:=VAR30+1;
+				RUKSAK[VAR22]:='@';
+			end;
+		else	begin {L17302}
+				{TODO}
+			end
 		end; { case of }
 	end; { for VAR20 }
 end; { for VAR16 }
@@ -669,8 +709,7 @@ end;
 WRITE('Ваш счет -');
 WRITE(VAR16:5);
 {$C
-	.BLKW	4908
-	.GLOBL	PSHSET
+	.BLKW	4646
 	.GLOBL	UNSMUL
 }
 END.
