@@ -457,9 +457,18 @@ for VAR16:=-1 to 1 do begin {L12422}
 				{TODO}
 				WRITELN('Ну, сейчас он вам покажет...');
 				{TODO}
+				if F[VAR4,VAR22,VAR24] in ['!','-'] then ;
+				{TODO}
+				WRITELN('Защищайтесь же!!!');
+				{TODO}
+				WRITELN('Готов!');
+				{TODO}
 			end;
 		'0','2','3','4','5','6','7','8','9','{','}': begin {L15616}
 				{TODO}
+				WRITELN('Недурственно!');
+				WRITELN('Тьфу...');
+				WRITELN('Свертoк. съедим?');
 			end;
 		'!','-','.':; { Стенки и пустая клетка } {L16046}
 		'b':	WRITELN('Надпись "Здесь был Вася"(здесь Вася и остался)'); {L16046}
@@ -500,6 +509,7 @@ for VAR16:=-1 to 1 do begin {L12422}
 			end;
 		else	begin {L17302}
 				{TODO}
+				WRITELN('Мешок с надписью "Take me!"');
 			end
 		end; { case of }
 	end; { for VAR20 }
@@ -563,6 +573,8 @@ case VAR53 of {L20554}
 							CURSORTO(VAR16,VAR20);
 							VAR53:=F[VAR4,VAR16,VAR20]; {L21342}
 							{TODO}
+							if F[VAR4,VAR16,VAR20] in ['!','#','-','.'] then ;
+							{TODO}
 						end;
 					end;
 				end;
@@ -599,7 +611,7 @@ case VAR53 of {L20554}
 		if VAR16 < 7 then begin
 			if (V33106[VAR16] and 2000B) = 0 then begin
 				if VAR53 <> '.' then begin
-					VAR30:=VAR30-1;
+					VAR30:=VAR30-1; {L22646}
 					RUKSAK[VAR16]:='.';
 					if not (V11070^ in ['"','''']) then begin
 						V11070^:=VAR53;
@@ -623,16 +635,57 @@ case VAR53 of {L20554}
 			WRITELN('Где золото-тo?');
 	end;
 'S':	begin { свистнуть }
-		{TODO}
+		VAR22:=L02332('?','?'); { Ищем в рюкзаке свисток }
+		if VAR22 < 7 then begin
+			if (V33106[VAR22] and 6) = 0 then begin
+				WRITE(CHR(7)); { bell }
+				{TODO}
+			end else if (V33106[VAR22] and 6) = 2 then begin {L23310}
+				for VAR16:=-2 to 2 do begin
+					for VAR20:=-2 to 2 do begin
+						if (VAR12+VAR16) in [2..15] then ;
+						{TODO}
+						if (VAR12+VAR16) in [2..15] then ;
+						{TODO}
+						if F[VAR4,VAR12+VAR16,VAR14+VAR20] in ['A'..'Z'] then ;
+						{TODO}
+					end;
+				end;
+				{TODO}
+				WRITELN('Б А М - М - М ! ! !');
+				{TODO}
+				WRITELN('Уничтожение зверя');
+			end;
+			{TODO}
+		end else
+			WRITELN('Однакo, свисток нужен');
 	end;
 'E':	begin { поесть }
 		{TODO}
+		WRITELN('Спасибо!');
+		{TODO}
+		WRITELN('Еды нет');
 	end;
 'T':	begin { взять предмет, на котором стоишь }
-		{TODO}
+		VAR16:=L02332('.','.'); { Ищем место в рюкзаке }
+		if VAR16 < 7 then begin
+			if V11070^ in ['"',''''] then
+				NELZYA { Комариную плешь брать нельзя }
+			else begin
+				WRITELN('Берем');
+				VAR30:=VAR30+1;
+				RUKSAK[VAR16]:=V11070^;
+				V33106[VAR16]:=V33074^;
+				V11070^:='.';
+			end;
+		end else
+			WRITELN('Рюкзак полон');
 	end;
 'P':	begin { надеть доспехи }
 		{TODO}
+		WRITELN('Доспехи надеты');
+		{TODO}
+		WRITELN('Нету');
 	end;
 'L':	begin { включить фонарь } {L25436}
 		if VAR32 > 0 then begin
@@ -648,11 +701,21 @@ case VAR53 of {L20554}
 	end;
 'W':	begin { взмахнуть волшебной палочкой }
 		{TODO}
+		WRITELN('Выпустили до госприемки...');
+		{TODO}
+		WRITELN('"Да будет свет..."');
+		{TODO}
+		WRITELN('Пока Вы летели сквозь этажи, "ВП" потерялась');
+		{TODO}
+		WRITELN('Превращение догоняющего зверя');
+		{TODO}
+		WRITELN('Махать-то нечем !');
 	end;
 '/','?': begin { переложить вещи в рюкзаке }
 		VAR52:=RUKSAK[6];
 		VAR20:=V33106[6];
 		{TODO}
+		WRITELN('Перестройка в рюкзаке');
 	end;
 'F':	begin { приготовиться к сражению }
 		VAR50:=CHR(1);
@@ -673,6 +736,9 @@ case VAR53 of {L20554}
 	end;
 'M':	begin { приготовить оружие }
 		{TODO}
+		WRITELN('Оружие приготовлено');
+		{TODO}
+		WRITELN('Нету!');
 	end;
 'B':	begin { заменить батареи }
 		{TODO}
@@ -709,10 +775,18 @@ case VAR53 of {L20554}
 	end;
 'K':	begin { сломать стенку киркой } {L32600}
 		{TODO}
+		WRITE('Направление? ');
+		{TODO}
+		WRITELN('Кусок свода обрушился и раскололся о вашу глупую голову');
+		{TODO}
 		if VAR22 in [2..15] then ;
 		if VAR24 in [2..31] then ;
 		{TODO}
 		if F[VAR4,VAR22,VAR24] in ['!','-'] then ;
+		{TODO}
+		WRITELN('Ну, чего размахался?');
+		{TODO}
+		WRITELN('А стенку вы будете лбом прошибать?..');
 	end;
 'Y':	begin { зажарить убегающего зверя } {L33724}
 		if ((V33074^ AND 6) = 2) and (V11070^ in ['A'..'Z']) then
@@ -746,8 +820,7 @@ Q - Пить
 R - Читать папирус
 S - Свистнуть
 T - Взять предмет, на клтором стоишь
-U - Вызвать джинна (только в безнадежном случае!)...
-	Дальше? ');
+U - Вызвать джинна (только в безнадежном случае!)...	Дальше? ');
 		READCHAR(VAR53);
 		if VAR53 = CHR(15B) then begin
 			READCHAR(VAR53);
@@ -760,8 +833,9 @@ Y - Зажарить убегающего зверя
 Z - Перевести деньги в банк на счет пещеры.
 / - Переложить вещи в рюкзаке
    П Е Р Е Д В И Ж Е Н И Е:
+
 	7 8 9
-	4   6
+	4   6 	- Движение по уровню
 	1 2 3
 5 - Внмз по лестнице
 . - Вверх по лестнице
@@ -782,6 +856,11 @@ Z - Перевести деньги в банк на счет пещеры.
 	end;
 'U':	begin { вызвать джинна }
 		{TODO}
+		WRITE('Что, влип? ладно, попробую тебя  перенести
+отсюда. только дороговато это встанет...
+Ты готов? ');
+		{TODO}
+		WRITELN('Джинн в отгуле');
 	end;
 else	WRITELN('Что-что?')
 end; { case of }
@@ -848,7 +927,7 @@ end;
 WRITE('Ваш счет -');
 WRITE(VAR16:5);
 {$C
-	.BLKW	3109
+	.BLKW	2114
 	.GLOBL	UNSMUL
 }
 END.
