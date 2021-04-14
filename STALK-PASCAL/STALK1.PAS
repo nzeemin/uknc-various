@@ -5,7 +5,7 @@ STALK.SAV, PIKNIK.SAV или ZONA.SAV и предназначался для с�
 совместимых машин - таких как ДВК и УКНЦ.
 Это игра в жанре рогалик (Rogue-like), бродилка по подземельям, по мотивам
 повести Стругацких "Пикник на обочине".
-Игра, по-видимому, создана примерно в конце 1980-х, автор игры - неизвестный
+Игра, по-видимому, создана в конце 1980-х, автор игры - неизвестный
 программист из Ульяновска - первоначально программа писала копирайт:
 *** (С)УЛЬЯНОВСК УЛПИ "ГОЛОГРАФИЯ"***
 Данный исходник предназначается для Паскаля ДВК или OMSI PASCAL-1
@@ -747,10 +747,14 @@ case VAR53 of {L20554}
 			WRITELN('Однакo, свисток нужен');
 	end;
 'E':	begin { поесть }
-		{TODO}
-		WRITELN('Спасибо!');
-		{TODO}
-		WRITELN('Еды нет');
+		VAR16:=L02332(':',';');
+		if VAR16 < 7 then begin
+			IND[2]:=IND[2]+18; { Энергия }
+			RUKSAK[VAR16]:='.';
+			VAR30:=VAR30-1;
+			WRITELN('Спасибо!');
+		end else
+			WRITELN('Еды нет');
 	end;
 'T':	begin { взять предмет, на котором стоишь }
 		VAR16:=L02332('.','.'); { Ищем место в рюкзаке }
@@ -768,10 +772,16 @@ case VAR53 of {L20554}
 			WRITELN('Рюкзак полон');
 	end;
 'P':	begin { надеть доспехи }
-		{TODO}
-		WRITELN('Доспехи надеты');
-		{TODO}
-		WRITELN('Нету');
+		VAR16:=L02332(')','(');
+		if VAR16 < 7 then begin
+			if ((V33106[VAR16]) and 2000B) = 0 then begin
+				RUKSAK[VAR16]:='.';
+				IND[4]:=IND[4]+11;
+				WRITELN('Доспехи надеты');
+			end else
+				ZAKLYATIE;
+		end else
+			WRITELN('Нету');
 	end;
 'L':	begin { включить фонарь } {L25436}
 		if VAR32 > 0 then begin
@@ -786,21 +796,55 @@ case VAR53 of {L20554}
 		WRITELN('Фонарь выключен');
 	end;
 'W':	begin { взмахнуть волшебной палочкой }
-		{TODO}
-		WRITELN('Выпустили до госприемки...');
-		{TODO}
-		WRITELN('"Да будет свет..."');
-		{TODO}
-		WRITELN('Пока Вы летели сквозь этажи, "ВП" потерялась');
-		{TODO}
-		WRITELN('Превращение догоняющего зверя');
-		{TODO}
-		WRITELN('Махать-то нечем !');
+		VAR16:=L02332('/','\');
+		if VAR16 < 7 then begin
+			if ((V33106[VAR16]) and 3) = 3 then begin
+				WRITELN('Выпустили до госприемки...');
+			end else if ((V33106[VAR16]) and 3) = 2 then begin
+				for VAR20:=2 to 31 do begin
+					for VAR22:=2 to 15 do begin
+						CURSORTO(VAR22,VAR20);
+						WRITE(F[VAR4,VAR22,VAR20]);
+						F2[VAR4,VAR22,VAR20]:=F2[VAR4,VAR22,VAR20] or 100B;
+					end;
+				end;
+				RUKSAK[VAR16]:='.';
+				CLEARMSG;
+				WRITELN('"Да будет свет..."');
+			end else if ((V33106[VAR16]) and 3) = 1 then begin
+				if VAR46 <> CHR(0) then begin {L26420}
+					VAR4:=VAR4-6;
+					if VAR4 < 0 then VAR4:=0;
+				end else begin
+					VAR4:=VAR4+3;
+					if VAR4 > 8 then VAR4:=8;
+				end;
+				RUKSAK[VAR16]:='.';
+				L03362('J');
+				WRITELN('Пока Вы летели сквозь этажи, "ВП" потерялась');
+				VAR30:=VAR30-1;
+			end else begin {L26570}
+				WRITELN('Превращение догоняющего зверя');
+				for VAR22:=1 to 3 do begin
+					if V33122[VAR22] <> ' ' then begin
+						V33122[VAR22]:=' ';
+						F[VAR22,V33136[VAR22],V33146[VAR22]]:=CHR(RANDOM(36,63));
+					end;
+				end;
+			end;
+		end else
+			WRITELN('Махать-то нечем !');
 	end;
 '/','?': begin { переложить вещи в рюкзаке }
 		VAR52:=RUKSAK[6];
 		VAR20:=V33106[6];
-		{TODO}
+		for VAR16:=1 to 6 do begin
+			RUKSAK[7-VAR16]:=RUKSAK[6-VAR16];
+			V33106[7-VAR16]:=V33106[6-VAR16];
+		end;
+		RUKSAK[1]:=VAR52;
+		V33106[1]:=VAR20;
+		V33156:=CHR(1);
 		WRITELN('Перестройка в рюкзаке');
 	end;
 'F':	begin { приготовиться к сражению }
@@ -808,42 +852,120 @@ case VAR53 of {L20554}
 		WRITELN('У-р-р-р-а-a ! ! !');
 	end;
 'N':	begin { идёт начальник }
-		{TODO}
+		WRITE(CHR(33B),CHR(105B));
+		for VAR16:=1 to 19 do begin
+			WRITE(CHR(22B));
+		end;
+		repeat
+			READCHAR(VAR53);
+		until VAR53 = 'P';
+		for VAR16:=1 to 19 do begin
+			WRITE(CHR(26B));
+		end;
+		WRITE(CHR(27B));
 	end;
 'X':	begin { закончить }
 		WRITE('Закончить изволите? ');
 		READCHAR(VAR53);
 		if VAR53 in ['D','Y'] then begin
 			WRITELN('А ведь придупреждали...');
-			{TODO: Сброс SP}
+			{TODO: Сброс SP}{$C
+				NOP
+				NOP
+			}
 			exit; { Выход из игрового цикла }
 		end;
 		{TODO}
 	end;
-'M':	begin { приготовить оружие }
-		{TODO}
-		WRITELN('Оружие приготовлено');
-		{TODO}
-		WRITELN('Нету!');
+'M':	begin { приготовить оружие } {L27742}
+		VAR16:=L02332('[',']'); { Ищем в рюкзаке }
+		if VAR16 < 7 then begin
+			if (V33106[VAR16] and 2000B) = 0 then begin
+				RUKSAK[VAR16]:='.';
+				IND[3]:=IND[3]+15;
+				WRITELN('Оружие приготовлено');
+			end else
+				ZAKLYATIE;
+		end else
+			WRITELN('Нету!');
 	end;
 'B':	begin { заменить батареи }
-		{TODO}
-		WRITELN('Батареи заменены');
-		{TODO}
-		WRITELN('Батарей нет');
+		VAR16:=L02332('<','>');
+		if VAR16 < 7 then begin
+			if (V33106[VAR16] and 2000B) = 0 then begin
+				RUKSAK[VAR16]:='.';
+				VAR30:=VAR30-1;
+				VAR32:=400;
+				WRITELN('Батареи заменены');
+			end else
+				ZAKLYATIE;
+		end else
+			WRITELN('Батарей нет');
 	end;
 'J':	L03362('J'); { обновить экран }
 'R':	begin { читать папирус }
-		{TODO}
-		WRITELN('"APCHXYZZYURR!!!"... Заклятие снято');
-		{TODO}
-		WRITELN('Надпись гласит: "Сам дурак"');
-		{TODO}
-		WRITE('Лестница -');
-		{TODO}
-		WRITELN('Золотой шар украден!');
-		WRITE('Золотой шар - 8');
-		WRITELN('А читать-то и нечего');
+		VAR16:=L02332('&','&');
+		if VAR16 < 7 then begin
+			if (V33106[VAR16] and 6) = 0 then begin
+				for VAR20:=1 to 8 do begin
+					V33106[VAR20]:=V33106[VAR20] and 175777B;
+				end;
+				{TODO}
+				WRITELN('"APCHXYZZYURR!!!"... Заклятие снято');
+			end else if (V33106[VAR16] and 6) = 2 then begin
+				WRITELN('Надпись гласит: "Сам дурак"');
+			end else if (V33106[VAR16] and 6) = 4 then begin
+				VAR22:=2; {L30710}
+				while VAR22 < 16 do begin {L30716}
+					VAR24:=2;
+					while VAR24 < 32 do begin
+						if F[VAR4,VAR22,VAR24] = '%' then
+							exit;
+						{TODO:L31036}{$C
+							NOP
+							NOP}
+						VAR24:=VAR24+1;
+					end;
+					if F[VAR4,VAR22,VAR24] = '%' then
+						exit;
+					{TODO:L31134}{$C
+						NOP
+						NOP}
+					VAR22:=VAR22+1;
+				end;
+				WRITE('Лестница -');
+				WRITE(VAR22:4,VAR24:4);
+				WRITELN;
+			end else begin {L31226}
+				VAR22:=1;
+				while VAR22 < 16 do begin
+					VAR24:=2;
+					while VAR24 < 32 do begin
+						if F[8,VAR22,VAR24] = ',' then
+							exit;
+						{TODO:L31336}{$C
+							NOP
+							NOP}
+						VAR24:=VAR24+1;
+					end;
+					if F[8,VAR22,VAR24] = ',' then
+						exit;
+					{TODO:L31416}{$C
+						NOP
+						NOP}
+					{TODO}
+					VAR22:=VAR22+1;
+				end;
+				if (VAR22 = 16) and (VAR24 = 32) then
+					WRITELN('Золотой шар украден!')
+				else begin
+					WRITE('Золотой шар - 8');
+					WRITE(VAR22:4,VAR24:4);
+					WRITELN;
+				end;
+			end;
+		end else
+			WRITELN('А читать-то и нечего');
 	end;
 'I':	begin { надеть кольцо }
 		{TODO}
@@ -1029,7 +1151,7 @@ end;
 WRITE('Ваш счет -');
 WRITE(VAR16:5);
 {$C
-	.BLKW	1821
+	.BLKW	923
 	.GLOBL	UNSMUL
 }
 END.
