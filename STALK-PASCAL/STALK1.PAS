@@ -276,7 +276,7 @@ TITLE[29]:=' ';
 WRITE('*** ');
 WRITE(TITLE); { Вывод начальной строки}
 WRITELN('***');
-WRITELN('__ С Т А Л К Е Р __'); {TODO:спецсимволы в строке}
+WRITELN(' ^_^_^_^  __ С Т А Л К Е Р __       '); {TODO:спецсимволы в строке}
 WRITE('загадайте число. может быть, оно вам пригодится... там... ');
 { Ввод числа, которое "может быть пригодится там" }
 VAR44:=0;
@@ -491,23 +491,55 @@ for VAR16:=-1 to 1 do begin {L12422}
 						V11070^:='.';
 						F[VAR4,VAR22,VAR24]:=VAR53;
 						F2[VAR4,VAR22,VAR24]:=V33074^;
-					end else begin
-						{TODO}
 					end;
+				end else if ((not ORD(VAR51)) and 1) <> 0 then begin
+					if ((not ORD(VAR50)) and 1) <> 0 then begin
+						if IND[4] > 1 then
+							IND[4]:=IND[4]-RANDOM(2,15)
+						else
+							IND[2]:=IND[2]-RANDOM(2,15);
+					end;
+					WRITE(CHR(7));
+					WRITELN('Защищайтесь же!!!');
+				end else begin
+					IND[3]:=IND[3]-RANDOM(2,11);
+					IND[4]:=IND[4]-2;
+					VAR50:=CHR(0);
+					VAR54:='.';
+					WRITE(CHR(7));
+					WRITELN('Готов!');
+					IND[1]:=IND[1]+10;
+					if IND[4] > 0 then begin
+						IND[2]:=IND[2]+IND[4];
+						IND[4]:=0;
+					end;
+					if IND[3] > 0 then begin
+						IND[1]:=IND[1]+IND[3];
+						IND[3]:=0;
+					end;
+					VAR16:=1;
+					while (V33122[VAR16] <> V11070^) and (VAR16 < 4) do
+						VAR16:=VAR16+1;
+					V33122[VAR16]:=' ';
+					V11070^:='m';
 				end;
-				{TODO}
-				WRITELN('Защищайтесь же!!!');
-				{TODO}
-				WRITELN('Готов!');
-				{TODO}
 			end else begin
 				L02574(VAR4,VAR6,VAR10);
 			end;
 		'0','2','3','4','5','6','7','8','9','{','}': begin {L15616}
-				{TODO}
-				WRITELN('Недурственно!');
-				WRITELN('Тьфу...');
-				WRITELN('Свертoк. съедим?');
+				if (VAR16 = 0) and (VAR20 = 0) then begin
+					VAR22:=RANDOM(-7,7);
+					IND[2]:=IND[2]+VAR22;
+					if VAR22 > 0 then begin
+						WRITELN('Недурственно!');
+						V11070^:='z';
+					end else begin
+						WRITELN('Тьфу...');
+						V11070^:='y';
+					end;
+				end else begin
+					WRITELN('Свертoк. съедим?');
+				end;
 			end;
 		'!','-','.':; { Стенки и пустая клетка } {L16046}
 		'b':	WRITELN('Надпись "Здесь был Вася"(здесь Вася и остался)'); {L16046}
@@ -520,21 +552,21 @@ for VAR16:=-1 to 1 do begin {L12422}
 		'i':	WRITELN('Записка:" Зря ты сюда полез, парень... Автор. ');
 		'j':	WRITE('Черный ящик.');
 		'k':	WRITELN('Лужа машинного масла');
-		'l':	WRITELN('Раздолбанный компьютер ZX SPECTRUM - 128.');
+		'l':	WRITELN('Раздолбанный компьютер ZX SPECTRUM - 128.    '); {Пробелы компенсируют нули после строки}
 		'm':	WRITE('Дохлый морлок');
 		'n':	WRITE('Зуда.');
 		'o':	WRITE('Пустышка.');
 		'p':	WRITE('Куча сепулек.');
-		'r':	WRITELN('Разложившийся труп девушки.');
-		's':	WRITELN('Надпись: "Мы до тебя еще доберемся!!! "');
-		't':	WRITELN('Отрезанная голова предыдущего Сталкера.');
-		'u':	WRITELN('Зачитанный журнал "АКУШЕРСТВО И ГИНЕКОЛОГИЯ"');
+		'r':	WRITELN('Разложившийся труп девушки.      '); {Пробелы компенсируют нули после строки}
+		's':	WRITELN('Надпись: "Мы до тебя еще доберемся!!!   "'); {Пробелы компенсируют нули после строки}
+		't':	WRITELN('Отрезанная голова предыдущего Сталкера.                  '); {Пробелы компенсируют нули после строки}
+		'u':	WRITELN('Зачитанный журнал "АКУШЕРСТВО И ГИНЕКОЛОГИЯ"    '); {Пробелы компенсируют нули после строки}
 		'v':	WRITE('Артефакт.');
-		'w':	WRITELN('Здесь-то мы его и съели');
+		'w':	WRITELN('Надпись "Здесь-то мы его и съели"');
 		'x':	WRITELN('Окровавленная бензопила');
 		'y':	WRITELN('Что-то очень мерзкое');
 		'z':	WRITE('Следы пикника.');
-		'q':	WRITELN('Кладбище снусмумриков.'); {L17026}
+		'q':	WRITELN('Кладбище снусмумриков.        '); {L17026} {Пробелы компенсируют нули после строки}
 		'~':	WRITE('Черт-те что.');
 		'1','A','B': WRITELN('Бродячий торговый автомат');
 		'|':	WRITELN('Пережаренный зелюк.');
@@ -547,8 +579,12 @@ for VAR16:=-1 to 1 do begin {L12422}
 				RUKSAK[VAR22]:='@';
 			end;
 		else	begin {L17302}
-				{TODO}
-				WRITELN('Мешок с надписью "Take me!"');
+				if (VAR16 = 0) and (VAR20 = 0) then begin
+					V11070^:=CHR(RANDOM(32,126));
+					V33074^:=RANDOM(1,8191);
+				end else begin
+					WRITELN('Мешок с надписью "Take me!"');
+				end;
 			end
 		end; { case of }
 	end; { for VAR20 }
@@ -580,7 +616,7 @@ WRITE(VAR30:3); { Вредность } {L20356}
 CURSORTO(10,33); { Рюкзак }
 if V33156 <> CHR(0) then begin {L20406}
 	for VAR16:=1 to 6 do begin
-		WRITE(RUKSAK[VAR16]); {L20460}
+		WRITE(RUKSAK[VAR16]:2); {L20460}
 	end;
 end;
 V33156:=CHR(0); {L20520}
@@ -611,9 +647,10 @@ case VAR53 of {L20554}
 						if F[VAR4,VAR16,VAR20] <> '.' then begin
 							CURSORTO(VAR16,VAR20);
 							VAR53:=F[VAR4,VAR16,VAR20]; {L21342}
-							{TODO}
-							if F[VAR4,VAR16,VAR20] in ['!','#','-','.'] then ;
-							{TODO}
+							if F[VAR4,VAR16,VAR20] in ['!','#','-','.'] then begin
+								VAR53:=CHR(RANDOM(33,126));
+							end;
+							WRITE(VAR53);
 						end;
 					end;
 				end;
@@ -676,24 +713,34 @@ case VAR53 of {L20554}
 'S':	begin { свистнуть }
 		VAR22:=L02332('?','?'); { Ищем в рюкзаке свисток }
 		if VAR22 < 7 then begin
-			if (V33106[VAR22] and 6) = 0 then begin
+			if (V33106[VAR22] and 6) = 4 then begin
 				WRITE(CHR(7)); { bell }
-				{TODO}
 			end else if (V33106[VAR22] and 6) = 2 then begin {L23310}
 				for VAR16:=-2 to 2 do begin
 					for VAR20:=-2 to 2 do begin
-						if (VAR12+VAR16) in [2..15] then ;
-						{TODO}
-						if (VAR12+VAR16) in [2..15] then ;
-						{TODO}
-						if F[VAR4,VAR12+VAR16,VAR14+VAR20] in ['A'..'Z'] then ;
-						{TODO}
+						if ((VAR12+VAR16) in [2..15]) and ((VAR14+VAR20) in [2..15]) then begin
+							F[VAR14,VAR12+VAR16,VAR14+VAR20]:=' ';
+						end;
 					end;
 				end;
-				{TODO}
+				RUKSAK[VAR22]:='.';
+			end else if (V33106[VAR22] and 6) = 0 then begin
 				WRITELN('Б А М - М - М ! ! !');
-				{TODO}
+				VAR12:=RANDOM(2,15);
+				VAR14:=RANDOM(2,31);
+				V11070:=@F[VAR4,VAR12,VAR14];
+				V33074:=@F2[VAR4,VAR12,VAR14];
+			end else begin
 				WRITELN('Уничтожение зверя');
+				for VAR16:=1 to 4 do
+					V33122[VAR16]:=' ';
+				for VAR16:=-1 to 1 do begin
+					for VAR20:=-1 to 1 do begin
+						if F[VAR4,VAR12+VAR16,VAR14+VAR20] in ['A'..'Z'] then begin
+							F[VAR4,VAR12+VAR16,VAR14+VAR20]:='*';
+						end;
+					end;
+				end;
 			end;
 			{TODO}
 		end else
@@ -982,7 +1029,7 @@ end;
 WRITE('Ваш счет -');
 WRITE(VAR16:5);
 {$C
-	.BLKW	2318
+	.BLKW	1821
 	.GLOBL	UNSMUL
 }
 END.
