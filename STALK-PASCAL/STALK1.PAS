@@ -38,8 +38,8 @@ var	DUNGEON: integer; { Номер подземелья }
 	VAR40:	integer;
 	VAR42:	integer; { Число для генератора случайных чисел }
 	VAR44:	integer; { Число для генератора случайных чисел }
-	VAR46:	char;
-	VAR47:	char; { Фонарь 1 - горит, 0 - не горит }
+	VAR46:	boolean;
+	VAR47:	boolean; { Фонарь горит или нет }
 	VAR50:	char;
 	VAR51:	char;
 	VAR52:	char;
@@ -383,7 +383,7 @@ if DUNGEON = 1 then begin
 	end;
 	{ Инициализация переменных }
 	IND[2]:=25; { Энергия }
-	VAR47:=CHR(0); { Фонарь не горит }
+	VAR47:=false; { Фонарь не горит }
 	VAR51:=CHR(0);
 	VAR50:=CHR(0);
 	VAR40:=0;
@@ -394,7 +394,7 @@ end;
 for VAR16:=1 to 6 do begin {L11762}
 	V33106[VAR16]:=RANDOM(0,-1)&175777B; {L12022}
 end;
-VAR46:=CHR(0); {L12074}
+VAR46:=false; {L12074}
 for VAR16:=1 to 4 do begin {L12100}
 	V33122[VAR16]:=' '; {L12140}
 end;
@@ -422,7 +422,7 @@ for VAR16:=-1 to 1 do begin {L12422}
 		',':	begin
 				if VAR4 = 8 then begin
 					WRITE('Золотой шар!!!');
-					VAR46:=CHR(1);
+					VAR46:=true;
 				end else
 					WRITE('Волшебная кирка.');
 			end;
@@ -430,7 +430,7 @@ for VAR16:=-1 to 1 do begin {L12422}
 		' ':	begin
 				WRITELN('Черная дыра');
 				if (VAR16 = 0) and (VAR20 = 0) then begin
-					if VAR46 <> CHR(0) then begin
+					if VAR46 <> false then begin
 						if VAR4 > 0 then
 							VAR4:=VAR4-1; { Этаж вниз }
 					end else begin
@@ -468,7 +468,7 @@ for VAR16:=-1 to 1 do begin {L12422}
 				VAR14:=VAR10;
 				V11070:=@F[VAR4,VAR12,VAR14];
 				V33074:=@F2[VAR4,VAR12,VAR14];
-				if VAR46 <> CHR(0) then
+				if VAR46 <> false then
 					V11070^:='.';
 			end;
 		'&':	WRITE('Папирус.');
@@ -591,7 +591,7 @@ for VAR16:=-1 to 1 do begin {L12422}
 end; { for VAR16 }
 VAR54:=V11070^; { Сохраняем символ, на который встал игрок }
 V11070^:='@'; {L20006}
-if VAR47 <> CHR(0) then begin { Фонарь горит }
+if VAR47 <> false then begin { Фонарь горит }
 	L01460(VAR4,VAR12,VAR14); {L20026}
 end else begin
 	CURSORTO(VAR12,VAR14); {L20052}
@@ -785,14 +785,14 @@ case VAR53 of {L20554}
 	end;
 'L':	begin { включить фонарь } {L25436}
 		if VAR32 > 0 then begin
-			VAR47:=CHR(1); { Фонарь горит }
+			VAR47:=true; { Фонарь горит }
 			WRITELN('Фонарь включен');
 		end else begin
 			WRITELN('Батареи сели.Надо было экономить ... ');
 		end;
 	end;
 'O':	begin { выключить фонарь } {L25532}
-		VAR47:=CHR(0); { Фонарь не горит }
+		VAR47:=false; { Фонарь не горит }
 		WRITELN('Фонарь выключен');
 	end;
 'W':	begin { взмахнуть волшебной палочкой }
@@ -812,7 +812,7 @@ case VAR53 of {L20554}
 				CLEARMSG;
 				WRITELN('"Да будет свет..."');
 			end else if ((V33106[VAR16]) and 3) = 1 then begin
-				if VAR46 <> CHR(0) then begin {L26420}
+				if VAR46 <> false then begin {L26420}
 					VAR4:=VAR4-6;
 					if VAR4 < 0 then VAR4:=0;
 				end else begin
@@ -968,14 +968,28 @@ case VAR53 of {L20554}
 			WRITELN('А читать-то и нечего');
 	end;
 'I':	begin { надеть кольцо }
-		{TODO}
-		WRITELN('Силовое поле включено!');
-		WRITELN('Нету');
+		VAR16:=L02332('=','=');
+		if VAR16 < 7 then begin
+			if (V33106[VAR16] and 2000B) = 0 then begin
+				WRITELN('Силовое поле включено!');
+				VAR51:=CHR(1);
+				RUKSAK[VAR16]:='.';
+			end else
+				ZAKLYATIE;
+		end else
+			WRITELN('Нету');
 	end;
 'V':	begin { снять кольцо }
-		{TODO}
-		WRITELN('Рюкзак полон');
-		WRITELN('Кольца нет');
+		if VAR51 <> CHR(0) then begin
+			VAR16:=L02332('.','.');
+			if VAR16 < 7 then begin
+				RUKSAK[VAR16]:='=';
+				V33106[VAR16]:=2000B;
+				VAR51:=CHR(0);
+			end else
+				WRITELN('Рюкзак полон');
+		end else
+			WRITELN('Кольца нет');
 	end;
 'A':	begin { купить (на золото) } {L32222}
 		if V11070^ in ['1','A','B'] then begin
@@ -998,18 +1012,36 @@ case VAR53 of {L20554}
 			WRITELN('Подойди ближе к автомату!');
 	end;
 'K':	begin { сломать стенку киркой } {L32600}
-		{TODO}
-		WRITE('Направление? ');
-		{TODO}
-		WRITELN('Кусок свода обрушился и раскололся о вашу глупую голову');
-		{TODO}
-		if VAR22 in [2..15] then ;
-		if VAR24 in [2..31] then ;
-		{TODO}
-		if F[VAR4,VAR22,VAR24] in ['!','-'] then ;
-		{TODO}
-		WRITELN('Ну, чего размахался?');
-		{TODO}
+		VAR16:=L02332(',',',');
+		if VAR16 < 7 then begin
+			WRITE('Направление? ');
+			READCHAR(VAR53);
+			CLEARMSG;
+			VAR22:=VAR12;
+			VAR24:=VAR14;
+			case VAR53 of
+			'1':	begin VAR22:=VAR12+1; VAR24:=VAR14-1; end;
+			'2':	VAR22:=VAR12+1;
+			'3':	begin VAR22:=VAR12+1; VAR24:=VAR14+1; end;
+			'4':	VAR24:=VAR14-1;
+			'5':	V11070^:=' ';
+			'6':	VAR24:=VAR14+1;
+			'7':	begin VAR22:=VAR12-1; VAR24:=VAR14-1; end;
+			'8':	VAR22:=VAR12-1;
+			'9':	begin VAR22:=VAR12-1; VAR24:=VAR14+1; end;
+			'.':	if VAR4 > 0 then begin
+					F[VAR4-1,VAR12,VAR14]:=' ';
+					WRITELN('Кусок свода обрушился и раскололся о вашу глупую голову');
+				end;
+			else	NELZYA
+			end; { case of }
+			if (VAR22 in [2..15]) and (VAR24 in [2..31]) and
+			   (F[VAR4,VAR22,VAR24] in ['!','-']) then begin
+				   F[VAR4,VAR22,VAR24]:='c';
+				   IND[2]:=IND[2]-1;
+			end else
+				WRITELN('Ну, чего размахался?');
+		end else
 		WRITELN('А стенку вы будете лбом прошибать?..');
 	end;
 'Y':	begin { зажарить убегающего зверя } {L33724}
@@ -1079,79 +1111,138 @@ Z - Перевести деньги в банк на счет пещеры.
 		{TODO}
 	end;
 'U':	begin { вызвать джинна }
-		{TODO}
-		WRITE('Что, влип? ладно, попробую тебя  перенести
+		if (not VAR46) <> false then begin
+			WRITE('Что, влип? ладно, попробую тебя  перенести
 отсюда. только дороговато это встанет...
 Ты готов? ');
-		{TODO}
-		WRITELN('Джинн в отгуле');
+			READCHAR(VAR53);
+			if VAR53 <> 'N' then begin
+				for VAR16:=1 to 5 do begin
+					IND[VAR16]:=IND[VAR16]-RANDOM(0,15);
+				end;
+				for VAR16:=1 to 6 do begin {L34504}
+					RUKSAK[VAR16]:='.';
+				end;
+				VAR12:=RANDOM(2,15);
+				VAR14:=RANDOM(2,31);
+				VAR22:=RANDOM(0,8);
+				V11070:=@F[VAR4,VAR12,VAR14];
+				V33074:=@F2[VAR4,VAR12,VAR14];
+				if VAR22 > VAR4 then
+					VAR22:=VAR4;
+				VAR4:=VAR22;
+				L03362('J'); { Обновить экран }
+			end;
+		end else
+			WRITELN('Джинн в отгуле');
 	end;
 else	WRITELN('Что-что?')
-end; { case of }
-{L35274}
+end; { case of } {L35274}
 if VAR40 > 0 then begin
-	{TODO}
-	if VAR22 in [2..15] then ;
-	if VAR24 in [2..31] then ;
-	{TODO}
+	VAR22:=VAR12+RANDOM(1,3)-2;
+	VAR24:=VAR24+RANDOM(1,3)-2;
+	if (VAR22 in [2..15]) and (VAR24 in [2..31]) then begin
+		VAR12:=VAR22;
+		VAR14:=VAR24;
+		VAR40:=VAR40-1;
+	end;
+	V11070:=@F[VAR4,VAR12,VAR14];
+	V33074:=@F2[VAR4,VAR12,VAR14];
 end;
 VAR20:=1; {L35650}
 VAR26:=VAR26+VAR30; {L35656}
-if VAR47 <> CHR(0) then { Фонарь горит }
+if VAR47 <> false then { Фонарь горит }
 	VAR32:=VAR32-1; { Уменьшаем заряд батарей }
-{TODO}
+VAR2:=VAR2+((IND[3]+IND[4]) div 10);
+if VAR2 > 200 then begin
+	VAR2:=0;
+	IND[1]:=IND[1]+1;
+	IND[2]:=IND[2]-1;
+end;
 if IND[2] < 5 then
 	WRITELN('Силы на исходе'); {L35774}
 if IND[2] > 50 then IND[2]:=50; {L36032}
-if (VAR32 < 10) and (VAR47 <> CHR(0)) and (VAR32 > 1) then
+if (VAR32 < 10) and VAR47 and (VAR32 > 1) then
 	WRITELN('Фонарь гаснет'); {L36122}
 if VAR32 = 1 then begin
 	IND[1]:=IND[1]-1;
-	VAR47:=CHR(0); { Фонарь не горит }
+	VAR47:=false; { Фонарь не горит }
 	VAR32:=0; { Заряд батарей }
 end;
 if VAR26 > 200 then
 	WRITELN('Отдохнуть-бы');
-if VAR26 > 215 then begin {L36232}
+if VAR26 > 215 then begin { Слишком устал } {L36232}
 	IND[2]:=IND[2]-3;
 	VAR26:=50; {L36254}
 end;
 for VAR16:=1 to 4 do begin {L36262}
-	if V33122[VAR16] <> ' ' then begin
-		{TODO}
+	if V33122[VAR16] <> ' ' then begin {L36322}
+		if (V33136[VAR16] <> VAR12) or (V33146[VAR16] > VAR14) then begin
+			if VAR12 > V33136[VAR16] then
+				VAR22:=V33146[VAR16]+1
+			else if VAR12 > V33146[VAR16] then
+				VAR22:=V33136[VAR16]-1;
+			if VAR14 > V33146[VAR16] then
+				VAR24:=V33146[VAR16]+1
+			else if VAR14 > V33146[VAR16] then
+				VAR24:=V33146[VAR16]-1;
+		end;
+		if (F[VAR4,VAR22,VAR24] in ['!','-']) and ((V33126[VAR16] and 6) = 4) then {L36674}
+			V33122[VAR16]:=' '
+		else begin
+			F[VAR4,V33136[VAR16],V33146[VAR16]]:='.';
+			CURSORTO(V33136[VAR16],V33146[VAR16]);
+			WRITE('.');
+			F[VAR4,VAR22,VAR24]:=V33122[VAR16];
+			CURSORTO(VAr22,VAR24);
+			WRITE(V33122[VAR16]);
+			F2[VAR4,VAR22,VAR24]:=V33126[VAR16];
+			V33136[VAR16]:=VAR22;
+			V33146[VAR16]:=VAR24;
+			CURSORTO(18,0);
+			WRITE(CHR(33B),CHR(113B))
+		end;
 	end;
 end;
-if IND[2] < 0 then begin { Умер от недостатка Энергии }
+if IND[2] < 0 then begin { Умер от недостатка Энергии } {L37536}
 	VAR16:=RANDOM(10,1000);
 	WRITE('	Вот Вы и стали');
 	WRITE(VAR16:4);
 	WRITELN('-ой жертвой этого подземелья.');
-	exit;{TODO: Сброс SP} { Выход из игрового цикла }
+	{TODO:L37650}{$C
+		NOP
+		NOP}
+	exit; { Выход из игрового цикла }
 end;
-{ Энергия пока есть - продолжаем }
-{TODO}
-if F[VAR4,VAR22,VAR24] in ['!','-'] then ;
-{TODO}
-if IND[5] >= 0 then begin { В банке есть деньги? }
-	WRITE('Как, Вы вернулись?! Ну и ну !!!
+{ Энергия пока есть - продолжаем } {L37660}
+if VAR4 = 0 then begin
+	if VAR46 <> false then begin
+		if (VAR12 = 2) and (VAR14 = 2) then begin
+			if IND[5] >= 0 then begin { В банке есть деньги? }
+				WRITE('Как, Вы вернулись?! Ну и ну !!!
 А дальше пойдете?');
-	READCHAR(VAR53);
-	if VAR53 = 'Y' then begin
-		DUNGEON:=DUNGEON+1; { следующее подземелье }
-		IND[1]:=IND[1]+50; { Рейтинг }
-		{TODO:рестарт игры - как?}
-	end else
-		exit;
-	{TODO}
-end else
-	WRITELN('А расплачиваться кто будет?');
+				READCHAR(VAR53);
+				if VAR53 = 'Y' then begin
+					DUNGEON:=DUNGEON+1; { следующее подземелье }
+					IND[1]:=IND[1]+50; { Рейтинг }
+					{TODO:рестарт игры - как?}{$C
+						NOP
+						NOP}
+				end else begin
+					{TODO:L40056}{$C
+						NOP
+						NOP}
+					exit;
+				end;
+			end else
+				WRITELN('А расплачиваться кто будет?');
+		end;
+	end;
+end;
 { конец игрового цикла }
 end;
-{TODO: расчёт счёта игрока}
+{ Расчёт счёта игрока }
+VAR16:=IND[1]+((IND[2]+IND[3]+IND[4]+IND[5] div 5) div 3);
 WRITE('Ваш счет -');
 WRITE(VAR16:5);
-{$C
-	.BLKW	923
-	.GLOBL	UNSMUL
-}
 END.
