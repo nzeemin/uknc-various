@@ -40,8 +40,8 @@ var	DUNGEON: integer; { Номер подземелья }
 	VAR44:	integer; { Число для генератора случайных чисел }
 	VAR46:	boolean;
 	VAR47:	boolean; { Фонарь горит или нет }
-	VAR50:	char;
-	VAR51:	char;
+	VAR50:	boolean; { Приготовился к сражению }
+	VAR51:	boolean;
 	VAR52:	char;
 	VAR53:	char;
 	VAR54:	char; { Символ в клетке на которой стоит игрок }
@@ -384,15 +384,15 @@ if DUNGEON = 1 then begin
 	{ Инициализация переменных }
 	IND[2]:=25; { Энергия }
 	VAR47:=false; { Фонарь не горит }
-	VAR51:=CHR(0);
-	VAR50:=CHR(0);
+	VAR51:=false;
+	VAR50:=false;
 	VAR40:=0;
 	VAR32:=400; { Заряд батарей } {L11742}
 	VAR26:=0; { Усталость = 0 }
 	V33156:=CHR(1);
 end;
 for VAR16:=1 to 6 do begin {L11762}
-	V33106[VAR16]:=RANDOM(0,-1)&175777B; {L12022}
+	V33106[VAR16]:=RANDOM(0,8191) and 175777B; {L12022}
 end;
 VAR46:=false; {L12074}
 for VAR16:=1 to 4 do begin {L12100}
@@ -460,7 +460,7 @@ for VAR16:=-1 to 1 do begin {L12422}
 		'[',']': WRITE('Оружие.');
 		'?':	WRITE('Свисток.');
 		':',';': WRITE('Еда!!!');
-		'\':	WRITE('"ВП".');
+		'\','/': WRITE('"ВП".');
 		'<','>': WRITE('Батареи.');
 		'"','''': begin {L14040}
 				WRITELN('Комариная плешь');
@@ -483,45 +483,45 @@ for VAR16:=-1 to 1 do begin {L12422}
 				if (V33074^ and 6) = 0 then begin
 					V33076^:=(V33076^ or 6);
 					WRITELN('Ну, сейчас он вам покажет...')
-				end else if (V33074^ and 6) = 2 then begin
+				end else if (V33076^ and 6) = 2 then begin
 					VAR22:=RANDOM(1,3)-2+VAR12;
 					VAR24:=RANDOM(1,3)-2+VAR14;
-					if F[VAR4,VAR22,VAR24] in ['!','-'] then begin
+					if not (F[VAR4,VAR22,VAR24] in ['!','-']) then begin
 						VAR53:=V11070^;
 						V11070^:='.';
 						F[VAR4,VAR22,VAR24]:=VAR53;
 						F2[VAR4,VAR22,VAR24]:=V33074^;
 					end;
-				end else if ((not ORD(VAR51)) and 1) <> 0 then begin
-					if ((not ORD(VAR50)) and 1) <> 0 then begin
-						if IND[4] > 1 then
+				end else if not VAR51 then begin {L15100}
+					if not VAR50 then begin {L15120}
+						if IND[4] > 1 then {L15140}
 							IND[4]:=IND[4]-RANDOM(2,15)
 						else
-							IND[2]:=IND[2]-RANDOM(2,15);
+							IND[2]:=IND[2]-RANDOM(2,15); { Энергия уменьшается }
+						WRITE(CHR(7)); { bell }
+						WRITELN('Защищайтесь же!!!');
+					end else begin
+						IND[3]:=IND[3]-RANDOM(2,11);
+						IND[4]:=IND[4]-2;
+						VAR50:=false;
+						VAR54:='.';
+						WRITE(CHR(7));
+						WRITELN('Готов!');
+						IND[1]:=IND[1]+10;
+						if IND[4] < 0 then begin
+							IND[2]:=IND[2]+IND[4];
+							IND[4]:=0;
+						end;
+						if IND[3] < 0 then begin
+							IND[1]:=IND[1]+IND[3];
+							IND[3]:=0;
+						end;
+						VAR16:=1;
+						while (V33122[VAR16] <> V11070^) and (VAR16 < 4) do
+							VAR16:=VAR16+1;
+						V33122[VAR16]:=' ';
+						V11070^:='m';
 					end;
-					WRITE(CHR(7));
-					WRITELN('Защищайтесь же!!!');
-				end else begin
-					IND[3]:=IND[3]-RANDOM(2,11);
-					IND[4]:=IND[4]-2;
-					VAR50:=CHR(0);
-					VAR54:='.';
-					WRITE(CHR(7));
-					WRITELN('Готов!');
-					IND[1]:=IND[1]+10;
-					if IND[4] > 0 then begin
-						IND[2]:=IND[2]+IND[4];
-						IND[4]:=0;
-					end;
-					if IND[3] > 0 then begin
-						IND[1]:=IND[1]+IND[3];
-						IND[3]:=0;
-					end;
-					VAR16:=1;
-					while (V33122[VAR16] <> V11070^) and (VAR16 < 4) do
-						VAR16:=VAR16+1;
-					V33122[VAR16]:=' ';
-					V11070^:='m';
 				end;
 			end else begin
 				L02574(VAR4,VAR6,VAR10);
@@ -535,7 +535,7 @@ for VAR16:=-1 to 1 do begin {L12422}
 						V11070^:='z';
 					end else begin
 						WRITELN('Тьфу...');
-						V11070^:='y';
+						V11072^:='y';
 					end;
 				end else begin
 					WRITELN('Свертoк. съедим?');
@@ -742,7 +742,6 @@ case VAR53 of {L20554}
 					end;
 				end;
 			end;
-			{TODO}
 		end else
 			WRITELN('Однакo, свисток нужен');
 	end;
@@ -848,7 +847,7 @@ case VAR53 of {L20554}
 		WRITELN('Перестройка в рюкзаке');
 	end;
 'F':	begin { приготовиться к сражению }
-		VAR50:=CHR(1);
+		VAR50:=true;
 		WRITELN('У-р-р-р-а-a ! ! !');
 	end;
 'N':	begin { идёт начальник }
@@ -875,7 +874,6 @@ case VAR53 of {L20554}
 			}
 			exit; { Выход из игрового цикла }
 		end;
-		{TODO}
 	end;
 'M':	begin { приготовить оружие } {L27742}
 		VAR16:=L02332('[',']'); { Ищем в рюкзаке }
@@ -910,7 +908,6 @@ case VAR53 of {L20554}
 				for VAR20:=1 to 8 do begin
 					V33106[VAR20]:=V33106[VAR20] and 175777B;
 				end;
-				{TODO}
 				WRITELN('"APCHXYZZYURR!!!"... Заклятие снято');
 			end else if (V33106[VAR16] and 6) = 2 then begin
 				WRITELN('Надпись гласит: "Сам дурак"');
@@ -919,18 +916,20 @@ case VAR53 of {L20554}
 				while VAR22 < 16 do begin {L30716}
 					VAR24:=2;
 					while VAR24 < 32 do begin
-						if F[VAR4,VAR22,VAR24] = '%' then
+						if F[VAR4,VAR22,VAR24] = '%' then begin
+							{TODO:L31036}{$C
+								NOP
+								NOP}
 							exit;
-						{TODO:L31036}{$C
-							NOP
-							NOP}
+						end;
 						VAR24:=VAR24+1;
 					end;
-					if F[VAR4,VAR22,VAR24] = '%' then
+					if F[VAR4,VAR22,VAR24] = '%' then begin
+						{TODO:L31134}{$C
+							NOP
+							NOP}
 						exit;
-					{TODO:L31134}{$C
-						NOP
-						NOP}
+					end;
 					VAR22:=VAR22+1;
 				end;
 				WRITE('Лестница -');
@@ -953,7 +952,6 @@ case VAR53 of {L20554}
 					{TODO:L31416}{$C
 						NOP
 						NOP}
-					{TODO}
 					VAR22:=VAR22+1;
 				end;
 				if (VAR22 = 16) and (VAR24 = 32) then
@@ -972,7 +970,7 @@ case VAR53 of {L20554}
 		if VAR16 < 7 then begin
 			if (V33106[VAR16] and 2000B) = 0 then begin
 				WRITELN('Силовое поле включено!');
-				VAR51:=CHR(1);
+				VAR51:=true;
 				RUKSAK[VAR16]:='.';
 			end else
 				ZAKLYATIE;
@@ -980,12 +978,12 @@ case VAR53 of {L20554}
 			WRITELN('Нету');
 	end;
 'V':	begin { снять кольцо }
-		if VAR51 <> CHR(0) then begin
+		if VAR51 <> false then begin
 			VAR16:=L02332('.','.');
 			if VAR16 < 7 then begin
 				RUKSAK[VAR16]:='=';
 				V33106[VAR16]:=2000B;
-				VAR51:=CHR(0);
+				VAR51:=false;
 			end else
 				WRITELN('Рюкзак полон');
 		end else
@@ -1108,7 +1106,6 @@ Z - Перевести деньги в банк на счет пещеры.
 		end;
 		L03362('J'); { Обновить экран }
 		IND[1]:=IND[1] - 2; { Рейтинг }
-		{TODO}
 	end;
 'U':	begin { вызвать джинна }
 		if (not VAR46) <> false then begin
