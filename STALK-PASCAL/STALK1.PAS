@@ -173,21 +173,26 @@ begin
 				VAR4:=VAR4-1; { Этаж вниз } {L03560}
 				IND[2]:=IND[2]-2; { Энергия минус 2 }
 				IND[1]:=IND[1]+1;
+				{$C	NOP}{TODO: разобраться с R4}
+				{$C	NOP
+					NOP}{TODO L03604: код на который нет перехода}
 			end else if VAR4 <> 8 then begin
 				VAR4:=VAR4+1;
 				IND[1]:=IND[1]+3;
+				{$C	NOP}{TODO: разобраться с R4}
 			end else begin
 				V11070:=@F[VAR4,VAR12,VAR14]; {L03644}
 				V33074:=@F2[VAR4,VAR12,VAR14]; {L03716}
 				V11072:=@F[VAR4,VAR6,VAR10]; {L04000}
 				V33074:=@F2[VAR4,VAR6,VAR10]; {L04052}
 			end;
-			{$C	.BLKW	5}{TODO: разобраться с R4}
+			{$C	.BLKW	3}{TODO: разобраться с R4}
 		end else begin { не на лестнице }
 			WRITELN(' Без лестницы?'); {L04140}
 		end;
+	end else begin {$C }
 	end;
-	{$C	.BLKW	8}
+	{$C	.BLKW	4}
 	WRITE(CHR(3B),CHR(110B),CHR(33)); {L04172}
 	WRITE('J	Подземелье ');
 	WRITE(DUNGEON); { Номер подземелья }
@@ -549,7 +554,7 @@ for VAR16:=-1 to 1 do begin {L12422}
 		'f':	WRITELN('Странствующий скелет');
 		'g':	WRITELN('Стадо бродячих живых трупов.');
 		'h':	WRITELN('Кусочек Ноева ковчега');
-		'i':	WRITELN('Записка:" Зря ты сюда полез, парень... Автор. ');
+		'i':	WRITELN('Записка:" Зря ты сюда полез, парень... Автор. "');
 		'j':	WRITE('Черный ящик.');
 		'k':	WRITELN('Лужа машинного масла');
 		'l':	WRITELN('Раздолбанный компьютер ZX SPECTRUM - 128.    '); {Пробелы компенсируют нули после строки}
@@ -558,7 +563,7 @@ for VAR16:=-1 to 1 do begin {L12422}
 		'o':	WRITE('Пустышка.');
 		'p':	WRITE('Куча сепулек.');
 		'r':	WRITELN('Разложившийся труп девушки.      '); {Пробелы компенсируют нули после строки}
-		's':	WRITELN('Надпись: "Мы до тебя еще доберемся!!!   "'); {Пробелы компенсируют нули после строки}
+		's':	WRITELN('Надпись: "Мы до тебя еще доберемся!!! "  '); {Пробелы компенсируют нули после строки}
 		't':	WRITELN('Отрезанная голова предыдущего Сталкера.                  '); {Пробелы компенсируют нули после строки}
 		'u':	WRITELN('Зачитанный журнал "АКУШЕРСТВО И ГИНЕКОЛОГИЯ"    '); {Пробелы компенсируют нули после строки}
 		'v':	WRITE('Артефакт.');
@@ -718,7 +723,7 @@ case VAR53 of {L20554}
 			end else if (V33106[VAR22] and 6) = 2 then begin {L23310}
 				for VAR16:=-2 to 2 do begin
 					for VAR20:=-2 to 2 do begin
-						if ((VAR12+VAR16) in [2..15]) and ((VAR14+VAR20) in [2..15]) then begin
+						if ((VAR12+VAR16) in [2..15]) and ((VAR14+VAR20) in [2..31]) then begin
 							F[VAR14,VAR12+VAR16,VAR14+VAR20]:=' ';
 						end;
 					end;
@@ -1159,7 +1164,7 @@ end;
 if IND[2] < 5 then
 	WRITELN('Силы на исходе'); {L35774}
 if IND[2] > 50 then IND[2]:=50; {L36032}
-if (VAR32 < 10) and VAR47 and (VAR32 > 1) then
+if (VAR47 and (VAR32 < 10)) and (VAR32 > 1) then
 	WRITELN('Фонарь гаснет'); {L36122}
 if VAR32 = 1 then begin
 	IND[1]:=IND[1]-1;

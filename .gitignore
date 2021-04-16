@@ -5,3 +5,7 @@ x-*
 *.MAP
 *.SAV
 /STALK-PASCAL/STALK1.MAC
+/STALK-PASCAL/StalkPatcher/bin
+/STALK-PASCAL/StalkPatcher/obj
+/STALK-PASCAL/StalkPatcher/*.suo
+/STALK-PASCAL/StalkPatcher/.vs

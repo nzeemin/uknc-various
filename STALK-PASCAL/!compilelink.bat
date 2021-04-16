@@ -38,19 +38,8 @@ REM  findstr /RC:"^****** " STALK1.LST
 
 @if exist STALKP.MAC del STALKP.MAC
 
-REM Patching the STALK1.MAC file replacing KOI-7 chars with KOI-8 ones
-set replaces= -replace ^
- ':\t.WORD\t25120\r\n\t.WORD\t23109\r\n\t.WORD\t19488\r\n\t.WORD\t21317\r\n\t.WORD\t20052\r\n\t.WORD\t17225\r\n\t.WORD\t16217', ^
- ':	.BYTE 32,226,197,218,32,204,197,211,212,206,201,195,217,63' -replace ^
- ':\t.WORD\t2378\r\n\t.WORD\t20336\r\n\t.WORD\t23108\r\n\t.WORD\t19781\r\n\t.WORD\t19525\r\n\t.WORD\t17752\r\n\t.WORD\t32', ^
- ':	.BYTE 74,9,240,207,196,218,197,205,197,204,216,197,32,0' -replace ^
- ':\t.WORD\t28192\r\n\t.WORD\t17696\r\n\t.WORD\t19488\r\n\t.WORD\t22560\r\n\t.WORD\t23072\r\n\t.WORD\t20768', ^
- ':	.BYTE 32,238,32,197,32,204,32,216,32,218,32,209' -replace ^
- ':\t.WORD\t8314\r\n\t.WORD\t8279\r\n\t.WORD\t8261\r\n\t.WORD\t8274\r\n\t.WORD\t8280\r\n\t.WORD\t33', ^
- ':	.BYTE 250,32,215,32,197,32,210,32,216,32,33,0' -replace ^
- ':\t.WORD\t16750\r\n\t.WORD\t23584\r\n\t.WORD\t20308\r\n\t.WORD\t8266\r\n\t.WORD\t21595\r\n\t.WORD\t19285\r\n\t.WORD\t8261\r\n\t.WORD\t16730\r\n\t.WORD\t19531\r\n\t.WORD\t21585\r\n\t.WORD\t17737\r\n\t.WORD\t0', ^
- ':	.BYTE 238,193,32,220,212,207,202,32,219,212,213,203,197,32,218,193,203,204,209,212,201,197,0,0'
-powershell -Command "(Get-Content STALK1.MAC -Raw) %replaces% | Out-File -encoding ASCII STALK1P.MAC"
+REM Patching the STALK1.MAC file -> STALK1P.MAC
+StalkPatcher\bin\Debug\StalkPatcher.exe
 
 REM Adding BLK000.INC header to the patched file
 copy BLK000.INC+STALK1P.MAC STALKP.MAC
