@@ -922,20 +922,16 @@ case VAR53 of {L20554}
 					VAR24:=2;
 					while VAR24 < 32 do begin {L30740}
 						if F[VAR4,VAR22,VAR24] = '%' then begin
-							{TODO:L31036}{$C
-								NOP
-								NOP}
 							exit;
+						end else begin
+							VAR24:=VAR24+1;
 						end;
-						VAR24:=VAR24+1;
 					end;
 					if F[VAR4,VAR22,VAR24] = '%' then begin
-						{TODO:L31134}{$C
-							NOP
-							NOP}
 						exit;
+					end else begin
+						VAR22:=VAR22+1;
 					end;
-					VAR22:=VAR22+1;
 				end;
 				WRITE('Лестница -');
 				WRITE(VAR22:4,VAR24:4);
@@ -946,20 +942,16 @@ case VAR53 of {L20554}
 					VAR24:=2;
 					while VAR24 < 32 do begin
 						if F[8,VAR22,VAR24] = ',' then begin
-							{TODO:L31336}{$C
-								NOP
-								NOP}
 							exit;
+						end else begin
+							VAR24:=VAR24+1;
 						end;
-						VAR24:=VAR24+1;
 					end;
 					if F[8,VAR22,VAR24] = ',' then begin
-						{TODO:L31416}{$C
-							NOP
-							NOP}
 						exit;
+					end else begin
+						VAR22:=VAR22+1;
 					end;
-					VAR22:=VAR22+1;
 				end;
 				if (VAR22 = 16) and (VAR24 = 32) then
 					WRITELN('Золотой шар украден!')
@@ -1189,7 +1181,6 @@ for VAR16:=1 to 4 do begin {L36262}
 				VAR24:=V33146[VAR16]+1 {L36600}
 			else if VAR14 < V33146[VAR16] then {L36626}
 				VAR24:=V33146[VAR16]-1; {L36652}
-		end;
 		if (F[VAR4,VAR22,VAR24] in ['!','-']) and ((V33126[VAR16] and 6) = 4) then {L36674}
 			V33122[VAR16]:=' '
 		else begin
@@ -1204,6 +1195,7 @@ for VAR16:=1 to 4 do begin {L36262}
 			V33146[VAR16]:=VAR24;
 			CURSORTO(18,0);
 			WRITE(CHR(33B),CHR(113B))
+		end;
 		end;
 	end;
 end;
