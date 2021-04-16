@@ -1,4 +1,4 @@
-(* WORK IN PROGRESS!!!
+(*
 Это восстановленный из исполнимого файла код на языке Паскаль для игры,
 которая называлась 'Зона' или 'Сталкер', файл игры назывался
 STALK.SAV, PIKNIK.SAV или ZONA.SAV и предназначался для советских PDP11-
@@ -116,15 +116,15 @@ begin
 	end;
 end;
 
-{ Поиск предметов в рюкзаке, возвращает индекс или 7 если не найдены }
-function L02332(A,B:char):integer;
+{ Поиск предметов в рюкзаке, возвращает индекс 1..6, или 7 если не найдены }
+function RUKSEEK(A,B:char):integer; {L02332}
 var K:integer;
 begin
 	K:=1; {L02340}
 	while (RUKSAK[K] <> A) and (RUKSAK[K] <> B) and (K < 7) do begin
 		K:=K+1;
 	end;
-	L02332:=K;
+	RUKSEEK:=K;
 	V33156:=CHR(1);
 end;
 
@@ -133,7 +133,7 @@ begin
 	WRITELN(' Н е л ь з я ! ! !');
 end;
 
-procedure L02574(V,Y,X:integer);
+procedure ZVERX(V,Y,X:integer); {L02574}
 var FV:char; FV2:integer;
 begin
 	FV:=F[V,Y,X];
@@ -533,7 +533,7 @@ for VAR16:=-1 to 1 do begin {L12422}
 					end;
 				end;
 			end else begin
-				L02574(VAR4,VAR6,VAR10);
+				ZVERX(VAR4,VAR6,VAR10);
 			end;
 		'0','2','3','4','5','6','7','8','9','{','}': begin {L15616}
 				if (VAR16 = 0) and (VAR20 = 0) then begin
@@ -582,7 +582,7 @@ for VAR16:=-1 to 1 do begin {L12422}
 		'`':	WRITELN('Мышелот (в собственном соку)');
 		'@':	begin {L17200}
 				WRITE('Призрак.');
-				VAR22:=L02332('.','.');
+				VAR22:=RUKSEEK('.','.');
 				if VAR22 < 7 then
 					VAR30:=VAR30+1;
 				RUKSAK[VAR22]:='@';
@@ -646,7 +646,7 @@ case VAR53 of {L20554}
 '0':	VAR26:=0;	{ отдохнуть }
 '.':	L03362('.');	{ вверх по лестнице }
 'Q':	begin { пить }
-		VAR16:=L02332('$','+');
+		VAR16:=RUKSEEK('$','+');
 		if VAR16 < 7 then begin
 			RUKSAK[VAR16]:='.';
 			VAR30:=VAR30-1;
@@ -692,7 +692,7 @@ case VAR53 of {L20554}
 		READCHAR(VAR53);
 		{$C	BIC	#^O040000, @#^O000044}
 		CLEARMSG;
-		VAR16:=L02332(VAR53,VAR53); { Ищем в рюкзаке }
+		VAR16:=RUKSEEK(VAR53,VAR53); { Ищем в рюкзаке }
 		if VAR16 < 7 then begin
 			if (V33106[VAR16] and 2000B) = 0 then begin
 				if VAR53 <> '.' then begin
@@ -709,7 +709,7 @@ case VAR53 of {L20554}
 			WRITELN('Нету');
 	end;
 'Z':	begin { перевести деньги в банк на счёт пещеры } {L23010}
-		VAR16:=L02332('*','*'); { Ищем в рюкзаке }
+		VAR16:=RUKSEEK('*','*'); { Ищем в рюкзаке }
 		if VAR16 < 7 then begin
 			IND[1]:=IND[1]+1;
 			VAR30:=VAR30-1;
@@ -720,7 +720,7 @@ case VAR53 of {L20554}
 			WRITELN('Где золото-тo?');
 	end;
 'S':	begin { свистнуть }
-		VAR22:=L02332('?','?'); { Ищем в рюкзаке свисток }
+		VAR22:=RUKSEEK('?','?'); { Ищем в рюкзаке свисток }
 		if VAR22 < 7 then begin
 			if (V33106[VAR22] and 6) = 4 then begin
 				WRITE(CHR(7)); { bell }
@@ -755,7 +755,7 @@ case VAR53 of {L20554}
 			WRITELN('Однакo, свисток нужен');
 	end;
 'E':	begin { поесть }
-		VAR16:=L02332(':',';');
+		VAR16:=RUKSEEK(':',';');
 		if VAR16 < 7 then begin
 			IND[2]:=IND[2]+18; { Энергия }
 			RUKSAK[VAR16]:='.';
@@ -765,7 +765,7 @@ case VAR53 of {L20554}
 			WRITELN('Еды нет');
 	end;
 'T':	begin { взять предмет, на котором стоишь }
-		VAR16:=L02332('.','.'); { Ищем место в рюкзаке }
+		VAR16:=RUKSEEK('.','.'); { Ищем место в рюкзаке }
 		if VAR16 < 7 then begin
 			if V11070^ in ['"',''''] then
 				NELZYA { Комариную плешь брать нельзя }
@@ -780,7 +780,7 @@ case VAR53 of {L20554}
 			WRITELN('Рюкзак полон');
 	end;
 'P':	begin { надеть доспехи }
-		VAR16:=L02332(')','(');
+		VAR16:=RUKSEEK(')','(');
 		if VAR16 < 7 then begin
 			if ((V33106[VAR16]) and 2000B) = 0 then begin
 				RUKSAK[VAR16]:='.';
@@ -804,7 +804,7 @@ case VAR53 of {L20554}
 		WRITELN('Фонарь выключен');
 	end;
 'W':	begin { взмахнуть волшебной палочкой }
-		VAR16:=L02332('/','\');
+		VAR16:=RUKSEEK('/','\');
 		if VAR16 < 7 then begin
 			if ((V33106[VAR16]) and 3) = 3 then begin
 				WRITELN('Выпустили до госприемки...');
@@ -881,7 +881,7 @@ case VAR53 of {L20554}
 		end;
 	end;
 'M':	begin { приготовить оружие } {L27742}
-		VAR16:=L02332('[',']'); { Ищем в рюкзаке }
+		VAR16:=RUKSEEK('[',']'); { Ищем в рюкзаке }
 		if VAR16 < 7 then begin
 			if (V33106[VAR16] and 2000B) = 0 then begin
 				RUKSAK[VAR16]:='.';
@@ -893,7 +893,7 @@ case VAR53 of {L20554}
 			WRITELN('Нету!');
 	end;
 'B':	begin { заменить батареи }
-		VAR16:=L02332('<','>');
+		VAR16:=RUKSEEK('<','>');
 		if VAR16 < 7 then begin
 			if (V33106[VAR16] and 2000B) = 0 then begin
 				RUKSAK[VAR16]:='.';
@@ -907,7 +907,7 @@ case VAR53 of {L20554}
 	end;
 'J':	L03362('J'); { обновить экран }
 'R':	begin { читать папирус }
-		VAR16:=L02332('&','&');
+		VAR16:=RUKSEEK('&','&');
 		if VAR16 < 7 then begin
 			if (V33106[VAR16] and 6) = 0 then begin
 				for VAR20:=1 to 8 do begin
@@ -965,7 +965,7 @@ case VAR53 of {L20554}
 			WRITELN('А читать-то и нечего');
 	end;
 'I':	begin { надеть кольцо }
-		VAR16:=L02332('=','=');
+		VAR16:=RUKSEEK('=','=');
 		if VAR16 < 7 then begin
 			if (V33106[VAR16] and 2000B) = 0 then begin
 				WRITELN('Силовое поле включено!');
@@ -978,7 +978,7 @@ case VAR53 of {L20554}
 	end;
 'V':	begin { снять кольцо }
 		if VAR51 <> false then begin
-			VAR16:=L02332('.','.');
+			VAR16:=RUKSEEK('.','.');
 			if VAR16 < 7 then begin
 				RUKSAK[VAR16]:='=';
 				V33106[VAR16]:=2000B;
@@ -993,7 +993,7 @@ case VAR53 of {L20554}
 			if IND[5] > 0 then begin  { В банке есть деньги? }
 				WRITE('Чего изволите?');
 				READCHAR(VAR53);
-				VAR16:=L02332('.','.');
+				VAR16:=RUKSEEK('.','.');
 				if VAR16 < 7 then begin
 					RUKSAK[VAR16]:=VAR53;
 					V33106[VAR16]:=RANDOM(1,8191);
@@ -1009,7 +1009,7 @@ case VAR53 of {L20554}
 			WRITELN('Подойди ближе к автомату!');
 	end;
 'K':	begin { сломать стенку киркой } {L32600}
-		VAR16:=L02332(',',',');
+		VAR16:=RUKSEEK(',',',');
 		if VAR16 < 7 then begin
 			WRITE('Направление? ');
 			READCHAR(VAR53);
@@ -1181,21 +1181,21 @@ for VAR16:=1 to 4 do begin {L36262}
 				VAR24:=V33146[VAR16]+1 {L36600}
 			else if VAR14 < V33146[VAR16] then {L36626}
 				VAR24:=V33146[VAR16]-1; {L36652}
-		if (F[VAR4,VAR22,VAR24] in ['!','-']) and ((V33126[VAR16] and 6) = 4) then {L36674}
-			V33122[VAR16]:=' '
-		else begin
-			F[VAR4,V33136[VAR16],V33146[VAR16]]:='.';
-			CURSORTO(V33136[VAR16],V33146[VAR16]);
-			WRITE('.');
-			F[VAR4,VAR22,VAR24]:=V33122[VAR16];
-			CURSORTO(VAr22,VAR24);
-			WRITE(V33122[VAR16]);
-			F2[VAR4,VAR22,VAR24]:=V33126[VAR16];
-			V33136[VAR16]:=VAR22;
-			V33146[VAR16]:=VAR24;
-			CURSORTO(18,0);
-			WRITE(CHR(33B),CHR(113B))
-		end;
+			if (F[VAR4,VAR22,VAR24] in ['!','-']) and ((V33126[VAR16] and 6) = 4) then {L36674}
+				V33122[VAR16]:=' '
+			else begin
+				F[VAR4,V33136[VAR16],V33146[VAR16]]:='.';
+				CURSORTO(V33136[VAR16],V33146[VAR16]);
+				WRITE('.');
+				F[VAR4,VAR22,VAR24]:=V33122[VAR16];
+				CURSORTO(VAr22,VAR24);
+				WRITE(V33122[VAR16]);
+				F2[VAR4,VAR22,VAR24]:=V33126[VAR16];
+				V33136[VAR16]:=VAR22;
+				V33146[VAR16]:=VAR24;
+				CURSORTO(18,0);
+				WRITE(CHR(33B),CHR(113B))
+			end;
 		end;
 	end;
 end;
