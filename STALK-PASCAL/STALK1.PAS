@@ -173,13 +173,13 @@ begin
 				VAR4:=VAR4-1; { Этаж вниз } {L03560}
 				IND[2]:=IND[2]-2; { Энергия минус 2 }
 				IND[1]:=IND[1]+1;
-				{$C	NOP}{TODO: разобраться с R4}
+				{$C	CLR	R4 }{TODO: разобраться с R4}
 				{$C	NOP
 					NOP}{TODO L03604: код на который нет перехода}
 			end else if VAR4 <> 8 then begin
 				VAR4:=VAR4+1;
 				IND[1]:=IND[1]+3;
-				{$C	NOP}{TODO: разобраться с R4}
+				{$C	CLR	R4 }{TODO: разобраться с R4}
 			end else begin
 				V11070:=@F[VAR4,VAR12,VAR14]; {L03644}
 				V33074:=@F2[VAR4,VAR12,VAR14]; {L03716}
@@ -191,8 +191,8 @@ begin
 		end;
 	end else begin
 	end;
-	{$C	NOP
-		NOP}{TODO: разобраться с R4}
+	{$C	BR	.+4 }{TODO: непонятно откуда и зачем}
+	{$C	ADD	R4, SP }{TODO: разобраться с R4}
 	WRITE(CHR(33B),CHR(110B),CHR(33B)); {L04172}
 	WRITE('J	Подземелье ');
 	WRITE(DUNGEON); { Номер подземелья }
@@ -248,6 +248,7 @@ begin
 	F2[VAR4,VAR12,VAR14]:=RANDOM(0,32767) and 177677B;
 end;
 
+label 1, 2;
 BEGIN {MAIN}
 TITLE[00]:='(';
 TITLE[01]:='H';
@@ -282,7 +283,7 @@ TITLE[29]:=' ';
 WRITE('*** ');
 WRITE(TITLE); { Вывод начальной строки}
 WRITELN('***');
-WRITELN(' ^_^_^_^  __ С Т А Л К Е Р __       '); {TODO:спецсимволы в строке}
+WRITELN(' ^_^_^_^  __ С Т А Л К Е Р __       '); {место под спецсимволы в строке}
 WRITE('загадайте число. может быть, оно вам пригодится... там... ');
 { Ввод числа, которое "может быть пригодится там" }
 VAR44:=0;
@@ -302,6 +303,7 @@ VAR44:=0;
 READLN(VAR42);
 DUNGEON:=1; { Подземелье = 1 }
 {$C	BIS	#^O010000, @#^O000044}
+1:
 { Начало игры, или рестарт на следующем подземелье }
 WRITE(CHR(33B),CHR(110B),CHR(33B),CHR(112B));
 CURSORTO(10,1);
@@ -874,11 +876,7 @@ case VAR53 of {L20554}
 		READCHAR(VAR53);
 		if VAR53 in ['D','Y'] then begin
 			WRITELN('А ведь придупреждали...');
-			{TODO: Сброс SP}{$C
-				NOP
-				NOP
-			}
-			exit; { Выход из игрового цикла }
+			goto 2; { Выход из игрового цикла }
 		end;
 	end;
 'M':	begin { приготовить оружие } {L27742}
@@ -1213,10 +1211,7 @@ if IND[2] < 0 then begin { Умер от недостатка Энергии } {
 	WRITE('	Вот Вы и стали');
 	WRITE(VAR16:4);
 	WRITELN('-ой жертвой этого подземелья.');
-	{TODO:L37650}{$C
-		NOP
-		NOP}
-	exit; { Выход из игрового цикла }
+	goto 2; { Выходим из игрового цикла }
 end;
 { Энергия пока есть - продолжаем } {L37660}
 if VAR4 = 0 then begin
@@ -1229,15 +1224,9 @@ if VAR4 = 0 then begin
 				if VAR53 = 'Y' then begin
 					DUNGEON:=DUNGEON+1; { следующее подземелье }
 					IND[1]:=IND[1]+50; { Рейтинг }
-					{TODO:рестарт игры - как?}{$C
-						NOP
-						NOP}
-				end else begin
-					{TODO:L40056}{$C
-						NOP
-						NOP}
-					exit;
+					goto 1; { Рестарт игры }
 				end;
+				goto 2; { Выходим из игрового цикла }
 			end else
 				WRITELN('А расплачиваться кто будет?');
 		end;
@@ -1245,6 +1234,7 @@ if VAR4 = 0 then begin
 end;
 { конец игрового цикла }
 end;
+2:
 { Расчёт счёта игрока }
 VAR16:=IND[1]+((IND[2]+IND[3]+IND[4]+IND[5] div 5) div 3);
 WRITE('Ваш счет -');
