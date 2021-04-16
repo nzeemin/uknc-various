@@ -184,16 +184,16 @@ begin
 				V11070:=@F[VAR4,VAR12,VAR14]; {L03644}
 				V33074:=@F2[VAR4,VAR12,VAR14]; {L03716}
 				V11072:=@F[VAR4,VAR6,VAR10]; {L04000}
-				V33074:=@F2[VAR4,VAR6,VAR10]; {L04052}
+				V33076:=@F2[VAR4,VAR6,VAR10]; {L04052}
 			end;
-			{$C	.BLKW	3}{TODO: разобраться с R4}
 		end else begin { не на лестнице }
 			WRITELN(' Без лестницы?'); {L04140}
 		end;
-	end else begin {$C }
+	end else begin
 	end;
-	{$C	.BLKW	4}
-	WRITE(CHR(3B),CHR(110B),CHR(33)); {L04172}
+	{$C	NOP
+		NOP}{TODO: разобраться с R4}
+	WRITE(CHR(33B),CHR(110B),CHR(33B)); {L04172}
 	WRITE('J	Подземелье ');
 	WRITE(DUNGEON); { Номер подземелья }
 	WRITE('
@@ -209,6 +209,7 @@ begin
 	for VAR16:=1 to 5 do begin { выводим значения индикаторов }
 		CURSORTO(VAR16,37);
 		WRITE(IND[VAR16]:3);
+		WRITE(' ');
 	end;
 	CURSORTO(7,37);
 	WRITE(VAR30:3); { Вредность }
@@ -552,7 +553,7 @@ for VAR16:=-1 to 1 do begin {L12422}
 		'd':	WRITELN('Метла бабы яги (сломана)');
 		'e':	WRITE('Череп.');
 		'f':	WRITELN('Странствующий скелет');
-		'g':	WRITELN('Стадо бродячих живых трупов.');
+		'g':	WRITELN('Стадо бродячих живых трупов. ');
 		'h':	WRITELN('Кусочек Ноева ковчега');
 		'i':	WRITELN('Записка:" Зря ты сюда полез, парень... Автор. "');
 		'j':	WRITE('Черный ящик.');
@@ -562,7 +563,7 @@ for VAR16:=-1 to 1 do begin {L12422}
 		'n':	WRITE('Зуда.');
 		'o':	WRITE('Пустышка.');
 		'p':	WRITE('Куча сепулек.');
-		'r':	WRITELN('Разложившийся труп девушки.      '); {Пробелы компенсируют нули после строки}
+		'r':	WRITELN('Разложившийся труп девушки.     '); {Пробелы компенсируют нули после строки}
 		's':	WRITELN('Надпись: "Мы до тебя еще доберемся!!! "  '); {Пробелы компенсируют нули после строки}
 		't':	WRITELN('Отрезанная голова предыдущего Сталкера.                  '); {Пробелы компенсируют нули после строки}
 		'u':	WRITELN('Зачитанный журнал "АКУШЕРСТВО И ГИНЕКОЛОГИЯ"    '); {Пробелы компенсируют нули после строки}
@@ -571,7 +572,7 @@ for VAR16:=-1 to 1 do begin {L12422}
 		'x':	WRITELN('Окровавленная бензопила');
 		'y':	WRITELN('Что-то очень мерзкое');
 		'z':	WRITE('Следы пикника.');
-		'q':	WRITELN('Кладбище снусмумриков.        '); {L17026} {Пробелы компенсируют нули после строки}
+		'q':	WRITELN('Кладбище снусмумриков.         '); {L17026} {Пробелы компенсируют нули после строки}
 		'~':	WRITE('Черт-те что.');
 		'1','A','B': WRITELN('Бродячий торговый автомат');
 		'|':	WRITELN('Пережаренный зелюк.');
@@ -652,7 +653,7 @@ case VAR53 of {L20554}
 						if F[VAR4,VAR16,VAR20] <> '.' then begin
 							CURSORTO(VAR16,VAR20);
 							VAR53:=F[VAR4,VAR16,VAR20]; {L21342}
-							if F[VAR4,VAR16,VAR20] in ['!','#','-','.'] then begin
+							if not (F[VAR4,VAR16,VAR20] in ['!','#','-','.']) then begin
 								VAR53:=CHR(RANDOM(33,126));
 							end;
 							WRITE(VAR53);
@@ -665,7 +666,7 @@ case VAR53 of {L20554}
 				VAR26:=0;
 				WRITELN('Чувствуете прилив сил?'); {L21654}
 			end else if (V33106[VAR16] AND 6) = 4 then begin
-				for VAR16:=2 to 13 do begin {L21734}
+				for VAR16:=2 to 15 do begin {L21734}
 					for VAR20:=2 to 31 do begin
 						if F[VAR4,VAR16,VAR20] <> '.' then begin
 							CURSORTO(VAR16,VAR20); {L22112}
@@ -684,9 +685,9 @@ case VAR53 of {L20554}
 	end;
 'D':	begin { выбросить предмет } {L22466}
 		WRITE('Что выбросить? ');
-		{$C	BIS	#^O010000, @#^O000044}
+		{$C	BIS	#^O040000, @#^O000044}
 		READCHAR(VAR53);
-		{$C	BIС	#^O010000, @#^O000044}
+		{$C	BIC	#^O040000, @#^O000044}
 		CLEARMSG;
 		VAR16:=L02332(VAR53,VAR53); { Ищем в рюкзаке }
 		if VAR16 < 7 then begin
@@ -724,7 +725,7 @@ case VAR53 of {L20554}
 				for VAR16:=-2 to 2 do begin
 					for VAR20:=-2 to 2 do begin
 						if ((VAR12+VAR16) in [2..15]) and ((VAR14+VAR20) in [2..31]) then begin
-							F[VAR14,VAR12+VAR16,VAR14+VAR20]:=' ';
+							F[VAR4,VAR12+VAR16,VAR14+VAR20]:=' ';
 						end;
 					end;
 				end;
@@ -817,7 +818,7 @@ case VAR53 of {L20554}
 				WRITELN('"Да будет свет..."');
 			end else if ((V33106[VAR16]) and 3) = 1 then begin
 				if VAR46 <> false then begin {L26420}
-					VAR4:=VAR4-6;
+					VAR4:=VAR4-3;
 					if VAR4 < 0 then VAR4:=0;
 				end else begin
 					VAR4:=VAR4+3;
@@ -829,10 +830,10 @@ case VAR53 of {L20554}
 				VAR30:=VAR30-1;
 			end else begin {L26570}
 				WRITELN('Превращение догоняющего зверя');
-				for VAR22:=1 to 3 do begin
-					if V33122[VAR22] <> ' ' then begin
+				for VAR22:=1 to 3 do begin {L26612}
+					if V33122[VAR22] <> ' ' then begin {L26652}
 						V33122[VAR22]:=' ';
-						F[VAR22,V33136[VAR22],V33146[VAR22]]:=CHR(RANDOM(36,63));
+						F[VAR4,V33136[VAR22],V33146[VAR22]]:=CHR(RANDOM(36,63));
 					end;
 				end;
 			end;
@@ -916,11 +917,11 @@ case VAR53 of {L20554}
 				WRITELN('"APCHXYZZYURR!!!"... Заклятие снято');
 			end else if (V33106[VAR16] and 6) = 2 then begin
 				WRITELN('Надпись гласит: "Сам дурак"');
-			end else if (V33106[VAR16] and 6) = 4 then begin
+			end else if (V33106[VAR16] and 6) = 4 then begin {L30656}
 				VAR22:=2; {L30710}
 				while VAR22 < 16 do begin {L30716}
 					VAR24:=2;
-					while VAR24 < 32 do begin
+					while VAR24 < 32 do begin {L30740}
 						if F[VAR4,VAR22,VAR24] = '%' then begin
 							{TODO:L31036}{$C
 								NOP
@@ -945,18 +946,20 @@ case VAR53 of {L20554}
 				while VAR22 < 16 do begin
 					VAR24:=2;
 					while VAR24 < 32 do begin
-						if F[8,VAR22,VAR24] = ',' then
+						if F[8,VAR22,VAR24] = ',' then begin
+							{TODO:L31336}{$C
+								NOP
+								NOP}
 							exit;
-						{TODO:L31336}{$C
-							NOP
-							NOP}
+						end;
 						VAR24:=VAR24+1;
 					end;
-					if F[8,VAR22,VAR24] = ',' then
+					if F[8,VAR22,VAR24] = ',' then begin
+						{TODO:L31416}{$C
+							NOP
+							NOP}
 						exit;
-					{TODO:L31416}{$C
-						NOP
-						NOP}
+					end;
 					VAR22:=VAR22+1;
 				end;
 				if (VAR22 = 16) and (VAR24 = 32) then
@@ -1038,10 +1041,9 @@ case VAR53 of {L20554}
 				end;
 			else	NELZYA
 			end; { case of }
-			if (VAR22 in [2..15]) and (VAR24 in [2..31]) and
-			   (F[VAR4,VAR22,VAR24] in ['!','-']) then begin
-				   F[VAR4,VAR22,VAR24]:='c';
-				   IND[2]:=IND[2]-1;
+			if (VAR22 in [2..15]) and (VAR24 in [2..31]) and (F[VAR4,VAR22,VAR24] in ['!','-']) then begin
+				F[VAR4,VAR22,VAR24]:='c';
+				IND[2]:=IND[2]-1;
 			end else
 				WRITELN('Ну, чего размахался?');
 		end else
@@ -1142,7 +1144,7 @@ else	WRITELN('Что-что?')
 end; { case of } {L35274}
 if VAR40 > 0 then begin
 	VAR22:=VAR12+RANDOM(1,3)-2;
-	VAR24:=VAR24+RANDOM(1,3)-2;
+	VAR24:=VAR14+RANDOM(1,3)-2;
 	if (VAR22 in [2..15]) and (VAR24 in [2..31]) then begin
 		VAR12:=VAR22;
 		VAR14:=VAR24;
@@ -1179,15 +1181,15 @@ if VAR26 > 215 then begin { Слишком устал } {L36232}
 end;
 for VAR16:=1 to 4 do begin {L36262}
 	if V33122[VAR16] <> ' ' then begin {L36322}
-		if (V33136[VAR16] <> VAR12) or (V33146[VAR16] > VAR14) then begin
-			if VAR12 > V33136[VAR16] then
-				VAR22:=V33146[VAR16]+1
-			else if VAR12 > V33146[VAR16] then
-				VAR22:=V33136[VAR16]-1;
-			if VAR14 > V33146[VAR16] then
-				VAR24:=V33146[VAR16]+1
-			else if VAR14 > V33146[VAR16] then
-				VAR24:=V33146[VAR16]-1;
+		if (V33136[VAR16] <> VAR12) or (V33146[VAR16] <> VAR14) then begin {L36344}
+			if VAR12 > V33136[VAR16] then {L36434}
+				VAR22:=V33136[VAR16]+1 {L36460}
+			else if VAR12 < V33136[VAR16] then {L36506}
+				VAR22:=V33136[VAR16]-1; {L36532}
+			if VAR14 > V33146[VAR16] then {L36554}
+				VAR24:=V33146[VAR16]+1 {L36600}
+			else if VAR14 < V33146[VAR16] then {L36626}
+				VAR24:=V33146[VAR16]-1; {L36652}
 		end;
 		if (F[VAR4,VAR22,VAR24] in ['!','-']) and ((V33126[VAR16] and 6) = 4) then {L36674}
 			V33122[VAR16]:=' '
