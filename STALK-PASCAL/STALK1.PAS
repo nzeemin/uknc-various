@@ -162,6 +162,7 @@ end;
 
 { Параметр: 'J' - обновить экран; '.' - вверх; '5' - вниз }
 procedure L03362(A:char);
+label 1;
 begin
 	V33156:=CHR(1);
 	if A <> 'J' then begin {L03370}
@@ -173,14 +174,13 @@ begin
 				VAR4:=VAR4-1; { Этаж вниз } {L03560}
 				IND[2]:=IND[2]-2; { Энергия минус 2 }
 				IND[1]:=IND[1]+1;
-				{$C	CLR	R4 }{TODO: разобраться с R4}
-				{$C	NOP
-					NOP}{TODO L03604: код на который нет перехода}
-			end else if VAR4 <> 8 then begin
+				goto 1;
+			end else if VAR4 <> 8 then begin {L03610}
 				VAR4:=VAR4+1;
 				IND[1]:=IND[1]+3;
-				{$C	CLR	R4 }{TODO: разобраться с R4}
-			end else begin
+				goto 1;
+			end;
+			begin
 				V11070:=@F[VAR4,VAR12,VAR14]; {L03644}
 				V33074:=@F2[VAR4,VAR12,VAR14]; {L03716}
 				V11072:=@F[VAR4,VAR6,VAR10]; {L04000}
@@ -189,10 +189,9 @@ begin
 		end else begin { не на лестнице }
 			WRITELN(' Без лестницы?'); {L04140}
 		end;
-	end else begin
+		{$C	JMP L05114 } { Выход из процедуры }
 	end;
-	{$C	BR	.+4 }{TODO: непонятно откуда и зачем}
-	{$C	ADD	R4, SP }{TODO: разобраться с R4}
+1:
 	WRITE(CHR(33B),CHR(110B),CHR(33B)); {L04172}
 	WRITE('J	Подземелье ');
 	WRITE(DUNGEON); { Номер подземелья }
@@ -227,6 +226,8 @@ begin
 		end;
 	end;
 	CLEARMSG;
+{$C
+L05114: } {метка для выхода из процедуры}
 end;
 
 procedure L05370(DY,DX:integer);
