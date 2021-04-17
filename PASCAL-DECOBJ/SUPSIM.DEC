@@ -1,0 +1,619 @@
+	.ENABL	LC
+	.NLIST	BEX
+
+	.TITLE	SUPSIM
+
+	.ASECT		
+	.GLOBL	ARRERR,	BADDEV,	CHNMAP,	CH0OPT,	CH0PTR,	COROVR
+	.GLOBL	DIVZER,	EOFERR,	EXPOVR,	FATLIO,	FILE,	LOGNEG
+	.GLOBL	MISSNG,	NEWOF0,	NOTOPN,	OVRFLO,	RESREG,	RESRVD
+	.GLOBL	RTAREA,	RTERR,	SAVREG,	SETBIG,	SETR0,	SQRNEG
+	.GLOBL	TOOMNY,	VERERR,	$DEFEX,	$DEFLE,	$FREE,	$KORE
+	.GLOBL	$TTY
+
+	.CSECT	
+..:
+
+	.CSECT	$$$SIM
+B.:	.BLKB	2234
+
+	.CSECT	SIMDAT
+C.:	.BLKB	10
+
+	.CSECT	$$$SIM
+. = B.
+
+SUPSIM::      			; +I             
+	CALL	SAVREG
+	MOV	14(SP), R0
+	MOV	-(R0), R0
+	CMP	R0, #75037
+	BHI	B.26
+	CMP	R0, #75000
+	BCC	B.34
+B.26:				; +I            B
+	JSR	R5, RTERR
+	 RESRVD
+B.34:				;               B
+	BIC	#177747, R0
+	ASR	R0
+	ASR	R0
+	MOV	SP, R1
+	ADD	#20, R1
+	MOV	(R1)+, R2
+	MOV	(R1)+, R3
+	MOV	(R1)+, R4
+	MOV	(R1)+, R5
+	BIC	#17, 16(SP)
+	CALL	@C.0(R0)
+	MOV	R2, 24(SP)
+	MOV	R3, 26(SP)
+	MOV	14(SP), R1
+	MOV	(R1)+, R0
+	CMP	R0, #75037
+	BHI	B.164
+	CMP	R0, #75000
+	BCS	B.164
+	MOV	R1, 14(SP)
+	MOV	SP, R1
+	MOV	SP, R2
+	ADD	#20, R1
+	ADD	#24, R2
+	MOV	#10, R3
+B.152:				;               B
+	MOV	-(R1), -(R2)
+	DEC	R3
+	BNE	B.152
+	CMP	(SP)+, (SP)+
+	BR	B.34
+B.164:				; +I            B
+	CALL	RESREG
+	MOV	(SP)+, 2(SP)
+	MOV	(SP)+, 2(SP)
+	BIS	#4, 2(SP)
+	TST	4(SP)
+	BEQ	B.232
+	BPL	B.224
+	BIS	#10, 2(SP)
+B.224:				;               B
+	BIC	#4, 2(SP)
+B.232:				;               B
+	RTI	
+
+	.CSECT	SIMDAT
+. = C.
+C.0:				;           C    
+	 B.1134
+	 B.1130
+	 B.470
+	 B.724
+
+	.CSECT	$$$SIM
+
+FASTAD::      
+$B123::      			;                
+	CALL	B.264
+	 B.1134
+
+FASTSU::      
+$B121::      			;                
+	CALL	B.264
+	 B.1130
+
+FASTMU::      
+$B119::      			;                
+	CALL	B.264
+	 B.470
+
+FASTDI::      
+$B117::      			;                
+	CALL	B.264
+	 B.724
+B.264:				;           C    
+	MOV	R5, -(SP)
+	MOV	R4, -(SP)
+	MOV	R3, -(SP)
+	MOV	R2, -(SP)
+	MOV	R1, -(SP)
+	MOV	R0, -(SP)
+	MOV	@14(SP), R0
+	MOV	SP, R1
+	ADD	#30, R1
+	MOV	-(R1), R5
+	MOV	-(R1), R4
+	MOV	-(R1), R3
+	MOV	-(R1), R2
+	MOV	-(R1), -(R1)
+	CLR	2(R1)
+	CALL	@R0
+	MOV	SP, R1
+	ADD	#30, R1
+	MOV	R3, -(R1)
+	MOV	R2, -(R1)
+	MOV	177772(R1), -(R1)
+	MOV	177772(R1), -(R1)
+	MOV	(SP)+, R0
+	MOV	(SP)+, R1
+	MOV	(SP)+, R2
+	MOV	(SP)+, R3
+	MOV	(SP)+, R4
+	MOV	(SP)+, R5
+	ADD	#4, SP
+	RTI	
+
+$FMUL::      			;                
+	JSR	R0, B.426
+	 B.470
+
+$FDIV::      			;                
+	JSR	R0, B.426
+	 B.724
+
+$FADD::      			;                
+	JSR	R0, B.426
+	 B.1134
+
+$FSUB::      			;                
+	JSR	R0, B.426
+	 B.1130
+B.426:				;           C    
+	MOV	R1, -(SP)
+	MOV	R4, -(SP)
+	MOV	R5, -(SP)
+	CALL	@(R0)+
+	MOV	(SP)+, R5
+	MOV	(SP)+, R4
+	MOV	(SP)+, R1
+	MOV	(SP)+, R0
+	RETURN	
+B.450:				; +I        C    
+	JSR	R5, RTERR
+	 B.456
+B.456:				;    -I   @      
+	.ASCIZ	"FIS error"
+B.470:				;         @      
+	MOV	R2, R0
+	BEQ	B.716
+	CLR	-(SP)
+	ROL	R0
+	ROR	@SP
+	CLRB	R0
+	MOV	R4, R1
+	BEQ	B.714
+	CLR	-(SP)
+	ROL	R1
+	ROR	@SP
+	CLRB	R1
+	ADD	(SP)+, @SP
+	ADD	R1, R0
+	BCS	B.530
+	COMB	R0
+B.530:				;               B
+	SWAB	R0
+	MOV	R0, -(SP)
+	BIC	#177400, R2
+	BIS	#200, R2
+	BIC	#177400, R4
+	BIS	#200, R4
+	MOV	R3, -(SP)
+	SWAB	R4
+	SWAB	R5
+	BISB	R5, R4
+	CLRB	R5
+	MOV	R4, -(SP)
+	MOV	R2, R0
+	CLR	R1
+	CLR	R4
+	CLR	R3
+	CLR	R2
+B.602:				;               B
+	TST	R0
+	BNE	B.646
+	SWAB	2(SP)
+	BEQ	B.702
+	BISB	2(SP), R0
+	CLRB	2(SP)
+	CLRB	R1
+	BISB	R5, R1
+	SWAB	R1
+	CLRB	R5
+	BISB	@SP, R5
+	SWAB	R5
+	CLRB	@SP
+	SWAB	@SP
+	BR	B.602
+B.646:				;               B
+	ROR	@SP
+	ROR	R5
+	ROR	R1
+	ASL	2(SP)
+	ROLB	R0
+	BCC	B.602
+	ADD	R1, R4
+	ADC	R3
+	ADC	R2
+	ADD	R5, R3
+	ADC	R2
+	ADD	@SP, R2
+	BR	B.602
+B.702:				;               B
+	CMP	(SP)+, (SP)+
+	CLR	R4
+	CALL	B.1524
+	RETURN	
+B.714:				;               B
+	TST	(SP)+
+B.716:				;               B
+	CLR	R2
+	CLR	R3
+	RETURN	
+B.724:				;         @      
+	MOV	R2, R1
+	BEQ	B.1110
+	CLR	-(SP)
+	ROL	R1
+	ROR	@SP
+	CLRB	R1
+	MOV	R4, R0
+	BEQ	B.1120
+	CLR	-(SP)
+	ROL	R0
+	ROR	@SP
+	CLRB	R0
+	ADD	(SP)+, @SP
+	SUB	R1, R0
+	BCC	B.764
+	COMB	R0
+B.764:				;               B
+	SWAB	R0
+	MOV	R0, -(SP)
+	BIC	#177400, R2
+	BIS	#200, R2
+	BIC	#177400, R4
+	BIS	#200, R4
+	ADD	#10, @SP
+	MOV	#31, -(SP)
+	MOV	R2, R0
+	MOV	R3, R1
+	CLR	R2
+	CLR	R3
+B.1030:				;               B
+	CMP	R0, R4
+	BCS	B.1042
+	BHI	B.1052
+	CMP	R1, R5
+	BHI	B.1052
+B.1042:				;               B
+	SUB	R1, R5
+	SBC	R4
+	SUB	R0, R4
+	SEC	
+B.1052:				;               B
+	ROL	R3
+	ROL	R2
+	DEC	@SP
+	BEQ	B.1076
+	ASL	R5
+	ROL	R4
+	BIT	#177600, R4
+	BEQ	B.1052
+	BR	B.1030
+B.1076:				;               B
+	TST	(SP)+
+	CLR	R4
+	CALL	B.1524
+	RETURN	
+B.1110:				;    -I         B
+	 4067
+	 177334
+	 13
+	 5046
+B.1120:				;               B
+	TST	(SP)+
+	CLR	R2
+	CLR	R3
+	RETURN	
+B.1130:				;         @      
+	ADD	#100000, R2
+B.1134:				;         @      
+	CLR	-(SP)
+	MOV	#10, -(SP)
+	MOV	R2, R0
+	BEQ	B.1504
+	ASL	R0
+	CLRB	R0
+	SWAB	R0
+	MOV	R4, R1
+	BEQ	B.1510
+	ASL	R1
+	CLRB	R1
+	SWAB	R1
+	SUB	R1, R0
+	BMI	B.1204
+	CMP	R0, #30
+	BGT	B.1510
+	ADD	R0, R1
+	BR	B.1212
+B.1204:				;               B
+	CMP	R0, #177750
+	BLT	B.1504
+B.1212:				;               B
+	SUB	#200, R1
+	ADD	R1, @SP
+	BIC	#77600, R4
+	BIS	#200, R4
+	BPL	B.1244
+	NEG	R5
+	ADC	R4
+	NEG	R4
+	BIS	#100000, R4
+B.1244:				;               B
+	BIC	#77600, R2
+	BIS	#200, R2
+	BPL	B.1270
+	NEG	R3
+	ADC	R2
+	NEG	R2
+	BIS	#100000, R2
+B.1270:				;               B
+	TST	R0
+	BMI	B.1352
+	BEQ	B.1432
+	CLR	R1
+B.1300:				;               B
+	CMP	R0, #10
+	BLT	B.1336
+	CLRB	R1
+	BISB	R5, R1
+	SWAB	R1
+	CLRB	R5
+	BISB	R4, R5
+	SWAB	R5
+	SWAB	R4
+	MOVB	R4, R4
+	SUB	#10, R0
+	BGT	B.1300
+	BR	B.1436
+B.1336:				;               B
+	ASR	R4
+	ROR	R5
+	ROR	R1
+	DEC	R0
+	BNE	B.1336
+	BR	B.1436
+B.1352:				;               B
+	MOV	R0, R1
+	CLR	R0
+	NEG	R1
+B.1360:				;               B
+	CMP	R1, #10
+	BLT	B.1416
+	CLRB	R0
+	BISB	R3, R0
+	SWAB	R0
+	CLRB	R3
+	BISB	R2, R3
+	SWAB	R3
+	SWAB	R2
+	MOVB	R2, R2
+	SUB	#10, R1
+	BGT	B.1360
+	BEQ	B.1436
+B.1416:				;               B
+	ASR	R2
+	ROR	R3
+	ROR	R0
+	DEC	R1
+	BNE	B.1416
+	BR	B.1436
+B.1432:				;               B
+	CLR	R1
+	CLR	R0
+B.1436:				;               B
+	ADD	R1, R0
+	ADC	R3
+	ADC	R2
+	ADD	R5, R3
+	ADC	R2
+	ADD	R4, R2
+	BPL	B.1474
+	NEG	R0
+	ADC	R3
+	ADC	R2
+	NEG	R3
+	ADC	R2
+	NEG	R2
+	COM	2(SP)
+B.1474:				;               B
+	MOV	R0, R4
+	CALL	B.1524
+	RETURN	
+B.1504:				;               B
+	MOV	R4, R2
+	MOV	R5, R3
+B.1510:				;               B
+	CMP	(SP)+, (SP)+
+	CMP	R2, #100000
+	BNE	B.1522
+	CLR	R2
+B.1522:				;               B
+	RETURN	
+B.1524:				;           C    
+	MOV	4(SP), R0
+	MOV	(SP)+, 2(SP)
+	MOV	(SP)+, R1
+	SUB	#10, R1
+	MOV	R2, R5
+	BIS	R3, R5
+	BIS	R4, R5
+	BEQ	B.2000
+	BIT	#177400, R2
+	BEQ	B.1630
+B.1560:				;               B
+	BPL	B.1606
+	MOV	R3, R4
+	CLRB	R3
+	BISB	R2, R3
+	CLRB	R2
+	SWAB	R4
+	SWAB	R3
+	SWAB	R2
+	ADD	#10, R1
+	BR	B.1674
+B.1606:				;               B
+	CLC	
+	ROR	R2
+	ROR	R3
+	ROR	R4
+	INC	R1
+	BIT	#177400, R2
+	BNE	B.1560
+	BR	B.1674
+B.1630:				;               B
+	TST	R2
+	BNE	B.1670
+	SWAB	R3
+	BISB	R3, R2
+	CLRB	R3
+	SWAB	R4
+	BISB	R4, R3
+	CLRB	R4
+	SUB	#10, R1
+	BR	B.1630
+B.1656:				;               B
+	CLC	
+	ROL	R4
+	ROL	R3
+	ROL	R2
+	DEC	R1
+B.1670:				;               B
+	TSTB	R2
+	BPL	B.1656
+B.1674:				;    -I         B
+	 62704
+	 100000
+	 5503
+	 5502
+	 32702
+	 400
+	 1336
+	.ASCII	"W "<200>
+	.BYTE	177777
+	 3004
+	 4067
+	 176524
+	 12
+	 424
+B.1730:				;               B
+	CMP	R1, #200
+	BLT	B.1746
+	JSR	R0, B.450
+	RTI	
+	BR	B.2000
+B.1746:				;               B
+	ADD	#200, R1
+	BIC	#177400, R1
+	ASL	R2
+	BIC	#177400, R2
+	SWAB	R1
+	BIS	R1, R2
+	ROR	R2
+	BIC	#77777, R0
+	BIS	R0, R2
+B.2000:				;               B
+	RETURN	
+
+MULSIM::      			;                
+	MOV	R4, -(SP)
+	MOV	R3, -(SP)
+	MOV	R2, -(SP)
+	MOV	20(SP), R4
+	BEQ	B.2076
+	MOV	R1, R3
+	BEQ	B.2100
+	CLR	R2
+	CLR	R1
+	CLR	R0
+B.2030:				;               B
+	ROR	R4
+	BCC	B.2042
+	ADD	R3, R1
+	ADC	R0
+	ADD	R2, R0
+B.2042:				;               B
+	ASL	R3
+	ROR	R2
+	TST	R4
+	BNE	B.2030
+B.2052:				;               B
+	MOV	(SP)+, R2
+	MOV	(SP)+, R3
+	MOV	(SP)+, R4
+	INC	R0
+	CMP	R0, #1
+	BLOS	B.2074
+	SEC	
+	CLC	
+B.2074:				;               B
+	RETURN	
+B.2076:				;               B
+	CLR	R1
+B.2100:				;               B
+	CLR	R0
+	BR	B.2052
+
+DIVSIM::      			;                
+	MOV	R4, -(SP)
+	MOV	R2, -(SP)
+	MOV	16(SP), R4
+	BNE	B.2122
+	SEC	
+	BR	B.2226
+B.2122:				;               B
+	MOV	R0, -(SP)
+	MOV	R0, -(SP)
+	BPL	B.2140
+	NEG	R1
+	CLR	R0
+	BIC	#77777, @SP
+B.2140:				;               B
+	ADD	R4, @SP
+	TST	R4
+	BPL	B.2150
+	NEG	R4
+B.2150:				;               B
+	MOV	R4, R2
+	CMP	R2, R1
+	BHI	B.2202
+B.2156:				;               B
+	ASL	R2
+	BCS	B.2202
+	CMP	R2, R1
+	BLOS	B.2156
+	BR	B.2202
+B.2170:				;               B
+	ASL	R0
+	CMP	R2, R1
+	BHI	B.2202
+	SUB	R2, R1
+	INC	R0
+B.2202:				;               B
+	ROR	R2
+	CMP	R2, R4
+	BCC	B.2170
+	TST	(SP)+
+	BPL	B.2216
+	NEG	R0
+B.2216:				;               B
+	TST	(SP)+
+	BPL	B.2224
+	NEG	R1
+B.2224:				;               B
+	CLC	
+B.2226:				;               B
+	MOV	(SP)+, R2
+	MOV	(SP)+, R4
+	RETURN	
+
+	.END	
+                                                                                                            
