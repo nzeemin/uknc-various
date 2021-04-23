@@ -26,10 +26,12 @@ if "%errdet%"=="Errors detected:  0" (
 
 for /f "delims=" %%a in ('findstr /B "Undefined globals" KINGOM.MAP') do set "undefg=%%a"
 if "%undefg%"=="" (
-  type KINGOM.MAP
+  REM type KINGOM.MAP
   echo.
   echo %ESCchar%[92mLINKED SUCCESSFULLY%ESCchar%[0m
 ) ELSE (
   echo %ESCchar%[91m======= LINK FAILED =======%ESCchar%[0m
   exit /b
 )
+
+fc /b KINGOM.SAV KINGOM.GME
