@@ -22,8 +22,8 @@ type	intptr = ^integer;
 var	DUNGEON: integer; { Номер подземелья }
 	VAR2:	integer;
 	VAR4:	integer; { Номер этажа }
-	VAR6:	integer; { новый X игрока }
-	VAR10:	integer; { новый Y игрока }
+	VAR6:	integer; { новый Y игрока (строка) }
+	VAR10:	integer; { новый X игрока (столбец) }
 	VAR12:	integer; { Позиция Y игрока (строка) }
 	VAR14:	integer; { Позиция X игрока (столбец) }
 	VAR16:	integer; { переменная цикла }
@@ -319,7 +319,7 @@ for VAR4:=0 to 8 do begin { цикл по этажам }
 			F[VAR4,VAR16,VAR20]:='.';
 			F2[VAR4,VAR16,VAR20]:=VAR22;
 		end;
-		F[VAR4,VAR16,32]:='!'; { стенка слева }
+		F[VAR4,VAR16,32]:='!'; { стенка справа }
 	end;
 	for VAR20:=1 to 32 do begin
 		F[VAR4,16,VAR20]:='-'; { стенка снизу }

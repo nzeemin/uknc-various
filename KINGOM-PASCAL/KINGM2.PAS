@@ -1,6 +1,7 @@
 {$E+}
+{$S+}
 
-procedure L57170(var A:integer);
+function L57170(A:integer; var B:real):real;
 begin
 	{TODO}
 end;

@@ -1,4 +1,5 @@
 {$E+}
+{$S+}
 
 procedure L57660; external;
 

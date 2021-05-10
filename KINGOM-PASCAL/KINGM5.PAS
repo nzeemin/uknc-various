@@ -1,4 +1,5 @@
 {$E+}
+{$S+}
 
 var	VAR102:integer;
 	VAR104:integer;
@@ -6,8 +7,11 @@ var	VAR102:integer;
 procedure L57632; external;
 procedure L57660; external;
 
-{ Вывод статистики }
-procedure L62010;
+{ п▓я▀п╡п╬п╢ я│я┌п╟я┌п╦я│я┌п╦п╨п╦ }
+procedure L62010(
+	var A:real; var B:real; var C:real; var D:real; var E:real; var F:real;
+	G:integer; H:integer; I:integer; J:integer; K:integer; L:integer;
+	M:integer; N:integer; O:integer; P:integer; Q:integer; R:integer);
 begin
 	{TODO}
 end;
@@ -27,7 +31,7 @@ begin
 	{TODO}
 end;
 
-{ Работа с KIND.DAT }
+{ п═п╟п╠п╬я┌п╟ я│ KIND.DAT }
 procedure L65754;
 begin
 	{TODO}
