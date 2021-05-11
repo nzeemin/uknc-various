@@ -263,11 +263,42 @@ if VAR102 = 1 then begin {L04276}
 	WRITE(' rublej ( iskl`~aq valowanie )
 ==> skolxko deneg wy rashoduete na optowu` zakupku ? ');
 	READLN(VAR346);
-	if VAR346 > VAR402 then begin
+	if VAR346 > VAR402 then
 		VAR402 := VAR346;
-	end;
 	CURSORTO(18,0); {L07460}
 	ESCJ;
+	VAR352 := 0;
+	VAR356 := 0;
+	VAR362 := 0;
+	if VAR256 > VAR246 then {L07550}
+		VAR346 := VAR246
+	else
+		VAR346 := VAR256;
+	VAR346 := VAR346 * VAR200 + (VAR256 + VAR262) * VAR202; {L07736}
+	if (VAR72 < 100) AND (VAR346 > VAR252) then begin
+		WRITE(' zerno,'); {L10026}
+		VAR352 := TRUNC(VAR402 / VAR60); {L10044}
+		if VAR352 > VAR346 - VAR252 then
+			VAR352 := VAR346 - VAR252; {L10152}
+		VAR402 := VAR402 - VAR352 * VAR60; {L10204}
+	end;
+	if (VAR66 < 100) AND (VAR402 > VAR54) AND (VAR66 < VAR70) then begin
+		WRITE(' zoloto');
+		VAR356 := TRUNC(VAR402 / VAR54); {L10402}
+		VAR402 := VAR402 - VAR356 * VAR54; {L10444}
+	end;
+	if (VAR70 < 100) AND (VAR402 > VAR56) AND (VAR70 < VAR66) then begin {L10510}
+		WRITE(' zeml`');
+		VAR362 := TRUNC(VAR402 / VAR56); {L10642}
+		VAR402 := VAR402 - VAR362 * VAR56; {L10704}
+	end;
+	VAR102 := 0; {L10750}
+	if (VAR352 <> 0) OR (VAR356 <> 0) OR (VAR362 <> 0) then begin
+		WRITE(' predlaga` wygodno kupitx. soglasny ? (0/1) ');
+		READLN(VAR102);
+		if VAR102 = 0 then {L11144}
+			goto 2; {L11156}
+	end;
 	{TODO}
 end;
 
