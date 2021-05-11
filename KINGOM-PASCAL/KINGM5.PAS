@@ -5,7 +5,7 @@ var	VAR102:integer;
 	VAR104:integer;
 
 procedure L57632; external;
-procedure L57660; external;
+procedure L57660; external; { Разделяем на тысячи и остаток }
 
 { Вывод статистики }
 procedure L62010(
