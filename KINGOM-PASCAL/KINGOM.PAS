@@ -31,7 +31,7 @@ var	VARF0:array [0..11] of integer; {filler}
 	VAR72:integer;
 	VAR74:integer;
 	VAR76:integer;
-	VAR102:integer;
+	VAR102:integer; { Число 0/1, вводимое в ответ на вопрос }
 	VAR104:integer;
 	VAR106:integer;
 	VAR124:integer;
@@ -71,6 +71,11 @@ var	VARF0:array [0..11] of integer; {filler}
 	VAR252:real;
 	VAR256:real;
 	VAR262:real;
+	VAR266:real; { Золото купить/продать }
+	VAR276:real; { Земля купить/продать }
+	VAR302:real; { Зерно купить/продать }
+	VAR306:real; { Рабочие купить/продать }
+	VAR312:real; { Солдаты купить/продать }
 	VAR316:real;
 	VAR322:real;
 	VAR326:real;
@@ -299,11 +304,33 @@ if VAR102 = 1 then begin {L04276}
 		if VAR102 = 0 then {L11144}
 			goto 2; {L11156}
 	end;
-	{TODO}
+	if VAR102 = 1 then begin {L11166}
+		VAR346 := VAR352 * VAR60 + VAR356 * VAR54 + VAR362 * VAR56;
+		VAR242 := VAR242 - VAR346; {L11304}
+		VAR252 := VAR252 + VAR352; {L11336}
+		VAR236 := VAR236 + VAR356; {L11370}
+		VAR246 := VAR246 + VAR362; {L11422}
+		L62010(VAR242, VAR236, VAR246, VAR252, VAR256, VAR262,
+			VAR54, VAR56, VAR60, VAR62, VAR64, VAR66,
+			VAR70, VAR72, VAR74, VAR76, VAR172, VAR174);
+	end;
+	goto 3;
 end;
-
 2: {L11630}
-;
+CURSORTO(18,0);
+ESCJ;
+WRITE('==> velaete sami torgowatx ? (0/1) ');
+READLN(VAR102);
+if VAR102 = 0 then {L11700}
+	goto 3;
+CURSORTO(18,0);
+ESCJ;
+WRITELN('_           (+) pokupajte / prodawajte (-) :'); {NOTE: Тут в начале символ 016}
+WRITELN('  zoloto(kg),zemlq(ga),zerno(t),rabo~ie,soldaty(~el)?');
+WRITE('==> ');
+READLN(VAR266,VAR276,VAR302,VAR306,VAR312); {L12022}
+{L12122}
+{TODO}
 
 3: {L14064}
 CURSORTO(18,0);
@@ -326,12 +353,15 @@ VAR144 := 0;
 
 5: {L24036}
 ;
+{TODO}
 
 6: {L35224}
 ;
+{TODO}
 
 7: {L35332}
 ;
+{TODO}
 
 8: {L42230}
 ;
