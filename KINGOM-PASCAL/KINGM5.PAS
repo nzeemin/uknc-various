@@ -1,6 +1,11 @@
 {$E+}
 {$S+}
 
+procedure L61530;
+begin
+	{TODO}
+end;
+
 var	VAR102:integer;
 	VAR104:integer;
 
@@ -9,10 +14,17 @@ procedure L57660; external; { Разделяем на тысячи и остат
 
 { Вывод статистики }
 procedure L62010(
-	var A:real; var B:real; var C:real; var D:real; var E:real; var F:real;
+	var A:real;
+	var B:real; { Золото }
+	var C:real; { Земля }
+	var D:real; { Рабочие }
+	var E:real; { Солдаты }
+	var F:real;
 	G:integer; H:integer; I:integer; J:integer; K:integer; L:integer;
 	M:integer; N:integer; O:integer; P:integer; Q:integer; R:integer);
 begin
+	{TODO}
+	L61530;
 	{TODO}
 end;
 

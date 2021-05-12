@@ -31,9 +31,10 @@ var	VARF0:array [0..11] of integer; {filler}
 	VAR72:integer;
 	VAR74:integer;
 	VAR76:integer;
-	VAR102:integer; { Число 0/1, вводимое в ответ на вопрос }
-	VAR104:integer;
+	VAR102:integer; { Временная переменная для ввода, либо тысячи для вывода }
+	VAR104:integer; { Временная переменная, остаток от деления на 1000 }
 	VAR106:integer;
+	VAR112:integer;
 	VAR124:integer;
 	VAR126:integer;
 	VAR130:integer;
@@ -65,12 +66,14 @@ var	VARF0:array [0..11] of integer; {filler}
 	VAR214:integer;
 	VAR216:integer;
 	VAR224:real;
-	VAR236:real;
+	VAR226:real;
+	VAR232:real;
+	VAR236:real; { Золото }
 	VAR242:real;
-	VAR246:real;
-	VAR252:real;
-	VAR256:real;
-	VAR262:real;
+	VAR246:real; { Земля }
+	VAR252:real; { Зерно }
+	VAR256:real; { Рабочие }
+	VAR262:real; { Солдаты }
 	VAR266:real; { Золото купить/продать }
 	VAR276:real; { Земля купить/продать }
 	VAR302:real; { Зерно купить/продать }
@@ -329,14 +332,92 @@ WRITELN('_           (+) pokupajte / prodawajte (-) :'); {NOTE: Тут в нач
 WRITELN('  zoloto(kg),zemlq(ga),zerno(t),rabo~ie,soldaty(~el)?');
 WRITE('==> ');
 READLN(VAR266,VAR276,VAR302,VAR306,VAR312); {L12022}
-{L12122}
-{TODO}
-
+VAR346 := VAR236 + VAR266; {L12122}
+VAR352 := VAR246 + VAR276; {L12154}
+VAR356 := VAR252 + VAR302; {L12206}
+VAR362 := VAR256 + VAR306; {L12240}
+VAR366 := VAR262 + VAR312; {L12272}
+if (VAR346 < 0) OR (VAR352 < 0) OR (VAR352 < 0) OR (VAR356 < 0) OR (VAR366 < 0) then begin {L12324}
+	CURSORTO(18,0);
+	ESCJ;
+	WRITE('  wy prodaete towara bolx{e, ~em u was estx !
+==> powtoritx ? (0/1) ');
+	READLN(VAR102);
+	if VAR102 = 1 then
+		goto 1 {L12642}
+	else
+		goto 3; {L12656}
+end;
+VAR346 := -(VAR242 - VAR266 * VAR54 - VAR276 * VAR56 - VAR302 * VAR60
+	- VAR306 * VAR62 - VAR312 * VAR64); {L12666}
+if VAR346 > 0 then begin {L13056}
+	CURSORTO(18,0);
+	ESCJ;
+	L57660(VAR102,VAR104,VAR346); {L13124}
+	WRITE('  sdelka rastorgnuta - nehwataet');
+	WRITE(VAR102);
+	WRITE(' tys.');
+	WRITE(VAR104);
+	WRITE(' rub.
+==> powtoritx ? (0/1) ');
+	READLN(VAR102);
+	if VAR102 = 1 then {L13272}
+		goto 1 {L13306}
+	else
+		goto 3; {L13322}
+end;
+VAR242 := VAR242 - VAR266 * VAR54 - VAR276 * VAR56
+	- VAR302 * VAR60 - VAR306 * VAR62 - VAR312 * VAR64;
+VAR236 := VAR236 + VAR266; {L13516}
+VAR246 := VAR246 + VAR276; {L13550}
+VAR252 := VAR252 + VAR302; {L13602}
+VAR256 := VAR256 + VAR306; {L13634}
+VAR262 := VAR262 + VAR312; {L13666}
+L62010(VAR242, VAR236, VAR246, VAR252, VAR256, VAR262,
+		VAR54, VAR56, VAR60, VAR62, VAR64, VAR66,
+		VAR70, VAR72, VAR74, VAR76, VAR172, VAR174);
 3: {L14064}
 CURSORTO(18,0);
 ESCJ;
 WRITE('==> velaete sami rasporqditxsq zapasami zerna ? (0/1) '); {L14102}
 READLN(VAR102);
+if VAR256 < VAR246 then
+	VAR352 := VAR256
+else
+	VAR352 := VAR246;
+VAR356 := VAR200 * VAR352; {L14232}
+VAR362 := VAR202 * (VAR256 + VAR262); {L14264}
+VAR366 := VAR356 + VAR262; {L14330}
+VAR112 := L01044(VAR366); {L14362}
+CURSORTO(18,0); {L14406}
+ESCJ; {L14420}
+if VAR102 = 0 then begin
+	if (VAR366 < VAR252) OR (VAR366 = VAR252) then begin
+		WRITE('--->  wydelena norma :');
+		WRITE(VAR112);
+		WRITELN(' t. zerna');
+		VAR252 := VAR252 - VAR366; {L14614}
+		VAR226 := VAR356; {L14646}
+		VAR232 := VAR362;
+		VAR102 := L01044(VAR252);
+		WRITE('  izli{ki zerna w ambarah :');
+		WRITE(VAR102);
+		WRITELN(' tonn.');
+		goto 4;
+	end;
+end;
+CURSORTO(18,0); {L15014}
+ESCJ;
+WRITE('==> skolxko tonn zerna na edu, skolxko na posew ? ');
+READLN(VAR232,VAR226);
+VAR346 := VAR226 + VAR232; {L15104}
+if VAR346 > VAR252 then begin
+	VAR102 := L01044(VAR346 - VAR252);
+	WRITE('  razberitesx! nehwataet');
+	WRITE(VAR102);
+	WRITELN(' tonn zerna.');
+	goto 3;
+end;
 {TODO}
 
 4: {L15440}
