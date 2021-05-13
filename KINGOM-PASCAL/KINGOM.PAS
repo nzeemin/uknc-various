@@ -490,17 +490,176 @@ if VAR252 < 0 then
 VAR242 := VAR242 - VAR262 * VAR210; {L17762}
 if VAR242 < 0 then
 	VAR242 := 0;
-{L20074}
-{TODO}
-
+if VAR242 = 0 then begin {L20074}
+	VAR126 := L01044(VAR262 * L57170(0,VAR224) * 0.5);
+end;
+VAR262 := VAR262 - VAR126; {L20202}
+VAR346 := L57170(0,VAR224);
+if VAR346 < 0.2 then begin {L20264}
+	VAR140 := L01044(VAR236 * L57170(0,VAR224) * 0.5);
+	VAR236 := VAR236 - VAR140; {L20374}
+end;
+VAR346 := L57170(0,VAR224); {L20426}
+if (VAR346 < 0.2) AND (VAR342 <> 0) then begin {L20456}
+	VAR142 := L01044(VAR342 * L57170(0,VAR224) * 0.5); {L20562}
+	VAR342 := VAR342 - VAR142; {L20640}
+end;
+VAR346 := L57170(0,VAR224); {L20672}
+if (VAR346 < 0.2) AND (VAR326 <> 0) then begin {L20722}
+	VAR144 := L01044(VAR326 * L57170(0,VAR224) * 0.5); {L21026}
+	VAR326 := VAR326 - VAR144; {L21104}
+end;
+WRITE('==> wa{e wyso~estwo! pribyl wizirx, wpustitx ? (0/1) ');
+READLN(VAR102);
+if VAR102 = 0 then
+	goto 5;
+L57632; {L21212}
+CURSORTO(2,0);
+VAR346 := VAR262 * VAR210;
+if VAR346 <> 0 then begin {L21262}
+	L57660(VAR102,VAR104,VAR346); {L21312}
+	WRITE('
+   valowanie soldat :');
+	WRITE(VAR102);
+	WRITE(' tys.');
+	WRITE(VAR104);
+	WRITELN(' rublej
+  ---------------------------------------------------------------');
+end;
+VAR346 := L57170(0,VAR224); {L21450}
+if VAR346 > 0.5 then begin {L21500}
+	WRITELN('  t a j n a q  k a n c e l q r i q  soob}aet :');
+	VAR102 := ROUND(VAR316 * 100); {L21552}
+	if VAR102 > 1 then begin {L21604}
+		WRITE('  w narode');
+		WRITE(VAR102); {L21636}
+		WRITELN(' procentow zagowor}ikow !!');
+		if VAR316 > 0.8 then {L21672}
+			WRITELN('  polovenie  o ~ e n x  opasnoe, wozmoven pereworot.');
+		if (VAR316 > 0.5) AND (VAR316 < 0.8) then {L21746}
+			WRITELN('  polovenie opasnoe, sdelajte }edru` poda~ku.');
+		if (VAR316 > 0.2) AND (VAR316 < 0.5) then {L22074}
+			WRITELN('  w narode golod, rastet nedowolxstwo.');
+		if VAR316 < 0.2 then {L22222}
+			WRITELN('  narod dowolen, wysok awtoritet wa{ego weli~estwa.');
+		if VAR132 <> 0 then begin
+			WRITE('  -  krysy sovrali');
+			WRITE(VAR132);
+			WRITELN(' tonn zerna.');
+		end;
+		if VAR134 <> 0 then {L22362}
+			WRITELN('  -  stra{naq  z a s u h a  porazila posewy.');
+		if VAR136 <> 0 then {L22416}
+			WRITELN('  -  gigantskie  p o v a r y  pogubili urovaj.');
+		if VAR132 + VAR134 + VAR136 = 0 then
+			WRITELN(' -  u r o v a j n y j   g o d');
+		if VAR124 <> 0 then begin {L22516}
+			WRITE('  - rabo~im nehwataet zemli. sbevalo');
+			WRITE(VAR124);
+			WRITELN(' ~elowek.'); {L22560}
+		end;
+		if VAR126 <> 0 then begin {L22602}
+			WRITE('  - gwardiq ne polu~ila denevnogo dowolxstwiq,
+   ');
+			WRITE(VAR126);
+			WRITELN(' soldat pokinuli kazarmy i u{li za kordon.');
+		end;
+		if VAR130 <> 0 then begin {L22666}
+			WRITE('  - wy zamorili golodom');
+			WRITE(VAR130);
+			WRITELN(' wa{ih wernopoddannyh !');
+		end;
+		if VAR140 <> 0 then begin {L22752}
+			WRITE('  - s k a n d a l !!! ukradeno');
+			WRITE(VAR140);
+			WRITELN(' kg zolota !!!');
+		end;
+		if VAR142 <> 0 then begin {L23036}
+			WRITE('  - wa{  k a r a w a n  ograblen na');
+			WRITE(VAR142);
+			WRITELN(' rublej.');
+		end;
+		if VAR144 <> 0 then begin {L23122}
+			WRITE('  - p o z o r ! ! !  iz hrama ukrali');
+			WRITE(VAR144);
+			WRITELN(' rublej.');
+		end;
+		if VAR152 <> 0 then begin {L23206}
+			WRITE('  - w gosudarstwe rodilosx');
+			WRITE(VAR152);
+			WRITELN(' detej.'); {L23250}
+		end;
+		VAR346 := L57170(0,VAR224); {L23272}
+		if VAR346 < 0.05 then begin {L23322}
+			VAR346 := L57170(0,VAR224) * VAR242;
+			L57660(VAR102,VAR104,VAR346);
+			VAR242 := VAR242 - VAR346;
+			WRITE('  - wizirx  u k r a l  ');
+			WRITE(VAR102);
+			WRITE(' tys.');
+			WRITE(VAR104);
+			WRITELN(' rub. i skrylsq !!!'); {L23564}
+		end;
+		VAR346 := L57170(0,VAR224);
+		if VAR346 < 0.1 then begin
+			VAR102 := ROUND(VAR256 * L57170(0,VAR224));
+			VAR256 := VAR256 - VAR102;
+			WRITE('  - |pidemiq  ~ u m y  pogubila');
+			WRITE(VAR102);
+			WRITELN(' rabo~ih.');
+		end;
+	end;
+end;
 5: {L24036}
-;
+VAR346 := L57170(0,VAR224);
+if (VAR346 < 0.3) AND (VAR242 > 10000) then begin
+	L57660(VAR102,VAR104,VAR242);
+	WRITE('
+ mitropolit wa{ego gosudarstwa ovidaet sredstw dlq postrojki');
+	WRITE(VAR102);
+	WRITE(' tysq~');
+	WRITE(VAR104);
+	WRITE(' rublej. skolxko wydelqete ? ');
+	READLN(VAR332);
+end;
+if VAR332 > VAR242 then begin
+	L57632;
+	WRITELN('u was net stolxko deneg!');
+	goto 5; {L24426}
+end;
+L57632; {L24436}
+VAR242 := VAR242 - VAR342;
+VAR326 := VAR326 + VAR332;
+if VAR242 <> 0 then {L24526}
+	VAR346 := VAR332 / VAR242
+else
+	VAR346 := 1;
+if VAR346 < 0.1 then
+	WRITELN('wy ~to nasmehaetesx ?! skrqga !!!');
+if (VAR346 > 0.1) AND (VAR346 < 0.3) then
+	WRITELN('wy ~rezmerno skupy wa{e weli~estwo !');
+if (VAR346 > 0.3) AND (VAR346 < 0.6) then
+	WRITELN('slawa korol`, }edromu i mudromu prawitel` !!!');
+if (VAR346 > 0.6) AND (VAR346 < 0.9) then
+	WRITELN('wo wseh hramah sluvat zdrawnicu welikomu korol`.');
+if VAR346 > 0.9 then
+	WRITELN('wsewy{nij blagoslowit wa{e prawlenie na dolgie gody.');
+if VAR326 > 100000.0 then begin {L25374}
+	VAR102 := TRUNC(VAR326 / 100000.0);
+	{TODO}
+end;
 {TODO}
 
 6: {L35224}
-;
-{TODO}
-
+if VAR146 = 0 then begin
+	WRITELN('k o r o l x  u m e r ! ! !');
+	goto 8;
+end else begin
+	WRITELN('s y n   k o r o n o w a n ,  c a r s t w u j t e !');
+	VAR146 := 0;
+	VAR150 := 0;
+	VAR170 := 0;
+end;
 7: {L35332}
 ;
 {TODO}
