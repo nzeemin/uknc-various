@@ -14,7 +14,7 @@ procedure L57660; external; { Разделяем на тысячи и остат
 
 { Вывод статистики }
 procedure L62010(
-	var A:real;
+	var A:real; { Деньги }
 	var B:real; { Золото }
 	var C:real; { Земля }
 	var D:real; { Рабочие }

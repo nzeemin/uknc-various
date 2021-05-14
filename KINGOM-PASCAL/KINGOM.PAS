@@ -8,7 +8,7 @@ procedure ESCJ; external; {L57444}
 procedure CURSORTO(R,C:integer); external; {L57476}
 procedure L57632; external; { Курсор в 0,0; ESCJ }
 procedure L57660(var A:integer; var B:integer; var C:real); external; { Разделяем на тысячи и остаток }
-procedure L60060; external; { Вывод статистики }
+procedure L60060(A,B,C,D,E,F:real); external; { Вывод статистики }
 procedure L62010(
 	var A:real; var B:real; var C:real; var D:real; var E:real; var F:real;
 	G:integer; H:integer; I:integer; J:integer; K:integer; L:integer;
@@ -31,9 +31,10 @@ var	VARF0:array [0..11] of integer; {filler}
 	VAR72:integer;
 	VAR74:integer;
 	VAR76:integer;
-	VAR102:integer; { Временная переменная для ввода, либо тысячи для вывода }
-	VAR104:integer; { Временная переменная, остаток от деления на 1000 }
-	VAR106:integer;
+	VAR102:integer; { Временная переменная }
+	VAR104:integer; { Временная переменная }
+	VAR106:integer; { Временная переменная }
+	VAR110:integer; { Временная переменная }
 	VAR112:integer;
 	VAR124:integer;
 	VAR126:integer;
@@ -68,12 +69,12 @@ var	VARF0:array [0..11] of integer; {filler}
 	VAR224:real;
 	VAR226:real;
 	VAR232:real;
-	VAR236:real; { Золото }
-	VAR242:real;
-	VAR246:real; { Земля }
-	VAR252:real; { Зерно }
-	VAR256:real; { Рабочие }
-	VAR262:real; { Солдаты }
+	VAR236:real; { GOLD - Золото }
+	VAR242:real; { MONEY - Денег в казне }
+	VAR246:real; { LAND - Земля }
+	VAR252:real; { GRAIN - Зерно }
+	VAR256:real; { WORKS - Рабочие }
+	VAR262:real; { GUARD - Солдаты }
 	VAR266:real; { Золото купить/продать }
 	VAR276:real; { Земля купить/продать }
 	VAR302:real; { Зерно купить/продать }
@@ -615,7 +616,10 @@ VAR346 := L57170(0,VAR224);
 if (VAR346 < 0.3) AND (VAR242 > 10000) then begin
 	L57660(VAR102,VAR104,VAR242);
 	WRITE('
- mitropolit wa{ego gosudarstwa ovidaet sredstw dlq postrojki');
+ mitropolit wa{ego gosudarstwa ovidaet sredstw dlq postrojki
+            n o w o g o        h r a m a
+  
+ ==> w kazne');
 	WRITE(VAR102);
 	WRITE(' tysq~');
 	WRITE(VAR104);
@@ -646,6 +650,153 @@ if VAR346 > 0.9 then
 	WRITELN('wsewy{nij blagoslowit wa{e prawlenie na dolgie gody.');
 if VAR326 > 100000.0 then begin {L25374}
 	VAR102 := TRUNC(VAR326 / 100000.0);
+	VAR214 := VAR214 + VAR102;
+	VAR326 := VAR326 - VAR102 * 100000.0;
+	for VAR216 := 1 to VAR102 do begin
+		WRITELN(' -=-   w o z d w i g n u t  h r a m   -=-');
+	end;
+end;
+VAR346 := L57170(0,VAR224); {L25630}
+if VAR346 > 0.5 then begin {L25660}
+	if VAR342 > 0 then begin {L25710}
+		VAR346 := L57170(0,VAR224); {L25740}
+		if VAR346 > 0.5 then begin {L25770}
+			WRITE('==> pribyl gonec s izwestiqmi, wpustitx ? (0/1) ');
+			READLN(VAR106);
+			if VAR106 = 1 then begin
+				L57632; {L26066}
+				VAR346 := L57170(0,VAR224);
+				if VAR346 > 0.5 then begin {L26122}
+					VAR346 := VAR342 * 10 * (L57170(0,VAR224) + 0.5); {L26152}
+					L57660(VAR106,VAR110,VAR346);
+					WRITE('
+--->        w e r n u l s q   k a r a w a n 
+ ');
+					WRITE(VAR106);
+					WRITE(' tysq~');
+					WRITE(VAR110);
+					WRITELN(' rublej.');
+					VAR242 := VAR242 + VAR346; {L26374}
+					VAR342 := 0;
+				end else begin {L26450}
+					WRITELN('karawan   r a z g r a b l e n   p i r a t a m i !');
+					VAR342 := 0;
+				end;
+			end;
+		end;
+	end else begin {L26514}
+		if VAR242 > 1000.0 then begin
+			WRITE('
+zamorskij kupec predlagaet snarqditx karawan.
+==> wy soglasny ? (0/1) ');
+			READLN(VAR106);
+			if VAR106 = 1 then begin {L26576}
+				L57660(VAR102,VAR104,VAR242);
+				WRITE('w kazne');
+				WRITE(VAR102);
+				WRITE(' tysq~');
+				WRITE(VAR104);
+				WRITE(' rublej. skolxko w karawan ? ');
+				READLN(VAR342);
+				if VAR342 > VAR242 then
+					VAR342 := VAR242;
+				VAR242 := VAR242 - VAR342; {L27036}
+			end;
+			if VAR342 > 0 then
+				WRITELN('karawan otprawilsq za tridewqtx zemelx ')
+			else
+				WRITELN('karawan u{el w dalxnie strany bez wa{ih towarow.');
+			VAR346 := L57170(0,VAR224);
+			if VAR346 < 0.3 then begin
+				VAR346 := VAR242 * L57170(0,VAR224);
+				VAR356 := VAR236 * L57170(0,VAR224);
+				VAR362 := VAR246 * L57170(0,VAR224);
+				VAR366 := VAR252 * L57170(0,VAR224);
+				VAR372 := VAR256 * L57170(0,VAR224);
+				VAR376 := VAR262 * L57170(0,VAR224);
+				WRITELN('---> wam dostalosx nasledstwo :');
+				L60060(VAR346,VAR356,VAR362,VAR366,VAR372,VAR376);
+				VAR242 := VAR242 + VAR346;
+				VAR236 := VAR236 + VAR356;
+				VAR246 := VAR246 + VAR362;
+				VAR252 := VAR252 + VAR366;
+				VAR256 := VAR256 + VAR372;
+				VAR262 := VAR262 + VAR376;
+			end;
+			VAR346 := L57170(0,VAR224); {L30130}
+			if VAR346 < 0.2 then begin {L30160}
+				if VAR170 = 0 then begin {L30212}
+					VAR346 := VAR242 * L57170(0,VAR224);
+					VAR356 := VAR236 * L57170(0,VAR224);
+					VAR362 := VAR246 * L57170(0,VAR224);
+					VAR366 := VAR252 * L57170(0,VAR224);
+					VAR372 := VAR256 * L57170(0,VAR224);
+					VAR376 := VAR262 * L57170(0,VAR224);
+					WRITELN('---> imperator swataet do~x, pridannoe newesty:');
+					L60060(VAR346,VAR356,VAR362,VAR366,VAR372,VAR376);
+					WRITE('==> wy soglasny ? (0/1) ');
+					READLN(VAR102);
+					if VAR102 = 1 then begin
+						VAR170 := 1;
+						VAR242 := VAR242 + VAR346;
+						VAR236 := VAR236 + VAR356;
+						VAR246 := VAR246 + VAR362;
+						VAR252 := VAR252 + VAR366;
+						VAR256 := VAR256 + VAR372;
+						VAR262 := VAR262 + VAR376; {L31124}
+						L57632;
+						VAR346 := VAR242 * L57170(0,VAR224) * 0.5;
+						VAR242 := VAR242 - VAR346; {L31234}
+						L57660(VAR102,VAR104,VAR346);
+						WRITE('swadebnye rashody :');
+						WRITE(VAR102);
+						WRITE(' tysq~');
+						WRITE(VAR104);
+						WRITELN(' rublej.');
+					end else begin
+						WRITELN('oskorblenie !  v d i t e   w o j n y  !');
+						VAR150 := VAR150 + 1;
+					end;
+				end else begin {L31462}
+					VAR346 := VAR242 * L57170(0,VAR224) * 0.3;
+					L57660(VAR102,VAR104,VAR346);
+					VAR242 := VAR242 - VAR346;
+					VAR346 := L57170(0,VAR224) + VAR336;
+					WRITE('  u   was   r o d i l');
+					if VAR346 > 0.5 then begin
+						VAR146 := VAR146 + 1;
+						WRITELN(' s q   s y n  !');
+						VAR336 := 0;
+					end else begin
+						WRITELN(' a s x   do~x  !')
+					end;
+					WRITE('na torvestwennyj pir potra~eno :');
+					WRITE(VAR102);
+					WRITE(' tysq~');
+					WRITE(VAR104);
+					WRITELN(' rublej.');
+				end;
+			end;
+			VAR346 := L57170(0,VAR224); {L32130}
+			if (VAR346 < 0.2) AND (VAR170 <> 0) then begin
+				VAR346 := L57170(0,VAR224); {L32246}
+				WRITE('==> k wam pribyl sluga korolewy. wpustitx ? (0/1) ');
+				READLN(VAR102);
+				L57632;
+				if VAR346 > 0.5 then {L32334}
+					VAR102 := 1;
+				if VAR102 = 0 then begin {L32372}
+					WRITELN('k o r o l e w a   na was obidelasx !');
+					VAR336 := 0;
+				end else begin {L32450}
+					{TODO}
+				end;
+				{TODO}
+			end;
+			{TODO}
+		end;
+		{TODO}
+	end;
 	{TODO}
 end;
 {TODO}
