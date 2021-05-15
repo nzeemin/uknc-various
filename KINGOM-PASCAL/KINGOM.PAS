@@ -1,7 +1,8 @@
 PROGRAM KINGOM;
 {$S+}
+type FArray = array [1..12] of integer;
 
-procedure L65754; external; { Работа с KIND.DAT }
+procedure L65754(var F:FArray); external; { Работа с KIND.DAT }
 function L57170(A:integer; var B:real):real; external;
 procedure ESC161; external; {L57412}
 procedure ESCJ; external; {L57444}
@@ -14,8 +15,10 @@ procedure L62010(
 	G:integer; H:integer; I:integer; J:integer; K:integer; L:integer;
 	M:integer; N:integer; O:integer; P:integer; Q:integer; R:integer); external;
 
-var	VARF0:array [0..11] of integer; {filler}
-	VAR30:array [0..9] of char; { Ваш псевдоним }
+var	VARF0:array [1..12] of integer;
+	VAR24:integer;
+	VAR26:integer;
+	VAR30:array [1..10] of char; { Ваш псевдоним }
 	VAR42:integer;
 	VAR44:integer;
 	VAR46:integer;
@@ -31,11 +34,16 @@ var	VARF0:array [0..11] of integer; {filler}
 	VAR72:integer;
 	VAR74:integer;
 	VAR76:integer;
+	VAR100:integer;
 	VAR102:integer; { Временная переменная }
 	VAR104:integer; { Временная переменная }
 	VAR106:integer; { Временная переменная }
 	VAR110:integer; { Временная переменная }
 	VAR112:integer;
+	VAR114:integer;
+	VAR116:integer;
+	VAR120:integer;
+	VAR122:integer;
 	VAR124:integer;
 	VAR126:integer;
 	VAR130:integer;
@@ -141,7 +149,7 @@ READLN(VAR176);
 WRITE('==> wa{ psewdonim ? '); {L01534}
 READLN(VAR30);
 VAR102 := ROUND(L57170(1177, VAR224));
-VAR104 := ORD(VAR30[0] + VAR30[1]); {L01630}
+VAR104 := ORD(VAR30[1] + VAR30[2]); {L01630}
 VAR106 := VAR104 + VAR176; {L01646}
 for VAR216 := 1 to VAR106 do begin
 	VAR102 := ROUND(L57170(0,VAR224));
@@ -671,7 +679,8 @@ if VAR346 > 0.5 then begin {L25660}
 					L57660(VAR106,VAR110,VAR346);
 					WRITE('
 --->        w e r n u l s q   k a r a w a n 
- ');
+ 
+  ot torgowli polu~ena pribylx');
 					WRITE(VAR106);
 					WRITE(' tysq~');
 					WRITE(VAR110);
@@ -789,18 +798,109 @@ zamorskij kupec predlagaet snarqditx karawan.
 					WRITELN('k o r o l e w a   na was obidelasx !');
 					VAR336 := 0;
 				end else begin {L32450}
-					{TODO}
+					VAR346 := L57170(0,VAR224);
+					if VAR346 > 0.2 then begin
+						VAR170 := 0;
+						VAR346 := L57170(0,VAR224) * VAR242;
+						VAR242 := VAR242 - VAR346;
+						L57660(VAR102,VAR104,VAR346);
+						WRITE(' 
+       -   u m e r l a   k o r o l e w a   -
+  
+      na pohorony potra~eno');
+						WRITE(VAR102);
+						WRITE(' tysq~');
+						WRITE(VAR104);
+						WRITELN(' rublej.');
+					end else begin {L32774}
+						VAR346 := L57170(0,VAR224) * 0.5 * VAR242;
+						L57660(VAR102,VAR104,VAR346);
+						WRITE('
+korolewa prosit na narqdy');
+						WRITE(VAR102);
+						WRITE(' tysq~');
+						WRITE(VAR104);
+						WRITE(' rublej.
+==> kazna~e` wydatx denxgi ? (0/1) ');
+						READLN(VAR102);
+						if VAR102 = 1 then begin
+							VAR242 := VAR242 - VAR346;
+							VAR336 := VAR336 + VAR346 / VAR242;
+							WRITELN('korolewa   b l a g o d a r i t   w a s   ! ! !');
+						end else begin
+							WRITELN('korolewa nikogda ne rodit wam   s y n a  !');
+							VAR336 := 0;
+						end;
+					end;
 				end;
-				{TODO}
 			end;
-			{TODO}
+			VAR346 := L57170(0,VAR224) * 0.2 + VAR174 / 30; {L33414}
+			if VAR346 > 0.8 then begin
+				VAR352 := VAR242 * L57170(0,VAR242) * 0.5;
+				L57660(VAR102,VAR104,VAR352);
+				WRITE(' 
+  w y   z a b o l e l i  !
+  zamorskij lekarx trebuet za le~enie');
+				WRITE(VAR102);
+				WRITE(' tysq~');
+				WRITE(VAR104);
+				WRITE(' rublej. 
+==> wy budete le~itxsq ? (0/1) ');
+				READLN(VAR102);
+				if VAR102 = 0 then begin
+					VAR346 := L57170(0,VAR224);
+					if VAR346 > 0.5 then
+						goto 6; {L34046}
+				end else begin {L34062}
+					VAR242 := VAR242 - VAR352;
+					VAR346 := L57170(0,VAR224);
+					if VAR346 < 0.3 then begin {L34144}
+						VAR346 := L57170(0,VAR224);
+						if VAR346 > 0.5 then begin {L34226}
+							VAR346 := VAR242 * L57170(0,VAR224) * 0.8;
+							L57660(VAR102,VAR104,VAR352);
+							WRITE('
+wam stalo  h u v e , na lekarstwa trebuetsq');
+							WRITE(VAR102);
+							WRITE(' tys.');
+							WRITE(VAR104);
+							WRITE(' rub.
+p o k u p a e t e   l e k a r s t w a ? (0/1) ');
+							READLN(VAR102);
+							if VAR102 = 0 then begin {L34500}
+								VAR346 := L57170(0,VAR224);
+								if VAR346 > 0.5 then
+									goto 6; {L34572}
+							end;
+						end else begin {L34602}
+							VAR242 := VAR242 - VAR352;
+							VAR346 := L57170(0,VAR224);
+							if VAR346 < 0.5 then begin {L34670}
+								WRITE('
+ w y  p r i s m e r t i  -  koldun movet wyle~itx was,  n o  on trebuet
+   za le~enie - polowinu zolota iz wa{ej sokrowi}nicy! soglasny ? (0/1) ');
+								READLN(VAR102);
+								if VAR102 = 0 then begin
+									VAR346 := L57170(0,VAR224);
+									if VAR346 > 0.5 then
+										goto 6 {L35044}
+									else begin
+										VAR236 := VAR236 / 2;
+										VAR346 := L57170(0,VAR224);
+										if VAR346 < 0.05 then
+											goto 6; {L35174}
+									end;
+									goto 6; {L35204}
+								end;
+							end;
+						end;
+					end;
+				end;
+			end;
+			goto 7; {L35214}
 		end;
-		{TODO}
 	end;
-	{TODO}
 end;
-{TODO}
-
 6: {L35224}
 if VAR146 = 0 then begin
 	WRITELN('k o r o l x  u m e r ! ! !');
@@ -812,12 +912,213 @@ end else begin
 	VAR170 := 0;
 end;
 7: {L35332}
-;
-{TODO}
-
+VAR346 := (VAR242 + VAR246 * VAR56 + VAR236 * VAR54 / 2) / 1000 + 1;
+VAR352 := L57170(0,VAR224) * (VAR150 * 0.5 + (VAR346 - VAR262) / VAR346);
+if VAR352 > 0.7 then begin
+	VAR150 := 0;
+	WRITE(' 
+              -  w o z m o v n a   w o j n a  -
+  
+==> ob"qwlqete wseob}u` mobilizaci` ? ');
+	READLN(VAR102);
+	L57632;
+	if VAR102 = 1 then begin
+		VAR154 := L01044(VAR256 / 2 + VAR262);
+		VAR322 := 0.2;
+		VAR316 := VAR316 + VAR322;
+		if VAR316 > 1.0 then
+			VAR316 := 1.0;
+		WRITELN('w narode rastet nedowolxstwo!');
+	end else begin {L36116}
+		VAR154 := ROUND(VAR262);
+	end;
+	VAR156 := L01044((VAR256 / 2 + VAR262) * (L57170(0,VAR224) + 0.5));
+	if VAR346 > VAR262 * 10.0 then begin
+		VAR156 := L01044(VAR346 + VAR256 / 2); {L36302}
+	end;
+	WRITE(' 
+ w a { a    a r m i q         :');
+	WRITE(VAR154);
+	WRITE(' soldat. 
+ --------------------------------------------
+  p r o t i w n i k  (razwedka):');
+	WRITE(VAR156);
+	WRITELN(' soldat.');
+	if (VAR242 < 10000) AND (VAR236 > 10) then begin
+		WRITE('
+    polovenie opasnoe, wizirx sowetuet prodatx zoloto
+==> rostow}ik soglasen datx polowinu ceny, soglasny ? (0/1) ');
+		READLN(VAR102);
+		if VAR102 = 1 then begin
+			VAR242 := VAR242 + VAR236 / 2 * VAR54;
+			VAR236 := 0; {L36706}
+		end;
+		if VAR242 > 1000 then begin
+			L57660(VAR102,VAR104,VAR242);
+			WRITE('w kazne');
+			WRITE(VAR102);
+			WRITE(' tys.');
+			WRITE(VAR104);
+			WRITE(' rublej.
+==> skolxko hotite wzqtx naemnikow (naemnik - 100 rub) ? ');
+			READLN(VAR102);
+			if VAR102 * 100.0 < VAR242 then begin
+				VAR242 := VAR242 - (VAR102 * 100);
+				VAR154 := VAR154 + VAR102;
+			end;
+		end;
+		VAR346 := L57170(0,VAR224); {L37236}
+		if VAR346 < 0.1 then
+			WRITELN('zakl`~en   m i r n y j   d o g o w o r  !!!')
+		else begin {L37346}
+			VAR156 := L01044(VAR156 * (L57170(0,VAR224) + 0.5));
+			VAR346 := VAR154 / VAR156; {L37424}
+			WRITE('
+           n a ~ a t y   w o e n n y e   d e j s t i q .
+           -------------------------------------------
+           w wernyh korol` wojskah: ');
+			WRITE(VAR154);
+			WRITE(' soldat 
+           u wa{ego protiwnika    : ');
+			WRITE(VAR156);
+			WRITELN(' soldat');
+			if VAR346 > 1 then {L37560}
+				WRITELN('---> weroqtno wa{a armiq pobedit ....')
+			else
+				WRITELN('---> |ksperty proro~at poravenie ....');
+			if VAR102 <> 0 then begin
+				VAR346 := L57170(0,VAR224);
+				if VAR346 < 0.1 then begin
+					VAR104 := ROUND(VAR102 * L57170(0,VAR224));
+					if VAR104 > 0 then begin
+						WRITE('i z m e n a ! ! !');
+						WRITE(VAR104);
+						WRITELN(' naemnikow pere{li na storonu wraga !');
+						VAR154 := VAR154 + VAR102 + VAR104;
+						VAR156 := VAR156 + VAR104;
+					end;
+				end;
+			end;
+			VAR154 := ROUND(VAR154 * (L57170(0,VAR224) * 0.2 + 0.9)); {L40132}
+			VAR156 := ROUND(VAR156 * (L57170(0,VAR224) * 0.2 + 0.9));
+			for VAR102 := 1 to 300 do begin
+				VAR346 := SIN(0.5);
+			end;
+			VAR346 := VAR242 * L57170(0,VAR224); {L40404}
+			VAR356 := VAR236 * L57170(0,VAR224);
+			VAR362 := VAR246 * L57170(0,VAR224);
+			VAR366 := VAR242 * L57170(0,VAR224);
+			VAR372 := VAR256 * L57170(0,VAR224);
+			VAR376 := VAR262 * L57170(0,VAR224);
+			if VAR154 > VAR156 then
+				VAR120 := 1
+			else
+				VAR120 := -1;
+			VAR242 := VAR242 + VAR346 * VAR120; {L40754}
+			VAR236 := VAR236 + VAR356 * VAR120;
+			VAR246 := VAR246 + VAR362 * VAR120;
+			VAR252 := VAR252 + VAR366 * VAR120;
+			VAR256 := VAR256 + VAR372 * VAR120;
+			VAR262 := VAR262 + VAR376 * VAR120;
+			if VAR154 > VAR156 then
+				WRITELN(' 
+       p  o  b  e  d  a . zahwa~eno :')
+			else
+				WRITELN('
+       p o r a v e n i e . utra~eno :');
+			L60060(VAR346,VAR356,VAR362,VAR366,VAR372,VAR376);
+			WRITE('==> wstre~aete nowyj god ? (0/1) ');
+			READLN(VAR102);
+			if VAR102 = 1 then begin
+				if VAR242 > 1000 then begin
+					WRITE('==> ustraiwaete nowogodnij bal ? (0/1) ');
+					READLN(VAR102);
+					if VAR102 = 1 then begin
+						L57660(VAR102,VAR104,VAR242);
+						WRITE('==> w kazne');
+						WRITE(VAR102);
+						WRITE(' tys.');
+						WRITE(VAR104);
+						WRITE(' rub. skolxko na rovdestwo ? ');
+						READLN(VAR346);
+						VAR316 := VAR316 - (VAR346 / VAR256) / 100.0; {L41774}
+						if VAR316 < 0 then
+							VAR316 := 0;
+						VAR242 := VAR242 - VAR346;
+					end else begin {L42154}
+						goto 8;
+					end;
+					VAR172 := VAR172 + 1; {L42164}
+					VAR174 := VAR174 + 1;
+					if VAR174 > VAR176 then
+						goto 8; {L42210}
+					goto 0; {L42220}
+				end;
+			end;
+		end;
+	end;
+end;
 8: {L42230}
-;
-
-{TODO}
-L65754; { Работа с KIND.DAT }
+if VAR174 > VAR176 then begin
+	WRITELN('
+      -   w a {   s r o k   i s t e k   -');
+	VAR174 := VAR174 - 1;
+end;
+VAR150 := VAR174 * 10; {L42272}
+VAR100 := L01044(VAR242 / 1000);
+VAR102 := L01044(VAR236);
+VAR104 := L01044(VAR246 / 10);
+VAR152 := L01044(VAR246);
+VAR106 := L01044(VAR252 / 100);
+VAR154 := L01044(VAR252);
+VAR110 := L01044(VAR256 / 10);
+VAR156 := L01044(VAR256);
+VAR112 := L01044(VAR262 / 5);
+VAR160 := L01044(VAR262);
+VAR114 := VAR214 * 100;
+VAR116 := -VAR212;
+VAR120 := -L01044(VAR316 * 100);
+VAR122 := VAR150 + VAR100 + VAR102 + VAR104 + VAR106 + VAR110
+	+ VAR112 + VAR114 + VAR116 + VAR120;
+WRITE(' 
+ c e n n o s t i     k o l - w o       b a l l y ');
+WRITE(VAR174,VAR150);
+WRITE('
+  kapital( tys. )');
+WRITE(VAR100,VAR100);
+WRITE('
+  zoloto (  kg  )');
+WRITE(VAR102,VAR102);
+WRITE(' 
+  zemlq  (  ga  )'); {L43220}
+WRITE(VAR152,VAR104);
+WRITE('  
+  zerno  ( tonn )');
+WRITE(VAR154,VAR106);
+WRITE('   
+  rabo~ie( ~el. )');
+WRITE(VAR156,VAR110);
+WRITE('    
+  gwardiq( sol. )');
+WRITE(VAR160,VAR112);
+WRITE('     
+  hramy  ( {tuk )'); {L43430}
+WRITE(VAR214,VAR114);
+WRITE(' 
+  umerlo rabo~ih:');
+WRITE(VAR212,VAR116);
+WRITE(' 
+  gnew naroda   :');
+WRITE(-VAR120,VAR120);
+WRITE('
+  ---------------------------------------------- 
+  itogo:');
+WRITE(VAR122);
+WRITELN(' ballow.');
+for VAR216 := 1 to 10 do begin {L43654}
+	VARF0[VAR216] := ORD(VAR30[VAR216]);
+end;
+VAR24 := VAR122;
+VAR26 := VAR174; { Номер года правления }
+L65754(VARF0); { Работа с KIND.DAT }
 END. {L44040}

@@ -1,5 +1,6 @@
 {$E+}
 {$S+}
+type FArray = array [1..12] of integer;
 
 procedure L61530;
 begin
@@ -44,7 +45,7 @@ begin
 end;
 
 { Работа с KIND.DAT }
-procedure L65754;
+procedure L65754(var F:FArray);
 begin
 	{TODO}
 end;
