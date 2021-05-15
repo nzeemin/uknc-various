@@ -1,6 +1,6 @@
 PROGRAM KINGOM;
 {$S+}
-type FArray = array [1..12] of integer;
+type FArray = array [1..10] of integer;
 
 procedure L65754(var F:FArray); external; { Работа с KIND.DAT }
 function L57170(A:integer; var B:integer):real; external;
@@ -15,7 +15,7 @@ procedure L62010(
 	G:integer; H:integer; I:integer; J:integer; K:integer; L:integer;
 	M:integer; N:integer; O:integer; P:integer; Q:integer; R:integer); external;
 
-var	VARF0:array [1..12] of integer;
+var	VARF0:array [1..10] of integer;
 	VAR24:integer;
 	VAR26:integer;
 	VAR30:array [1..10] of char; { Ваш псевдоним }
@@ -74,6 +74,8 @@ var	VARF0:array [1..12] of integer;
 	VAR212:integer;
 	VAR214:integer;
 	VAR216:integer;
+	VAR220:integer;
+	VAR222:integer;
 	VAR224:integer;
 	VAR226:real;
 	VAR232:real;
@@ -84,6 +86,7 @@ var	VARF0:array [1..12] of integer;
 	VAR256:real; { WORKS - Рабочие }
 	VAR262:real; { GUARD - Солдаты }
 	VAR266:real; { Золото купить/продать }
+	VAR272:real;
 	VAR276:real; { Земля купить/продать }
 	VAR302:real; { Зерно купить/продать }
 	VAR306:real; { Рабочие купить/продать }
@@ -102,6 +105,7 @@ var	VARF0:array [1..12] of integer;
 	VAR372:real;
 	VAR376:real;
 	VAR402:real;
+	VAR406:array [1..6] of real;{filler}
 
 function L01044(A:real):integer;
 begin
@@ -149,7 +153,7 @@ READLN(VAR176);
 WRITE('==> wa{ psewdonim ? '); {L01534}
 READLN(VAR30);
 VAR102 := ROUND(L57170(1177, VAR224));
-VAR104 := ORD(VAR30[1] + VAR30[2]); {L01630}
+VAR104 := ORD(VAR30[1]) + ORD(VAR30[2]); {L01630}
 VAR106 := VAR104 + VAR176; {L01646}
 for VAR216 := 1 to VAR106 do begin
 	VAR102 := ROUND(L57170(0,VAR224));
@@ -186,7 +190,7 @@ VAR74 := ROUND(VAR62 / VAR50 * 100);
 VAR76 := ROUND(VAR64 / VAR52 * 100); {L03314}
 L57632; {L03360}
 L62010(VAR242, VAR236, VAR246, VAR252, VAR256, VAR262,
-	VAR54, VAR56, VAR60, VAR62, VAR54, VAR66,
+	VAR54, VAR56, VAR60, VAR62, VAR64, VAR66,
 	VAR70, VAR72, VAR74, VAR76, VAR172, VAR174);
 1: {L03530}
 CURSORTO(15,0);

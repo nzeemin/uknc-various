@@ -44,4 +44,5 @@ begin
 	WRITE('
              g w a r d i q ( sol. )');
 	WRITELN(T7);
+{$C	.BLKW	8} {TODO}
 end;

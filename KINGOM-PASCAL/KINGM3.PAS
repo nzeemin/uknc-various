@@ -6,8 +6,10 @@ procedure ESCJ; external; {L57444}
 
 procedure L57632;
 begin
+{$C	NOP} {TODO}
 	CURSORTO(0,0);
 	ESCJ;
+{$C	NOP} {TODO}
 end;
 
 { Разделяем C на тысячи A и остаток B }

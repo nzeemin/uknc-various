@@ -27,9 +27,9 @@ end;
 
 { Установить позицию курсора }
 procedure CURSORTO(R,C:integer); {L57476}
-var RCH,CCH:char;
+var RCH,CCH:integer;
 begin
-	RCH:=CHR(R)+' ';
-	CCH:=CHR(C)+' ';
-	WRITE(CHR(33B),'Y',RCH,CCH);
+	RCH:=R + ORD(' ');
+	CCH:=C + ORD(' ');
+	WRITE(CHR(33B),'Y',CHR(RCH),CHR(CCH));
 end;
