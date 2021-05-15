@@ -3,13 +3,13 @@ PROGRAM KINGOM;
 type FArray = array [1..12] of integer;
 
 procedure L65754(var F:FArray); external; { Работа с KIND.DAT }
-function L57170(A:integer; var B:real):real; external;
+function L57170(A:integer; var B:integer):real; external;
 procedure ESC161; external; {L57412}
 procedure ESCJ; external; {L57444}
 procedure CURSORTO(R,C:integer); external; {L57476}
 procedure L57632; external; { Курсор в 0,0; ESCJ }
 procedure L57660(var A:integer; var B:integer; var C:real); external; { Разделяем на тысячи и остаток }
-procedure L60060(A,B,C,D,E,F:real); external; { Вывод статистики }
+procedure L60060(K,B,C,D,E,F:real); external; { Вывод статистики }
 procedure L62010(
 	var A:real; var B:real; var C:real; var D:real; var E:real; var F:real;
 	G:integer; H:integer; I:integer; J:integer; K:integer; L:integer;
@@ -74,7 +74,7 @@ var	VARF0:array [1..12] of integer;
 	VAR212:integer;
 	VAR214:integer;
 	VAR216:integer;
-	VAR224:real;
+	VAR224:integer;
 	VAR226:real;
 	VAR232:real;
 	VAR236:real; { GOLD - Золото }
@@ -836,7 +836,7 @@ korolewa prosit na narqdy');
 			end;
 			VAR346 := L57170(0,VAR224) * 0.2 + VAR174 / 30; {L33414}
 			if VAR346 > 0.8 then begin
-				VAR352 := VAR242 * L57170(0,VAR242) * 0.5;
+				VAR352 := VAR242 * L57170(0,VAR224) * 0.5;
 				L57660(VAR102,VAR104,VAR352);
 				WRITE(' 
   w y   z a b o l e l i  !
@@ -878,7 +878,7 @@ p o k u p a e t e   l e k a r s t w a ? (0/1) ');
 							if VAR346 < 0.5 then begin {L34670}
 								WRITE('
  w y  p r i s m e r t i  -  koldun movet wyle~itx was,  n o  on trebuet
-   za le~enie - polowinu zolota iz wa{ej sokrowi}nicy! soglasny ? (0/1) ');
+  za le~enie - polowinu zolota iz wa{ej sokrowi}nicy! soglasny ? (0/1) ');
 								READLN(VAR102);
 								if VAR102 = 0 then begin
 									VAR346 := L57170(0,VAR224);
@@ -919,7 +919,7 @@ if VAR352 > 0.7 then begin
 	WRITE(' 
               -  w o z m o v n a   w o j n a  -
   
-==> ob"qwlqete wseob}u` mobilizaci` ? ');
+==> ob"qwlqete wseob}u` mobilizaci` ? (0/1) ');
 	READLN(VAR102);
 	L57632;
 	if VAR102 = 1 then begin
@@ -941,7 +941,7 @@ if VAR352 > 0.7 then begin
 	WRITE(VAR154);
 	WRITE(' soldat. 
  --------------------------------------------
-  p r o t i w n i k  (razwedka):');
+ p r o t i w n i k  (razwedka):');
 	WRITE(VAR156);
 	WRITELN(' soldat.');
 	if (VAR242 < 10000) AND (VAR236 > 10) then begin
@@ -1081,7 +1081,9 @@ VAR120 := -L01044(VAR316 * 100);
 VAR122 := VAR150 + VAR100 + VAR102 + VAR104 + VAR106 + VAR110
 	+ VAR112 + VAR114 + VAR116 + VAR120;
 WRITE(' 
- c e n n o s t i     k o l - w o       b a l l y ');
+ c e n n o s t i     k o l - w o       b a l l y 
+ -----------------------------------------------
+  srok   ( let  )');
 WRITE(VAR174,VAR150);
 WRITE('
   kapital( tys. )');

@@ -1,9 +1,17 @@
 {$E+}
 {$S+}
 
-function L57170(A:integer; var B:real):real;
+function L57170(A:integer; var B:integer):real;
+label 1;
 begin
-	{TODO}
+	if A <> 0 then B := A;
+	B := B * 5;
+1:
+	if B >= 16384 then B:=B - 16384;
+	if B >= 8192  then B:=B - 8192;
+	if B >= 4096  then B:=B - 4096;
+	if B > 4096   then goto 1; 
+	L57170 := B / 4096;
 end;
 
 procedure ESC161; {L57412}
