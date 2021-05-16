@@ -1,6 +1,6 @@
 {$E+}
 {$S+}
-type FArray = array [1..10] of integer;
+type FArray = array [1..12] of integer;
 
 procedure L61530;
 begin
