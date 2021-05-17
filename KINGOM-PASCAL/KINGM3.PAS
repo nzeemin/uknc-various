@@ -1,15 +1,14 @@
 {$E+}
 {$S+}
 
+procedure L57632;
+
 procedure CURSORTO(R,C:integer); external; {L57476}
 procedure ESCJ; external; {L57444}
 
-procedure L57632;
 begin
-{$C	NOP} {TODO}
 	CURSORTO(0,0);
 	ESCJ;
-{$C	NOP} {TODO}
 end;
 
 { Разделяем C на тысячи A и остаток B }

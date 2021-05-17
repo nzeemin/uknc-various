@@ -1,20 +1,9 @@
 {$E+}
 {$S+}
-type FArray = array [1..12] of integer;
-
-procedure L61530;
-begin
-	{TODO}
-{$C	.BLKW	81} {TODO}	
-end;
 
 var	VAR102:integer;
 	VAR104:integer;
 
-procedure L57632; external;
-procedure L57660; external; { Разделяем на тысячи и остаток }
-
-{ Вывод статистики }
 procedure L62010(
 	var A:real; { Деньги }
 	var B:real; { Золото }
@@ -24,16 +13,28 @@ procedure L62010(
 	var F:real;
 	G:integer; H:integer; I:integer; J:integer; K:integer; L:integer;
 	M:integer; N:integer; O:integer; P:integer; Q:integer; R:integer);
+var N1,N2,N3,N4,N5:integer;
+
+procedure L61530(var A:real; B:integer; var C:integer);
+var T:real;
+label 1;
 begin
+1:
+	T := A + (-32000.0);
+	if T > 0.0 then begin
+		{TODO}
+		goto 1;
+	end;
 	{TODO}
-	L61530;
-	{TODO}
-{$C	.BLKW	685} {TODO}
+{$C	.BLKW	48} {TODO}	
 end;
+
+procedure L57632; external;
+procedure L57660; external; { Разделяем на тысячи и остаток }
 
 procedure L64564;
 begin
-{$C	.BLKW	186} {TODO}
+{$C	.BLKW	178} {TODO}
 	{TODO}
 	WRITE(' :'); {L65322}
 	WRITE(VAR102);
@@ -42,19 +43,14 @@ begin
 	WRITELN(' let.');
 end;
 
-procedure L65504;
-begin
+{ Вывод статистики }
+begin {L62010}
+	L61530(B,G,N1);{TODO}
+	L61530(B,G,N1);{TODO}
+	L61530(B,G,N1);{TODO}
+	L61530(B,G,N1);{TODO}
+	L61530(B,G,N1);{TODO}
+	L57632;
 	{TODO}
-{$C	.BLKW	81} {TODO}
-end;
-
-{ Работа с KIND.DAT }
-procedure L65754(var F:FArray);
-var D: file of char;
-begin
-	Reset(D,'KING','DAT');
-	Put(D);
-	{TODO}
-	Close(D);
-{$C	.BLKW	491} {TODO}
+{$C	.BLKW	612} {TODO}
 end;
