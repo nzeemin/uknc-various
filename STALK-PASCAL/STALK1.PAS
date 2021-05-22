@@ -189,13 +189,12 @@ begin
 		end else begin { не на лестнице }
 			WRITELN(' Без лестницы?'); {L04140}
 		end;
-		{$C	JMP L05114 } { Выход из процедуры }
-	end;
+	end else begin
 1:
-	WRITE(CHR(33B),CHR(110B),CHR(33B)); {L04172}
-	WRITE('J	Подземелье ');
-	WRITE(DUNGEON); { Номер подземелья }
-	WRITE('
+		WRITE(CHR(33B),CHR(110B),CHR(33B)); {L04172}
+		WRITE('J	Подземелье ');
+		WRITE(DUNGEON); { Номер подземелья }
+		WRITE('
 								 Рейтинг
 								 Энергия
 								 Оружие
@@ -205,29 +204,28 @@ begin
 								 Вредность
 
 								  Рюкзак:');
-	for VAR16:=1 to 5 do begin { выводим значения индикаторов }
-		CURSORTO(VAR16,37);
-		WRITE(IND[VAR16]:3);
-		WRITE(' ');
-	end;
-	CURSORTO(7,37);
-	WRITE(VAR30:3); { Вредность }
-	CURSORTO(10,33);
-	for VAR16:=1 to 6 do begin { выводим содержимое рюкзака }
-		WRITE(RUKSAK[VAR16]:2);
-	end;
-	CURSORTO(0,0);
-	for VAR16:=1 to 16 do begin { выводим текущее поле }
-		for VAR20:=1 to 32 do begin
-			if F2[VAR4,VAR16,VAR20] & 100B <> 0 then begin
-				CURSORTO(VAR16,VAR20);
-				WRITE(F[VAR4,VAR16,VAR20]);
+		for VAR16:=1 to 5 do begin { выводим значения индикаторов }
+			CURSORTO(VAR16,37);
+			WRITE(IND[VAR16]:3);
+			WRITE(' ');
+		end;
+		CURSORTO(7,37);
+		WRITE(VAR30:3); { Вредность }
+		CURSORTO(10,33);
+		for VAR16:=1 to 6 do begin { выводим содержимое рюкзака }
+			WRITE(RUKSAK[VAR16]:2);
+		end;
+		CURSORTO(0,0);
+		for VAR16:=1 to 16 do begin { выводим текущее поле }
+			for VAR20:=1 to 32 do begin
+				if F2[VAR4,VAR16,VAR20] & 100B <> 0 then begin
+					CURSORTO(VAR16,VAR20);
+					WRITE(F[VAR4,VAR16,VAR20]);
+				end;
 			end;
 		end;
+		CLEARMSG;
 	end;
-	CLEARMSG;
-{$C
-L05114: } {метка для выхода из процедуры}
 end;
 
 procedure L05370(DY,DX:integer);
