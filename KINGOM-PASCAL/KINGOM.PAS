@@ -61,7 +61,7 @@ var	VARF0:array [1..12] of integer;
 	VAR164:integer;
 	VAR166:integer;
 	VAR170:integer;
-	VAR172:integer; { YEAR - Год правления, от 1986 }
+	VAR172:integer; { YEAR  - Текущий год, от 1986 }
 	VAR174:integer; { YRNUM - Номер года правления, от 1 }
 	VAR176:integer; { YRCNT - Сколько лет будем править }
 	VAR200:integer;
@@ -1121,7 +1121,7 @@ WRITELN(' ballow.');
 for VAR216 := 1 to 10 do begin {L43654}
 	VARF0[VAR216] := ORD(VAR30[VAR216]);
 end;
-VARF0[11] := VAR122;
+VARF0[11] := VAR122; { Баллы }
 VARF0[12] := VAR174; { Номер года правления }
 L65754(VARF0); { Работа с KIND.DAT }
 END. {L44040}

@@ -5,30 +5,31 @@ var	VAR102:integer;
 	VAR104:integer;
 
 procedure L62010(
-	var A:real; { Деньги }
-	var B:real; { Золото }
+	var MN:real; { Деньги }
+	var GD:real; { Золото }
 	var C:real; { Земля }
-	var D:real; { Рабочие }
-	var E:real; { Солдаты }
-	var F:real;
+	var D:real; { Зерно }
+	var E:real; { Рабочие }
+	var F:real; { Солдаты }
 	G:integer; H:integer; I:integer; J:integer; K:integer;
 	L:integer; M:integer; N:integer; O:integer; P:integer;
-	Q:integer; R:integer);
+	YR:integer; { Год }
+	YN:integer); { Год правления }
 
-var N1,N2,N3,N4,N5,N6:integer;
+var N1,N2,N3,N4,N5:integer;
 
-procedure L61530(var A:real; B:integer; var C:integer);
+procedure L61530(var X:real; Y:integer; var Z:integer);
 var T:real;
 label 1;
 begin
 1:
-	T := A + (-32000.0);
+	T := X + (-32000.0);
 	if T > 0.0 then begin {L61572}
-		F := F + T * FLOAT(B);{TODO}
-		A := A - T;
+		F := MN + T * FLOAT(Y); {L61620}
+		X := X - T;
 		goto 1;
 	end; {L61742}
-	C := TRUNC(A);
+	Z := TRUNC(X);
 end;
 
 procedure L57632; external;
@@ -36,15 +37,15 @@ procedure L57660(var A:integer; var B:integer; var C:real); external; { Разд
 
 { Вывод статистики }
 begin {L62010}
-	L61530(B,G,N1);{TODO}
+	L61530(GD,G,N1);{TODO}
 	L61530(C,H,N2);{TODO}
 	L61530(D,I,N3);{TODO}
 	L61530(E,J,N4);{TODO}
 	L61530(F,K,N5);{TODO}
 	L57632;
-	WRITE(Q);{TODO}
+	WRITE(YR);
 	WRITE(' god.                      ');
-	WRITE(R);{TODO}
+	WRITE(YN);
 	WRITELN('   god prawleniq.');
 	WRITE(' 
     w  w a { e m  g o s u d a r s t w e  n a  t e k u } i j  m o m e n t :
@@ -52,9 +53,9 @@ begin {L62010}
 !  n a i m e n o w a n i e !  koli~estwo  !   stoimostx   !  kurs  birvi  !
 ---------------------------------------------------------------------------
 !  z o l o t o   (  kg   ) !');
-	WRITE(N1);
+	WRITE(N3);
 	WRITE(' ! ');
-	WRITE(G);
+	WRITE(N4);
 	WRITE(' ! ');
 	WRITE(L);
 	WRITE(' !
@@ -88,33 +89,11 @@ begin {L62010}
 	WRITELN(' !
 ---------------------------------------------------------------------------');
 	WRITELN(CHR(32));
-	L57660(N1,N2,A);
+	L57660(N1,N2,MN);
 	WRITE('w nastoq}ee wremq w kazne -');
 	WRITE(N1);
 	WRITE(' tysq~ ');
 	WRITE(N2);
 	WRITELN(' rublej.');
-{$C	.BLKW	10} {TODO}
-end;
-
-procedure L64564;
-var N2,N5,V102,V104:integer;
-begin
-	if N5 = -1 {OR ??} then begin
-		for N2 := 1 to 12 do begin
-			{TODO}
-{$C	.BLKW	20} {TODO}
-		end;
-	end;
-{$C	.BLKW	18} {TODO}
-	{TODO}
-	for N2 := 1 to 10 do begin
-		{TODO}
-{$C	.BLKW	97} {TODO}
-	end;
-	WRITE(' :'); {L65322}
-	WRITE(V102);
-	WRITE(' ballow za');
-	WRITE(V104);
-	WRITELN(' let.');
+{$C	.BLKW	9} {TODO}
 end;
