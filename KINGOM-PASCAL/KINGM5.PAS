@@ -1,9 +1,6 @@
 {$E+}
 {$S+}
 
-var	VAR102:integer;
-	VAR104:integer;
-
 procedure L62010(
 	var MN:real; { Деньги }
 	var GD:real; { Золото }
@@ -18,7 +15,7 @@ procedure L62010(
 
 var N1,N2,N3,N4,N5:integer;
 
-procedure L61530(var X:real; Y:integer; var Z:integer);
+procedure L61530(var X:real; var Y:integer; var Z:integer);
 var T:real;
 label 1;
 begin
@@ -53,7 +50,7 @@ begin {L62010}
 !  n a i m e n o w a n i e !  koli~estwo  !   stoimostx   !  kurs  birvi  !
 ---------------------------------------------------------------------------
 !  z o l o t o   (  kg   ) !');
-	WRITE(N3);
+	WRITE(N1);
 	WRITE(' ! ');
 	WRITE(N4);
 	WRITE(' ! ');
@@ -95,5 +92,4 @@ begin {L62010}
 	WRITE(' tysq~ ');
 	WRITE(N2);
 	WRITELN(' rublej.');
-{$C	.BLKW	9} {TODO}
 end;

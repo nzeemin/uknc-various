@@ -7,24 +7,23 @@ procedure L65754(var F:FArray);
 var	T,U,V1,V2:integer;
 	D: file of FArray;
 	E: file of FArray;
-	O,P,Q,R,S:integer;
+	N:array[1..10] of char;
 	F2:FArray;
 
 procedure L64564;
 begin
-	if (F2[1] = -1) OR (F2[2] < F2[3]) then begin{TODO}
+	if (F2[1] = -1) OR (F2[1] < F[3]) then begin{TODO}
 		for V2 := 1 to 12 do begin {L64654}
-			F2[V2] := F2[V2];
+			F2[V2] := F[V2];
 		end;
 		T := 1; {L65042}
 	end;
 	E^ := F2; {L65050}
 	PUT(E);{TODO}
-	for V2 := 1 to 10 do begin
-		F2[V2] := F[V2];
+	for V2 := 1 to 10 do begin {L65120}
+		N[V2] := CHR(F2[V2]);
 	end;
-	{WRITE(NM);}
-{$C	.BLKW	10} {TODO} {L65300}
+	WRITE(N); {L65300}
 	WRITE(' :'); {L65322}
 	WRITE(F2[11]);
 	WRITE(' ballow za');
@@ -47,9 +46,9 @@ end;
 label 1;
 begin {L65754}
 1:
-	Reset(D,'KING','DAT',O);
+	Reset(D,'KING','DAT',V2);
 	V2 := 0;
-	Rewrite(E,'KING','DAT',P);
+	Rewrite(E,'KING','DAT',V1);
 	if V1 = -1 then begin
 		for U := 1 to 12 do begin
 			F2[U] := -1;{TODO}
@@ -89,10 +88,10 @@ begin {L65754}
 			for V2 := 1 to 12 do begin {L67112}
 				F2[V2] := -1; {L67152}
 			end;
-			F2 := F; {L67224}
+			D^ := F2; {L67224}
 			PUT(D);{TODO}
-		end else begin {L67300}
 {$C	.BLKW	1} {TODO}
+		end else begin {L67300}
 			L65504;
 			PUT(D);{TODO}
 			F2 := F; {L67330}
