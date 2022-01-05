@@ -12,16 +12,16 @@ var	T,U,V1,V2:integer;
 
 procedure L64564;
 begin
-	if (F2[1] = -1) OR (F2[1] < F[3]) then begin{TODO}
-		for V2 := 1 to 12 do begin {L64654}
-			F2[V2] := F[V2];
+	if (F2[1] = -1) OR (F2[11] < F[11]) then begin {L64572}
+		for U := 1 to 12 do begin {L64654}
+			F2[U] := F[U];
 		end;
 		T := 1; {L65042}
 	end;
 	E^ := F2; {L65050}
-	PUT(E);{TODO}
-	for V2 := 1 to 10 do begin {L65120}
-		N[V2] := CHR(F2[V2]);
+	PUT(E);
+	for U := 1 to 10 do begin {L65120}
+		N[U] := CHR(F2[U]);
 	end;
 	WRITE(N); {L65300}
 	WRITE(' :'); {L65322}
@@ -33,25 +33,25 @@ end;
 
 procedure L65504;
 begin {L65504}
-	if T = 1{TODO} then begin
-		F2 := F;
-		for V1 := 1 to 12 do begin
-			F[V1] := F2[V1]; {L65614}
+	if T = 1 then begin
+		F2 := D^; {L65526}
+		for U := 1 to 12 do begin {L65554}
+			F[U] := F2[U]; {L65614}
 		end;
-		T := 0;
+		T := 0; {L65742}
 	end;
 end;
 
 { Работа с KIND.DAT }
-label 1;
+label 1,2;
 begin {L65754}
 1:
-	Reset(D,'KING','DAT',V2);
+	Reset(D,'KING','DAT',V1); {L65764}
 	V2 := 0;
-	Rewrite(E,'KING','DAT',V1);
+	Rewrite(E,'KING','DAT',V2); {L66046}
 	if V1 = -1 then begin
 		for U := 1 to 12 do begin
-			F2[U] := -1;{TODO}
+			F2[U] := -1;
 		end;
 		for U := 1 to 3 do begin
 			E^ := F2; {L66312}
@@ -64,7 +64,7 @@ begin {L65754}
 	WRITELN('
  w rezulxtate analiza rezulxtatow, dostignutyh prawitelqmi   | j f o r i i
  -------------------------------------------------------------------------');
-	F2 := F; {L66442}
+	F2 := D^; {L66442}
 	V1 := F2[1];
 	WRITE(' rekord ustanowil ');
 	L64564;
@@ -73,34 +73,31 @@ begin {L65754}
 			F2[U] := -1; {L66574}
 		end;
 		E^ := F2; {L66646}
-		PUT(E);{TODO}
+		PUT(E);
 		E^ := F2; {L66714}
-		PUT(E);{TODO}
-{$C	.BLKW	1} {TODO}
-	end else begin {L66770}
-		L65504;
-		GET(D);{TODO}
-		F2 := D^; {L67020}
-		V1 := F2[1];
-		WRITE(' wtoroj rezulxtat ');
-		L64564;
-		if V1 = -1 then begin {L67076}
-			for V2 := 1 to 12 do begin {L67112}
-				F2[V2] := -1; {L67152}
-			end;
-			D^ := F2; {L67224}
-			PUT(D);{TODO}
-{$C	.BLKW	1} {TODO}
-		end else begin {L67300}
-			L65504;
-			PUT(D);{TODO}
-			F2 := F; {L67330}
-			WRITE(' tretij rezulxtat ');
-			L64564;
+		PUT(E);
+		goto 2;
+	end; {L66770}
+	L65504;
+	GET(D);
+	F2 := D^; {L67020}
+	V1 := F2[1];
+	WRITE(' wtoroj rezulxtat ');
+	L64564; {L67070}
+	if V1 = -1 then begin {L67076}
+		for U := 1 to 12 do begin {L67112}
+			F2[U] := -1; {L67152}
 		end;
-{$C	.BLKW	1} {TODO}
-	end;
-{$C	.BLKW	1} {TODO}
+		E^ := F2; {L67224}
+		PUT(E); {L67250}
+		goto 2;
+	end; {L67300}
+	L65504;
+	PUT(D);
+	F2 := D^; {L67330}
+	WRITE(' tretij rezulxtat ');
+	L64564;
+2:
 	Close(D);
 	Close(E);
 end;

@@ -22,8 +22,8 @@ begin
 1:
 	T := X + (-32000.0);
 	if T > 0.0 then begin {L61572}
-		F := MN + T * FLOAT(Y); {L61620}
-		X := X - T;
+		MN := MN + T * FLOAT(Y); {L61620}
+		X := X - T; {L61666}
 		goto 1;
 	end; {L61742}
 	Z := TRUNC(X);
@@ -52,7 +52,7 @@ begin {L62010}
 !  z o l o t o   (  kg   ) !');
 	WRITE(N1);
 	WRITE(' ! ');
-	WRITE(N4);
+	WRITE(G);
 	WRITE(' ! ');
 	WRITE(L);
 	WRITE(' !
@@ -66,21 +66,21 @@ begin {L62010}
 !  z e r n o     ( tonn  ) !');
 	WRITE(N3);
 	WRITE(' ! ');
-	WRITE(J);
+	WRITE(I);
 	WRITE(' ! ');
 	WRITE(N);
 	WRITE(' !
 !  r a b o ~ i e ( ~elow ) !');
 	WRITE(N4);
 	WRITE(' ! ');
-	WRITE(K);
+	WRITE(J);
 	WRITE(' ! ');
 	WRITE(O);
 	WRITE(' !
 !  g w a r d i q ( soldat) !');
 	WRITE(N5);
 	WRITE(' ! ');
-	WRITE(L);
+	WRITE(K);
 	WRITE(' ! ');
 	WRITE(P);
 	WRITELN(' !
