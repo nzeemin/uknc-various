@@ -30,7 +30,7 @@ type
 	end;
 
 var
-	VAR00: array[0..255] of CHSTATE;
+	VAR00: array[0..15] of CHSTATE;
 	VAR20: array[1..24] of RECA14;
 	VAR400: integer;
 
@@ -65,11 +65,11 @@ begin
 	end;
 end;
 
-procedure L01304(var SP04: integer; SP02: CHSTATE; SP06: PRECF);
+procedure L01304(var SP06: RECF; var SP04: integer; SP02: CHSTATE);
 begin
 	if VAR00[SP04] <> CHST0 then begin
 	end else begin
-		with SP06^ do begin
+		with SP06 do begin
 			RF04 := SP04;
 			RF02 := 0;
 			RF02 := 0;
@@ -123,21 +123,54 @@ begin
 	end;
 end;
 
-procedure L02020(var SP16: integer; SP20: PRECF);
+procedure L02020(var SP20: RECF; SP16: integer);
 var SP00: array[0..5] of integer;
 begin
-	with SP20^ do begin
+	with SP20 do begin
 		if VAR00[RF04] = CHST2 then begin
 			RF10[RF1010] := CHR(16);
 			RF1010 := RF1010 + 1;
 			if RF1010 > 512 then begin
 				RF02 := 0;
 				RF00 := false;
-				{TODO}
+				{$C
+					MOV SP, R0
+					ADD #0, R0
+					MOV R3, R1
+					ADD #8, R1
+					MOV #2304, (R0)
+					MOVB 4(R3), (R0)
+					MOV 6(R3), 2(R0)
+					MOV R1, 4(R0)
+					MOV #256, 6(R0)
+					CLR 8(R0)
+					EMT 253
+					BHIS L02250
+					MOVB @#52, R0
+					MOV R0, 2(R3)
+					BNE L02250
+					INC	0(R3)
+				L02250:
+				}
+				RF06 := RF06 + 1;
+				RF1010 := 1;
 			end;
-			{TODO}
 		end;
-		{TODO}
+	end;
+end;
+
+procedure L02276(var SP02: RECF);
+begin
+	with SP02 do begin
+		if VAR00[RF04] = CHST0 then begin
+		end else begin
+			if VAR00[RF04] = CHST2 then begin
+				while RF1010 <> 1 do begin
+					L02020(SP02, 0);
+				end;
+				VAR00[RF04] := CHST0;
+			end;
+		end;
 	end;
 end;
 
