@@ -1,4 +1,4 @@
-PROGRAM DECOBJ;
+{$E+}
 {$S+}
 
 type
@@ -9,24 +9,6 @@ type
 		RA10: integer;	{ index in VAR3712 }
 		RA12: integer;
 	end;
-
-	RECE = record
-		RE00: char;
-		RE02: array [1..6] of char;
-		RE10: char;
-		RE12: set of char;
-		RE22: integer;
-		RE24: integer;
-		RE26: integer;
-		RE30: integer;
-		RE32: integer;
-		RE34: integer;
-		RE36: char;
-		RE40: integer;
-		RE42: integer;
-		RE44: integer;
-		RE46: integer;
-	END;
 
 	RECF = record
 		RF00: boolean; {ERROR}
@@ -51,11 +33,6 @@ var
 	VAR00: array[0..15] of CHSTATE;
 	VAR20: array[1..24] of RECA14;
 	VAR400: integer;
-	VAR402: RECF;
-	VAR1414: RECF;
-	VAR2426: boolean;
-	VAR2436: RECE;
-	VAR2506: RECE;
 
 procedure L01000; external;
 procedure L01304(var SP06: RECF; var SP04: integer; SP02: CHSTATE); external;
@@ -63,12 +40,13 @@ procedure L01522(var SP16: integer; SP20: PRECF); external;
 procedure L02020(var SP20: RECF; SP16: integer); external;
 procedure L02276(var SP02: RECF); external;
 
-function L02554: integer; external;
-procedure L03004; external;
+function L02554: integer;
+var LOC:array[0..7] of integer;
+begin
+	{TODO}
+end;
 
-BEGIN
-
-	{$C
-		.BLKW 9520 }
-	WRITE('?DEC-I-LABELS USED : ');
-END.
+procedure L03004;
+begin
+	{TODO}
+end;
