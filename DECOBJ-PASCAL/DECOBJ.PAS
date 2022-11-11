@@ -58,12 +58,12 @@ var
 	VAR2506: RECE;
 
 procedure L01000; external;
-procedure L01304(var SP06: RECF; var SP04: integer; SP02: CHSTATE); external;
-procedure L01522(var SP16: integer; SP20: PRECF); external;
-procedure L02020(var SP20: RECF; SP16: integer); external;
-procedure L02276(var SP02: RECF); external;
+procedure L01304(var RECIO: RECF; var CHN: integer; CHS: CHSTATE); external;
+procedure L01522(var RECIO: RECF; var VAL: integer); external;
+procedure L02020(var RECIO: RECF; VAL: char); external;
+procedure L02276(var RECIO: RECF); external;
 
-function L02554: integer; external;
+{function L02554: integer; external;}
 procedure L03004; external;
 
 BEGIN
