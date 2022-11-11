@@ -48,7 +48,7 @@ type
 
 	RECG = record
 		RG00: integer; {SIZE OF DATA}
-		RG02: integer; {IDENTIFICATION CODE}
+		RG02: IDNCOD; {IDENTIFICATION CODE}
 		RG04: array [1..256] of integer;
 		RG1004: integer; {CHECKSUM}
 		RG1006: integer; {POINTER TO RG04}
@@ -57,7 +57,7 @@ type
 
 var
 	VAR00: array[0..15] of CHSTATE;
-	VAR20: array[1..24] of RECA14;
+	VAR20: array[1..20] of RECA14;
 	VAR400: integer;
 	VAR402: RECG;
 	VAR1414: RECG;
@@ -100,7 +100,8 @@ begin {L03004}
 		I := L02714;
 		RG00 := I - 6;
 		RG04[1] := L02714;
-		RG02 := RG04[1];
+		{$C
+			MOV 4(R3), 2(R3) } {RG02 := RG04[1];}
 		for I := 1 to RG00 do begin
 			RG04[I] := L02554;
 		end;
@@ -284,18 +285,19 @@ end;
 
 procedure L06772(var RECIO: RECF);
 begin
-	with VAR402 do
-		with VAR2436 do
+	with VAR402 do begin
+		with VAR2436 do begin
 			if VAR2426 and RG1010 then begin
 				RE00 := RLD;
 				VAR2426 := false;
 			end else begin
 				while RG1010 do begin
 					VAR402 := VAR1414;
-					if RG02 <> ORD(ENDMOD) then
+					if RG02 <> ENDMOD then
 						L03004(RECIO, VAR1414);
 				end;
-				{RE00 := RG02;
+				{$C
+					MOVB 2(3), @%2 } {RE00 := RG02;}
 				case RG02 of
 					GSD: L05306(VAR402,VAR2436);
 					ENDGSD: begin
@@ -333,13 +335,36 @@ begin
 							end;
 						end;
 					end;
-					RLD: if VAR2426 then
-						VAR2426 := false
-					else
-						L05740(VAR402,VAR2436);
+					RLD:
+						if VAR2426 then
+							VAR2426 := false
+						else
+							L05740(VAR402,VAR2436);
 					ENDMOD:
-				end;}
-    		end;
+				end;
+			end;
+		end;
+	end;
 end;
 
-{TODO}
+procedure L10104(var RECIO: RECF);
+begin
+	L06772(RECIO);
+	VAR2506.RE00 := VAR2556.RE00;
+	VAR2506.RE02 := VAR2556.RE02;
+	VAR2506.RE10 := VAR2556.RE10;
+	VAR2506.RE12 := VAR2556.RE12;
+	VAR2506.RE22 := VAR2556.RE22;
+	VAR2506.RE24 := VAR2556.RE24;
+	VAR2506.RE26 := VAR2556.RE26;
+	VAR2506.RE30 := VAR2556.RE30;
+	VAR2506.RE32 := VAR2556.RE32;
+	VAR2506.RE34 := VAR2556.RE34;
+	VAR2506.RE36 := VAR2556.RE36;
+	VAR2506.RE40 := VAR2556.RE40;
+	VAR2506.RE42 := VAR2556.RE42;
+	VAR2506.RE44 := VAR2556.RE44;
+	VAR2506.RE46 := VAR2556.RE46;
+	VAR2556 := VAR2626;
+	VAR2626 := VAR2436;
+end;
