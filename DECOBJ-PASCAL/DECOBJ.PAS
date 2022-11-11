@@ -69,6 +69,6 @@ procedure L03004; external;
 BEGIN
 
 	{$C
-		.BLKW 9520 }
+		.BLKW 9168 }
 	WRITE('?DEC-I-LABELS USED : ');
 END.
