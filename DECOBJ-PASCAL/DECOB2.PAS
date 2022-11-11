@@ -56,13 +56,13 @@ type
 	end;
 
 var
-	VAR00: array[0..15] of CHSTATE;
-	VAR20: array[1..20] of RECA14;
+	VAR00: array [0..15] of CHSTATE;
+	VAR20: array [1..20] of RECA14;
 	VAR400: integer;
 	VAR402: RECG;
 	VAR1414: RECG;
 	VAR2426: boolean;
-
+	GAP0: array [1..3] of integer;
 	VAR2436: RECE50;
 	VAR2506: RECE50;
 	VAR2556: RECE50;
