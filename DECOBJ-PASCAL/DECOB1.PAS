@@ -26,10 +26,10 @@ begin
 	end;
 	{$C
 		MOV	SP, R2
-		ADD	#0, R2
+		ADD	#DEVSPC, R2
 		MOV	SP, R3
-		ADD	#78, R3
-		MOV	#^ROBJ, (R3)
+		ADD	#DEFEXT, R3
+		MOV	#^ROBJ, @R3
 		MOV	#^RMAC, 2(R3)
 		.MCALL .RCTRLO
 		.RCTRLO
@@ -46,7 +46,7 @@ begin
 	end;
 end;
 
-procedure L01304(var RECIO: RECF; var CHN: integer; CHS: CHSTATE);
+procedure L01304(var RECIO: RECF; CHN: integer; CHS: CHSTATE);
 begin
 	if VAR00[CHN] <> CHST00 then begin
 	end else begin
@@ -56,7 +56,7 @@ begin
 			RF02 := 0;
 			if CHS = CHST01 then begin
 				RF06 := -1;
-				RF1010 := 1;
+				RF1010 := 512;
 			end else if CHS = CHST02 then begin
 				RF06 := 0;
 				RF1010 := 1;
@@ -77,16 +77,16 @@ begin
 				RF00 := false;
 				{$C
 					MOV SP, R0
-					ADD #0, R0
+					ADD #AREA, R0
 					MOV R3, R1
-					ADD #8, R1
+					ADD #RF10, R1
 					.MCALL .READW
-					.READW R0,4(R3),R1,#256,6(R3)
+					.READW R0,RF04(R3),R1,#256,RF06(R3)
 					BCC L01716
 					MOVB @#52, R0
-					MOV	R0, 2(R3)
+					MOV R0, RF02(R3)
 					BNE L01716
-					INC	0(R3)
+					INC RF00(R3)
 				L01716:
 				}
 				RF1010 := 0;
@@ -111,16 +111,16 @@ begin
 				RF00 := false;
 				{$C
 					MOV SP, R0
-					ADD #0, R0
+					ADD #AREA, R0
 					MOV R3, R1
-					ADD #8, R1
+					ADD #RF10, R1
 					.MCALL .WRITW
-					.WRITW R0,4(R3),R1,#256,6(R3)
+					.WRITW R0,RF04(R3),R1,#256,RF06(R3)
 					BCC L02250
 					MOVB @#52, R0
-					MOV R0, 2(R3)
+					MOV R0, RF02(R3)
 					BNE L02250
-					INC	0(R3)
+					INC RF00(R3)
 				L02250:
 				}
 				RF06 := RF06 + 1;

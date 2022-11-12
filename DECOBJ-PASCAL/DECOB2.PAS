@@ -69,7 +69,7 @@ var
 	VAR2626: RECE50;
 
 procedure L01000; external;
-procedure L01304(var RECIO: RECF; var CHN: integer; CHS: CHSTATE); external;
+procedure L01304(var RECIO: RECF; CHN: integer; CHS: CHSTATE); external;
 procedure L01522(var RECIO: RECF; var VAL: integer); external;
 procedure L02020(var RECIO: RECF; VAL: char); external;
 procedure L02276(var RECIO: RECF); external;
@@ -177,12 +177,12 @@ begin
 	J := R50NUM1;
 	for I := 3 downto 1 do begin
 		R50STR[I] := L04222(J MOD 40);
-		J:=J DIV 50;
+		J:=J DIV 40;
 	end;
 	J := R50NUM2;
 	for I := 6 downto 4 do begin
 		R50STR[I] := L04222(J MOD 40);
-		J := J DIV 50;
+		J := J DIV 40;
 	end;
 end;
 
