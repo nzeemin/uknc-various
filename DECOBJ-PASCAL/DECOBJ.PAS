@@ -1115,6 +1115,11 @@ end;
 
 {TODO}
 
+procedure L35532;
+begin
+	{TODO}
+end;
+
 procedure L37004(STR: STR6; VAL: integer);
 begin
 	{TODO}
@@ -1123,7 +1128,7 @@ end;
 procedure GAP0;
 begin
 {$C
-			.BLKW 1116 }
+			.BLKW 1113 }
 end;
 
 BEGIN {L37702}
@@ -1308,14 +1313,40 @@ BEGIN {L37702}
 								L10516;
 							end;
 						end;
-						{TODO}
 					end;
 					TXT: begin
 						L16656;
-						{TODO L44134}
+						if VAR2506.RE30 = VAR53410 then begin
+							L10516;
+							L10562('.ERROR');
+							L10442(' ');
+							L11032(VAR53410);
+							L10562(' ; BAD');
+							L10562(' LOCTN');
+							L10516;
+							L37004(VAR53402, VAR2506.RE30);
+						end;
+						if ((VAR53410 and 1) = 0) and not (VAR2506.RE26 = 0) or
+						   (VAR53414 <> [VS2]) and not (VS7 in VAR53414) and
+							 not (VS10 in VAR53414) and not (VAR53410 + 1 <> VAR53424) then begin
+							L30060;
+						end else begin {L44610}
+							L35532;
+						end;
 					end;
 					RLD: begin
-						{TODO L44620}
+						case VAR2506.RE36 of
+							RLDLCD:
+								L37004(VAR2506.RE02, VAR2506.RE44);
+								{TODO L44710}
+							RLDLCM:
+								{TODO L45126} ;
+							RLDLIM, RLDPR, RLD13:
+								{TODO L46122} ;
+							RLDIR, RLDGR, RLDIDR, RLDGDR, RLDGAR, RLDGADR,
+							RLDPDR, RLDPAR, RLDPADR, RLDCR:
+								{TODO L45666} ;
+						end;
 					end;
 					ENDMOD: begin
 						{TODO L46170}
@@ -1328,7 +1359,12 @@ BEGIN {L37702}
 						WRITE('?DEC-I-MRKED INSTR : '); {L46610}
 						WRITELN(VAR53426);
 						WRITE('?DEC-I-MKD NO INST : ');
-						{TODO}
+						WRITELN(VAR53430);
+						L10516;
+						L10544;
+						L10562('.END\ ');
+						L10544;
+						{TODO L46744}
 					end;
 				end;
 				{TODO L47142}
@@ -1337,7 +1373,7 @@ BEGIN {L37702}
 		{TODO}
 
 		{$C
-			.BLKW 732 }
+			.BLKW 484 }
 
 	end until false;
 END.
