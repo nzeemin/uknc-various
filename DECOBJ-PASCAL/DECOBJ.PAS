@@ -994,9 +994,61 @@ BEGIN {L37702}
 								if VAR2506.RE02 = '. ABS.' then begin
 									L10516;
 									L10544;
-									{TODO L42270}
+									L10562('.ASECT');
+									L10544;
+									L10544;
+									L10516;
+									if VAR2506.RE22 <> 0 then begin
+										L10544;
+										L10562('.BLKB\');
+										L10544;
+										L11032(VAR2506.RE22);
+										L10516;
+									end;
+									VAR53402 := '. ABS.';
+									VAR53410 := VAR2506.RE22;
 								end else begin
-									{TODO L42444}
+									L12262(VAR2506.RE02);
+									VAR3712[VAR4370].RB06 := VAR2506.RE22;
+									L10516;
+									L10544;
+									if (VAR2506.RE12 = VAR53462) or ((VAR2506.RE02 = '      ') and (VAR2506.RE12 = VAR53472)) then begin
+										L10562('.CSECT');
+										L10544;
+										L11602(VAR2506.RE02);
+									end else begin
+										L10562('.PSECT');
+										L10544;
+										L11602(VAR2506.RE02);
+										if VAR2506.RE12 = VAR53472 then begin
+											if not (BIT4 in VAR2506.RE12) then begin
+												L10562(', RO\ ');
+											end else begin
+											end;
+											if not (BIT7 in VAR2506.RE12) then begin
+												L10562(', D\  ');
+											end else begin
+											end;
+											if not (BIT2 in VAR2506.RE12) then begin
+												L10562(', OVR\');
+											end else begin
+											end;
+											if not (BIT5 in VAR2506.RE12) then begin
+											end else begin
+												L10562(', ABS\');
+											end;
+											if not (BIT6 in VAR2506.RE12) then begin
+												L10562(', GBL\');
+											end else begin
+											end;
+											L10516;
+											VAR53402 := VAR2506.RE02;
+											VAR53410 := 0;
+											{TODO L43570}
+										end;
+										{TODO}
+									end;
+									{TODO L43536}
 								end;
 								{TODO L43764}
 							end;
@@ -1022,7 +1074,7 @@ BEGIN {L37702}
 		{TODO}
 
 		{$C
-			.BLKW 1392 }
+			.BLKW 998 }
 		WRITE('?DEC-I-LABELS USED : ');
 		WRITE('?DEC-I-MRKED INSTR : ');
 		WRITE('?DEC-I-MKD NO INST : ');
