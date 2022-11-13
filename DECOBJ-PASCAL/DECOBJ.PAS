@@ -15,7 +15,7 @@ type
 	RECA14 = record
 		RA00: integer;
 		RA02: STR6;
-		RA10: integer;	{ index in VAR3712 }
+		RA10: integer;	{INDEX IN VAR3712}
 		RA12: integer;
 	end;
 
@@ -112,7 +112,7 @@ var
 	VAR53424: UINT;
 	VAR53426: integer; {MRKEDINSTR}
 	VAR53430: integer;
-	VAR53432: integer;
+	VAR53432: UINT;
 	VAR53434: UINT;
 	VAR53436: TYPCOM;
 	VAR53440: STR6;
@@ -875,6 +875,246 @@ TBEND:
 }
 end;
 
+procedure L30060;
+var LOC00,LOC02,LOC04,LOC06,LOC10,LOC12,LOC14: integer; LOC16,LOC17: boolean;
+
+ function L25600(REC: RECE50): boolean;
+ begin
+  with REC do
+   L25600:=((RE00=TXT) or (RE00=RLD) and (RE36 in [RLDLCD,RLDLCM,RLDLIM])) and (RE26=0);
+ end;
+
+ function L26010(REC: RECE50): boolean;
+ begin
+  with REC do
+   L26010:=(RE00=TXT) and (RE26=0) and ((RE34 and 1)<>0);
+ end;
+
+ procedure L26156(VAL: UINT);
+ var I: integer;
+ begin
+  I:=VAL DIV 8;
+  LOC00:=(I DIV 2)*2;
+  LOC02:=I and 1;
+  LOC04:=VAL and 7;
+  VAR52356:=[VS2];
+  if VAL=27B then
+   VAR52356:=[VS1];
+ end;
+
+ procedure L26426;
+ begin
+  L26156(VAR53432 and 77B);
+ end;
+
+ procedure L26502;
+ begin
+  L26156((VAR53432 DIV 100B) and 77B);
+  LOC10:=LOC00;
+  LOC12:=LOC02;
+  LOC14:=LOC04;
+ end;
+
+ procedure L27360;
+
+  procedure L26624;
+  begin
+   if LOC04=7 then
+    L10562('PC\   ')
+   else
+    if LOC04=6 then
+     L10562('SP\   ')
+    else
+     begin
+      L10442('R');
+      L11032(LOC04);
+     end;
+  end;
+
+  procedure L27042;
+  begin
+   L10442('(');
+   L26624;
+   L10442(')');
+  end;
+
+  procedure L27122;
+  begin
+   L10104(VAR52366);
+   if ((VAR2506.RE00=TXT) and (LOC00=6) and (LOC04=7)) then
+    L15350(VAR53402,VAR53410+2+VAR2506.RE34)
+   else
+    L22640;
+   VAR53410:=VAR53410+2;
+  end;
+
+ begin
+  if LOC02<>0 then
+   L10442('@');
+  if ((LOC04=7) and ((LOC00=2) or (LOC00=6)) and L25600(VAR2556)) then
+   case LOC00 of
+    2: begin
+        L10442('#');
+        L27122;
+       end;
+    6: L27122;
+   end
+  else
+   case LOC00 of
+    0: L26624;
+    2: begin
+        L27042;
+        L10442('+');
+       end;
+    4: begin
+        L10442('-');
+        L27042;
+       end;
+    6: begin
+        L27122;
+        L27042;
+       end;
+   end
+ end;
+
+begin
+ L23736;
+ VAR53410:=VAR53410+2;
+ L26502;
+ L26426;
+ if VAR53436=TY12 then
+  begin
+   if LOC12=0 then
+    if LOC10=0 then
+     if LOC04=LOC14 then
+      if ((LOC00=2) or (LOC00=4)) then
+       VAR53436:=TY15;
+   if ((LOC14=7) and ((LOC10 and 3)=0)) then
+    VAR53436:=TY15;
+   if ((LOC04=7) and ((LOC00 and 3)=0)) then
+    VAR53436:=TY15;
+   LOC16:=(LOC10=6) or (LOC10=2) and (LOC14=7);
+   LOC17:=(LOC00=6) or (LOC00=2) and (LOC04=7);
+   if LOC16 or LOC17 then
+    begin
+     if not L25600(VAR2556) then
+      VAR53436:=TY15;
+     if LOC16 and LOC17 then
+      if not L25600(VAR2626) then
+       VAR53436:=TY15;
+    end;
+   if ((010000B<=VAR53434) and (VAR53434<070000B)) then
+    begin
+     if ((LOC10=6) or (not LOC16) and (LOC00=6)) then
+      if L26010(VAR2556) then
+       VAR53436:=TY15;
+     if (LOC00=6) and LOC16 then
+      if L26010(VAR2626) then
+       VAR53436:=TY15;
+    end;
+  end;
+ if VAR53434=071000B then
+  if (LOC14 and 1)<>0 then
+   VAR53436:=TY15;
+ if ((VAR53434=000100B) or (VAR53434=004000B)) then
+  if ((LOC02=0) and (LOC00<=2)) then
+   VAR53436:=TY15;
+ if VAR53436 in [TY01,TY06,TY07] then
+  begin
+   if ((LOC04=7) and ((LOC00 and 3)=0)) then
+    VAR53436:=TY15;
+   if LOC00=6 then
+    if not L25600(VAR2556) then
+     VAR53436:=TY15;
+  end;
+ if VAR53436=TY15 then
+  begin
+   L16470;
+   L10544;
+   L10442(' ');
+   L22640;
+  end
+ else
+  if VAR53436=TY14 then
+   begin
+    L10544;
+    L10442(' ');
+    L11032(VAR53432);
+   end
+  else
+   begin
+    L10544;
+    L11602(VAR53440);
+    if VAR53434=000207B then
+     L10562('RN\   ');
+    L10544;
+    case VAR53436 of
+     TY02: begin
+            L26426;
+            LOC00:=0;
+            LOC02:=0;
+            L27360;
+           end;
+     TY01: begin
+            L26426;
+            if VAR53434=000100B then
+             VAR52356:=[VS4];
+            if VAR53434=004700B then
+             VAR52356:=[VS3];
+            L27360;
+           end;
+     TY06: begin
+            L26502;
+            LOC00:=0;
+            LOC02:=0;
+            L27360;
+            L10562(', \   ');
+            L26426;
+            if VAR53434=004000B then
+             VAR52356:=[VS3];
+            L27360;
+           end;
+     TY07: begin
+            L26426;
+            L27360;
+            L10562(', \   ');
+            L26502;
+            LOC00:=0;
+            LOC02:=0;
+            L27360;
+           end;
+     TY12: begin
+            L26502;
+            L27360;
+            L10562(', \   ');
+            L26426;
+            L27360;
+           end;
+     TY05: begin
+            LOC06:=VAR53432 and 377B;
+            if LOC06>=128 then
+             LOC06:=LOC06-256;
+            VAR52356:=[VS5];
+            L15350(VAR53402,LOC14*2+VAR53410);
+           end;
+     TY13: begin
+            L26502;
+            LOC00:=0;
+            LOC02:=0;
+            L27360;
+            L10562(', \   ');
+            LOC06:=VAR53432 and 77B;
+            VAR52356:=[VS5];
+            L15350(VAR53402,VAR53410-LOC14*2);
+           end;
+     TY10: L11032(L05122(VAR53432));
+    end;
+   end;
+ L10516;
+end;
+
+{TODO}
+
 procedure L37004(STR: STR6; VAL: integer);
 begin
 	{TODO}
@@ -883,7 +1123,7 @@ end;
 procedure GAP0;
 begin
 {$C
-			.BLKW 2591 }
+			.BLKW 1116 }
 end;
 
 BEGIN {L37702}
@@ -1044,28 +1284,51 @@ BEGIN {L37702}
 											L10516;
 											VAR53402 := VAR2506.RE02;
 											VAR53410 := 0;
-											{TODO L43570}
+											L15214(VAR2506.RE02, 0);
+											L10442(':');
+											if VAR2506.RE22 = VAR3712[VAR4370].RB12 then begin
+												L10544;
+												L10562('.BLKB\');
+												L10544;
+												L11032(VAR2506.RE22);
+												VAR53410 := VAR2506.RE22;
+											end;
 										end;
-										{TODO}
+										L10516;
 									end;
-									{TODO L43536}
 								end;
-								{TODO L43764}
 							end;
 							GSDPVI: begin {L43770}
-								{TODO L43770}
+								L10544;
+								L10562('.IDENT');
+								L10544;
+								L10442('/');
+								L10562(VAR2506.RE02);
+								L10442('/');
+								L10516;
 							end;
 						end;
 						{TODO}
 					end;
 					TXT: begin
-						{TODO L44130}
+						L16656;
+						{TODO L44134}
 					end;
 					RLD: begin
 						{TODO L44620}
 					end;
 					ENDMOD: begin
 						{TODO L46170}
+						WRITE('?DEC-I-LABELS USED : '); {L46204}
+						WRITELN(VAR52346);
+						if not L13314('. ABS.', 0) then begin
+							{TODO L46302}
+						end;
+						{TODO}
+						WRITE('?DEC-I-MRKED INSTR : '); {L46610}
+						WRITELN(VAR53426);
+						WRITE('?DEC-I-MKD NO INST : ');
+						{TODO}
 					end;
 				end;
 				{TODO L47142}
@@ -1074,10 +1337,7 @@ BEGIN {L37702}
 		{TODO}
 
 		{$C
-			.BLKW 998 }
-		WRITE('?DEC-I-LABELS USED : ');
-		WRITE('?DEC-I-MRKED INSTR : ');
-		WRITE('?DEC-I-MKD NO INST : ');
+			.BLKW 732 }
 
 	end until false;
 END.
