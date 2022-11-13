@@ -43,7 +43,7 @@ type
 
 	RECE50 = record
 		RE00: IDNCOD; {IDENTIFICATION CODE}
-		RE02: STR6;
+		RE02: STR6;  {SYMBOL NAME}
 		RE10: GSDENT;   {ENTRY TYPE GSD}
 		RE12: set of BITS; {FLAGS}
 		RE22: integer;  {VALUE OF GSD DATA BLOCK}
@@ -86,7 +86,7 @@ var
 	VAR2426: boolean;
 	VAR2430: STR6;
 	VAR2436: RECE50;
-	VAR2506: RECE50; {RE02 = module name}
+	VAR2506: RECE50;
 	VAR2556: RECE50;
 	VAR2626: RECE50;
 	VAR2676: integer;
@@ -584,10 +584,10 @@ end;
 
 procedure L22640;
 
- function L22542(VAL: UINT): boolean;
- begin
-  L22542:=((32<=VAL) and (VAL<=95));
- end;
+function L22542(VAL: UINT): boolean;
+begin
+	L22542 := ((32 <= VAL) and (VAL <= 95));
+end;
 
 begin
  case VAR2506.RE00 of
@@ -875,10 +875,15 @@ TBEND:
 }
 end;
 
+procedure L37004(STR: STR6; VAL: integer);
+begin
+	{TODO}
+end;
+
 procedure GAP0;
 begin
 {$C
-			.BLKW 2598 }
+			.BLKW 2591 }
 end;
 
 BEGIN {L37702}
@@ -933,13 +938,67 @@ BEGIN {L37702}
 								L10516;
 							end;
 							GSDTA: begin {L41004}
-								{TODO L41004}
+								VAR53446 := VAR2506.RE02;
+								VAR53454 := VAR2506.RE22;
 							end;
 							GSDGSN: begin {L41040}
-								{TODO L41040}
+								if BIT3 IN VAR2506.RE12 then begin
+									if VAR53456 = 0 then begin {L41104}
+										L10544;
+										L10562('.GLOBL');
+										L10544;
+										L11602(VAR2506.RE02);
+										VAR53456 := 1;
+									end else begin
+										L10442(',');
+										L10544;
+										L11602(VAR2506.RE02);
+										VAR53456 := VAR53456 + 1;
+									end;
+									if VAR53456 >= 6 then begin
+										L10516;
+										VAR53456 := 0;
+									end;
+								end else begin
+									case VAR2676 of {L41276}
+										0: {L41334}
+											if VAR53402 <> '. ABS.' then begin
+												L13120(VAR2506.RE02, VAR53402, VAR2506.RE22);
+												if VAR7202 <> 0 then begin
+													VAR52356 := [VS0];
+													if VAR2506.RE22 and 1 <> 0 then begin
+														VAR52356 := VAR52356 + [VS2];
+													end;
+													L13666(VAR53402, VAR2506.RE22);
+													if L13314(VAR53402, VAR2506.RE22) then
+														VAR7204[VAR52350].RD20 := VAR7202;
+												end;
+											end;
+										2: {L41736}
+											if VAR53402 = '. ABS.' then begin {L41772}
+												L12056(VAR2506.RE02, 0);
+												L10562(' == \ ');
+												L11032(VAR2506.RE22);
+												L10516;
+											end else begin {L42066}
+												if ORD(not L13314(VAR53402, VAR2506.RE22)) <> 0 then begin
+													L37004(VAR53402, VAR2506.RE22);
+													L16656;
+												end else begin
+												end;
+											end;
+									end;
+								end;
 							end;
 							GSDPSN: begin {L42224}
-								{TODO L42224}
+								if VAR2506.RE02 = '. ABS.' then begin
+									L10516;
+									L10544;
+									{TODO L42270}
+								end else begin
+									{TODO L42444}
+								end;
+								{TODO L43764}
 							end;
 							GSDPVI: begin {L43770}
 								{TODO L43770}
@@ -963,7 +1022,7 @@ BEGIN {L37702}
 		{TODO}
 
 		{$C
-			.BLKW 1764 }
+			.BLKW 1392 }
 		WRITE('?DEC-I-LABELS USED : ');
 		WRITE('?DEC-I-MRKED INSTR : ');
 		WRITE('?DEC-I-MKD NO INST : ');
