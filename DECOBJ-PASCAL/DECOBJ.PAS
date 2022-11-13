@@ -904,14 +904,53 @@ BEGIN {L37702}
 			L10104(VAR52366);
 			VAR53400 := false;
 			VAR53456 := 0;
-			if not ORD(VAR53400) and 1 <> 0 then begin
+			if not ORD(VAR53400) and 1 <> 0 then
 				L10104(VAR52366);
+			VAR53400 := false;
+			if VAR53456 = 0 then begin
+				if (VAR2506.RE00 <> GSD) OR (VAR2506.RE10 <> GSDGSN) OR (BIT3 IN VAR2506.RE12) then begin
+					L10516;
+					VAR53456 := 0;
+				end;
+				case VAR2506.RE00 of
+					GSD: begin {L40500}
+						case VAR2506.RE10 of
+							GSDMN: begin {L40536}
+								L10544;
+								{TODO L40542}
+							end;
+							GSDTA: begin
+								{TODO L41004}
+							end;
+							GSDGSN: begin
+								{TODO L41040}
+							end;
+							GSDPSN: begin
+								{TODO L42224}
+							end;
+							GSDPVI: begin
+								{TODO L43770}
+							end;
+						end;
+						{TODO}
+					end;
+					TXT: begin
+						{TODO L44130}
+					end;
+					RLD: begin
+						{TODO L44620}
+					end;
+					ENDMOD: begin
+						{TODO L46170}
+					end;
+				end;
+				{TODO L47142}
 			end;
-			{TODO: L40304}
 		end;
+		{TODO}
 
 		{$C
-			.BLKW 1977 }
+			.BLKW 1863 }
 		WRITE('?DEC-I-LABELS USED : ');
 		WRITE('?DEC-I-MRKED INSTR : ');
 		WRITE('?DEC-I-MKD NO INST : ');
