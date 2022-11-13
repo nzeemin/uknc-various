@@ -86,7 +86,7 @@ var
 	VAR2426: boolean;
 	VAR2430: STR6;
 	VAR2436: RECE50;
-	VAR2506: RECE50;
+	VAR2506: RECE50; {RE02 = module name}
 	VAR2556: RECE50;
 	VAR2626: RECE50;
 	VAR2676: integer;
@@ -154,14 +154,13 @@ end;
 procedure L10562(STR: STR6);
 var I: integer;
 begin
- I:=1;
- while ((I<6) and (STR[I]<>'\')) do
-  begin
-   L10442(STR[I]);
-   I:=I+1;
-   if ((I=6) and (STR[6]<>'\')) then
-    L10442(STR[6]);
-  end;
+	I := 1;
+	while ((I<6) and (STR[I] <> '\')) do begin
+		L10442(STR[I]);
+		I := I + 1;
+		if ((I = 6) and (STR[6] <> '\')) then
+			L10442(STR[6]);
+	end;
 end;
 
 procedure L11032(VAL: UINT);
@@ -917,18 +916,32 @@ BEGIN {L37702}
 						case VAR2506.RE10 of
 							GSDMN: begin {L40536}
 								L10544;
-								{TODO L40542}
+								L10562('.ENABL');
+								L10544;
+								L10562('LC\   ');
+								L10516;
+								L10544;
+								L10562('.NLIST');
+								L10544;
+								L10562('BEX\  ');
+								L10516;
+								L10516;
+								L10544;
+								L10562('.TITLE');
+								L10544;
+								L10562(VAR2506.RE02);
+								L10516;
 							end;
-							GSDTA: begin
+							GSDTA: begin {L41004}
 								{TODO L41004}
 							end;
-							GSDGSN: begin
+							GSDGSN: begin {L41040}
 								{TODO L41040}
 							end;
-							GSDPSN: begin
+							GSDPSN: begin {L42224}
 								{TODO L42224}
 							end;
-							GSDPVI: begin
+							GSDPVI: begin {L43770}
 								{TODO L43770}
 							end;
 						end;
@@ -950,7 +963,7 @@ BEGIN {L37702}
 		{TODO}
 
 		{$C
-			.BLKW 1863 }
+			.BLKW 1764 }
 		WRITE('?DEC-I-LABELS USED : ');
 		WRITE('?DEC-I-MRKED INSTR : ');
 		WRITE('?DEC-I-MKD NO INST : ');
