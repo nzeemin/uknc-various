@@ -98,7 +98,7 @@ var
 	VAR7200: integer;
 	VAR7202: integer;
 	VAR7204: array [0..1000] of RECD22;
-	VAR52346: integer;
+	VAR52346: integer; {LABELS - number of labels used}
 	VAR52350: integer;
 	VAR52352: integer;
 	VAR52354: integer;
@@ -110,7 +110,7 @@ var
 	VAR53412: integer;
 	VAR53414: set of VSET;
 	VAR53424: UINT;
-	VAR53426: integer;
+	VAR53426: integer; {MRKEDINSTR}
 	VAR53430: integer;
 	VAR53432: integer;
 	VAR53434: UINT;
@@ -636,10 +636,9 @@ begin
  end;
 end;
 
-
 procedure L23736;
 begin
- VAR53432:=VAR2506.RE34;
+	VAR53432 := VAR2506.RE34;
 {$C
 	CLR    	R1
 	MOV    	#<TBEND-TBBEG>,R0
@@ -877,9 +876,45 @@ TBEND:
 }
 end;
 
-BEGIN
+procedure GAP0;
+begin
+{$C
+			.BLKW 2598 }
+end;
 
-	{$C
-		.BLKW 4761 }
-	WRITE('?DEC-I-LABELS USED : ');
+BEGIN {L37702}
+	VAR53462 := [BIT2,BIT3,BIT5,BIT6];
+	VAR53472 := [BIT3,BIT5];
+	repeat begin
+		L01000;
+		VAR2626.RE12 := [];
+		VAR400 := 1;
+		VAR4366 := 0;
+		VAR7200 := 0;
+		L15160;
+		VAR53426 := 0;
+		VAR53430 := 0;
+		for VAR2676 := 0 to 2 do begin
+			L01304(VAR52366, 3, CHST1);
+			L01304(VAR2700, 0, CHST2);
+			VAR402.RG1010 := true;
+			VAR2426 := false;
+			L03004(VAR52366, VAR1414);
+			L10104(VAR52366);
+			L10104(VAR52366);
+			VAR53400 := false;
+			VAR53456 := 0;
+			if not ORD(VAR53400) and 1 <> 0 then begin
+				L10104(VAR52366);
+			end;
+			{TODO: L40304}
+		end;
+
+		{$C
+			.BLKW 1977 }
+		WRITE('?DEC-I-LABELS USED : ');
+		WRITE('?DEC-I-MRKED INSTR : ');
+		WRITE('?DEC-I-MKD NO INST : ');
+
+	end until false;
 END.
