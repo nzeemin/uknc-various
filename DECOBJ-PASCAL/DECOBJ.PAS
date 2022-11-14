@@ -1113,11 +1113,126 @@ begin
  L10516;
 end;
 
-{TODO}
-
 procedure L35532;
+var LOC00: array [1..60] of char; LOC74,LOC76: integer;
+    LOC100: boolean; LOC101: char; LOC102,LOC104: integer;
+
+ function L33406(VAL: UINT):boolean;
+ begin
+  L33406:=(32<=VAL) and (VAL<=127) or (VAL=7) or (VAL=9) or (VAL=13) or (VAL=10) or (VAL=12) or (VAL=128) or (VAL=0);
+ end;
+
+ procedure L33720;
+ begin
+  if LOC74>0 then
+   begin
+    L10544;
+    if ((LOC00[LOC74]<>CHR(0)) or (LOC74=1)) then
+     L10562('.ASCII')
+    else
+     begin
+      L10562('.ASCIZ');
+      LOC74:=LOC74-1;
+     end;
+    L10544;
+    LOC101:='"';
+    for LOC76:=1 to LOC74 do
+     if LOC00[LOC76]=LOC101 then
+      LOC101:='/';
+    if LOC00[1]>=' ' then
+     L10442(LOC101);
+    for LOC76:=1 to LOC74 do
+     begin
+      if LOC00[LOC76]>=' ' then
+       L10442(LOC00[LOC76])
+      else
+       begin
+        if LOC76>1 then
+         if LOC00[LOC76-1]>=' ' then
+          L10442(LOC101);
+        L10442('<');
+        LOC102:=ORD(LOC00[LOC76]);
+        if LOC102<0 then
+         LOC102:=LOC102+256;
+        L11032(LOC102);
+        L10442('>');
+        if LOC76<LOC74 then
+         if LOC00[LOC76+1]>=' ' then
+          L10442(LOC101);
+       end;
+     end;
+    if LOC00[LOC74]>=' ' then
+     L10442(LOC101);
+    L10516;
+   end;
+  LOC74:=0;
+ end;
+
+ procedure L35326(VAL: integer);
+ begin
+  LOC74:=LOC74+1;
+  LOC00[LOC74]:=CHR(VAL);
+  if ((LOC74>=60) or (VAL=0) or (VAL=128)) then
+   L33720;
+  VAR53410:=VAR53410+1;
+ end;
+
 begin
-	{TODO}
+ LOC100:=false;
+ if (VAR53410+3)<=VAR53424 then
+  if VAR2556.RE00=TXT then
+   if L33406(L05122(VAR2506.RE34)) and (L05122(VAR2506.RE34)<>0) and
+      ((VAR2506.RE26=1) or L33406(L05160(VAR2506.RE34)) and (L05160(VAR2506.RE34)<>0)) and
+      L33406(L05122(VAR2556.RE34)) then
+    begin
+     LOC74:=0;
+     L35326(L05122(VAR2506.RE34));
+     if VAR2506.RE26=0 then
+      L35326(L05160(VAR2506.RE34));
+     L10104(VAR52366);
+     repeat
+      L35326(L05122(VAR2506.RE34));
+      if VAR2506.RE26=1 then
+       L10104(VAR52366)
+      else
+       begin
+        VAR2506.RE26:=1;
+        VAR2506.RE30:=VAR2506.RE30+1;
+        VAR2506.RE34:=L05160(VAR2506.RE34);
+       end;
+     until ((VAR2506.RE00<>TXT) or (not L33406(L05122(VAR2506.RE34))) or (VAR53410>=VAR53424));
+     VAR53400:=true;
+     L33720;
+     LOC100:=true;
+    end;
+ if not LOC100 then
+  begin
+   L10544;
+   if VAR53424=(VAR53410+1) then
+    if VAR2506.RE26=0 then
+     begin
+      LOC104:=L05160(VAR2506.RE34);
+      VAR2506.RE34:=L05122(VAR2506.RE34);
+      VAR2506.RE26:=1;
+      VAR53400:=true;
+     end;
+   if VAR2506.RE26=0 then
+    L10442(' ')
+   else
+    begin
+     L10562('.BYTE\');
+     L10544;
+     L16470;
+    end;
+   L22640;
+   L10516;
+   VAR53410:=2-VAR2506.RE26+VAR53410;
+   if VAR53400 then
+    begin
+     VAR2506.RE30:=VAR2506.RE30+1;
+     VAR2506.RE34:=LOC104;
+    end;
+  end;
 end;
 
 procedure L37004(STR: STR6; VAL: integer);
@@ -1128,7 +1243,7 @@ end;
 procedure GAP0;
 begin
 {$C
-			.BLKW 1113 }
+			.BLKW 213 }
 end;
 
 BEGIN {L37702}
@@ -1336,9 +1451,19 @@ BEGIN {L37702}
 					end;
 					RLD: begin
 						case VAR2506.RE36 of
-							RLDLCD:
+							RLDLCD: begin
 								L37004(VAR2506.RE02, VAR2506.RE44);
-								{TODO L44710}
+								L15034(VAR53402, VAR53410);
+								L12262(VAR53402);
+								with VAR7204[VAR52350] do begin
+									if RD04 = VAR4370 then
+										VAR53424 := RD06
+									else
+										VAR53424 := -1;
+								end;
+								VAR53412 := 0;
+								VAR53414 := [];
+							end;
 							RLDLCM:
 								{TODO L45126} ;
 							RLDLIM, RLDPR, RLD13:
@@ -1373,7 +1498,7 @@ BEGIN {L37702}
 		{TODO}
 
 		{$C
-			.BLKW 484 }
+			.BLKW 411 }
 
 	end until false;
 END.
