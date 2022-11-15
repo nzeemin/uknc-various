@@ -1401,7 +1401,7 @@ BEGIN {L37702}
                       L10562('.PSECT');
                       L10544;
                       L11602(VAR2506.RE02);
-                      if VAR2506.RE12 = VAR53472 then begin
+                      if VAR2506.RE12 <> VAR53472 then begin
                         if (BIT4 in VAR2506.RE12) then begin
                           L10562(', RO\ ');
                         end else begin
@@ -1422,21 +1422,21 @@ BEGIN {L37702}
                           L10562(', GBL\');
                         end else begin
                         end;
-                        L10516;
-                        VAR53402 := VAR2506.RE02;
-                        VAR53410 := 0;
-                        L15214(VAR2506.RE02, 0);
-                        L10442(':');
-                        if VAR2506.RE22 = VAR3712[VAR4370].RB12 then begin
-                          L10544;
-                          L10562('.BLKB\');
-                          L10544;
-                          L11032(VAR2506.RE22);
-                          VAR53410 := VAR2506.RE22;
-                        end;
                       end;
-                      L10516;
                     end;
+                    L10516;
+                    VAR53402 := VAR2506.RE02;
+                    VAR53410 := 0;
+                    L15214(VAR2506.RE02, 0);
+                    L10442(':');
+                    if VAR2506.RE22 <> VAR3712[VAR4370].RB12 then begin
+                      L10544;
+                      L10562('.BLKB\');
+                      L10544;
+                      L11032(VAR2506.RE22);
+                      VAR53410 := VAR2506.RE22;
+                    end;
+                    L10516;
                   end;
                 end;
                 GSDPVI: begin {L43770}
@@ -1452,7 +1452,7 @@ BEGIN {L37702}
             end;
             TXT: begin
               L16656;
-              if VAR2506.RE30 = VAR53410 then begin
+              if VAR2506.RE30 <> VAR53410 then begin
                 L10516;
                 L10562('.ERROR');
                 L10442(' ');
@@ -1462,7 +1462,7 @@ BEGIN {L37702}
                 L10516;
                 L37004(VAR53402, VAR2506.RE30);
               end;
-              if ((VAR53410 and 1) = 0) and not (VAR2506.RE26 = 0) or
+              if ((VAR53410 and 1) = 0) and (VAR2506.RE26 = 0) or
                 (VAR53414 <> [VS2]) and not (VS7 in VAR53414) and
                 not (VS10 in VAR53414) and not (VAR53410 + 1 <> VAR53424) then begin
                 L30060;
@@ -1487,7 +1487,7 @@ BEGIN {L37702}
                 end;
                 RLDLCM: begin {L45126}
                   L16656;
-                  if VAR2506.RE44 < VAR53424 then
+                  if VAR2506.RE44 <= VAR53424 then
                     VAR53460 := VAR2506.RE44 - VAR53410
                   else begin
                     VAR53460 := VAR53424 - VAR53410;
@@ -1540,8 +1540,9 @@ BEGIN {L37702}
                   L22640;
                   L10516;
                   VAR53410 := 2 - VAR2506.RE40 + VAR53410;
-                  {TODO L46030}
-                  {$C .BLKW 4 }
+		end;
+		RLDLIM: begin
+                  L16656;
                   L10544; {L46040}
                   L10562('.LIMIT');
                   L10516;
@@ -1559,12 +1560,12 @@ BEGIN {L37702}
                 VAR52350 := VAR52352; {L46302}
                 VAR53456 := 0;
                 repeat
-                  if VAR53456 = 5 then begin
+                  if VAR53456 = 6 then begin
                     WRITELN;
                     VAR53456 := 0;
                   end;
                   with VAR7204[VAR52350] do
-                    if VS11 in RD10 then begin {L46440}
+                    if not (VS11 in RD10) then begin {L46440}
                       L37004(VAR3712[RD04].RB00, RD06);
                       L16656;
                     end;
@@ -1581,7 +1582,7 @@ BEGIN {L37702}
               L10544;
               L10562('.END\ ');
               L10544;
-              if (VAR53446 = STRABS) or (VAR53454 = 1) then begin
+              if (VAR53446 <> STRABS) or (VAR53454 <> 1) then begin
                 VAR52356 := [VS4]; {L47034}
                 L15350(VAR53446, VAR53454);
               end;
