@@ -1237,9 +1237,9 @@ end;
 
 procedure L37004(STR: STR6; VAL: integer);
 begin
- if (VAR53402<>STR) or (VAL<>VAR53410) then
+ if (STR <> VAR53402) or (VAL<>VAR53410) then
   L10516;
- if VAR53402<>STR then
+ if STR <> VAR53402 then
   begin
    L12262(VAR53402);
    VAR3712[VAR4370].RB10:=VAR53410;
