@@ -1289,305 +1289,305 @@ BEGIN {L37702}
       VAR53400 := false;
       VAR53456 := 0;
       repeat begin {L40250}
-        if not ORD(VAR53400) and 1 <> 0 then
+        if ((not ORD(VAR53400)) and 1) <> 0 then
           L10104(VAR52366);
         VAR53400 := false;
-        if VAR53456 = 0 then begin
+        if VAR53456 > 0 then begin
           if (VAR2506.RE00 <> GSD) OR (VAR2506.RE10 <> GSDGSN) OR (BIT3 IN VAR2506.RE12) then begin
             L10516;
             VAR53456 := 0;
           end;
-          case VAR2506.RE00 of
-            GSD: begin {L40500}
-              case VAR2506.RE10 of
-                GSDMN: begin {L40536}
-                  L10544;
-                  L10562('.ENABL');
-                  L10544;
-                  L10562('LC\   ');
-                  L10516;
-                  L10544;
-                  L10562('.NLIST');
-                  L10544;
-                  L10562('BEX\  ');
-                  L10516;
-                  L10516;
-                  L10544;
-                  L10562('.TITLE');
-                  L10544;
-                  L10562(VAR2506.RE02);
-                  L10516;
-                end;
-                GSDTA: begin {L41004}
-                  VAR53446 := VAR2506.RE02;
-                  VAR53454 := VAR2506.RE22;
-                end;
-                GSDGSN: begin {L41040}
-                  if BIT3 IN VAR2506.RE12 then begin
-                    if VAR53456 = 0 then begin {L41104}
-                      L10544;
-                      L10562('.GLOBL');
-                      L10544;
-                      L11602(VAR2506.RE02);
-                      VAR53456 := 1;
-                    end else begin
-                      L10442(',');
-                      L10544;
-                      L11602(VAR2506.RE02);
-                      VAR53456 := VAR53456 + 1;
-                    end;
-                    if VAR53456 >= 6 then begin
-                      L10516;
-                      VAR53456 := 0;
-                    end;
-                  end else begin
-                    case VAR2676 of {L41276}
-                      0: {L41334}
-                        if VAR53402 <> STRABS then begin
-                          L13120(VAR2506.RE02, VAR53402, VAR2506.RE22);
-                          if VAR7202 <> 0 then begin
-                            VAR52356 := [VS0];
-                            if VAR2506.RE22 and 1 <> 0 then begin
-                              VAR52356 := VAR52356 + [VS2];
-                            end;
-                            L13666(VAR53402, VAR2506.RE22);
-                            if L13314(VAR53402, VAR2506.RE22) then
-                              VAR7204[VAR52350].RD20 := VAR7202;
-                          end;
-                        end;
-                      2: {L41736}
-                        if VAR53402 = STRABS then begin {L41772}
-                          L12056(VAR2506.RE02, 0);
-                          L10562(' == \ ');
-                          L11032(VAR2506.RE22);
-                          L10516;
-                        end else begin {L42066}
-                          if ORD(not L13314(VAR53402, VAR2506.RE22)) <> 0 then begin
-                            L37004(VAR53402, VAR2506.RE22);
-                            L16656;
-                          end else begin
-                          end;
-                        end;
-                    end;
-                  end;
-                end;
-                GSDPSN: begin {L42224}
-                  if VAR2506.RE02 = STRABS then begin
-                    L10516;
-                    L10544;
-                    L10562('.ASECT');
-                    L10544;
-                    L10544;
-                    L10516;
-                    if VAR2506.RE22 <> 0 then begin
-                      L10544;
-                      L10562('.BLKB\');
-                      L10544;
-                      L11032(VAR2506.RE22);
-                      L10516;
-                    end;
-                    VAR53402 := STRABS;
-                    VAR53410 := VAR2506.RE22;
-                  end else begin
-                    L12262(VAR2506.RE02);
-                    VAR3712[VAR4370].RB06 := VAR2506.RE22;
-                    L10516;
-                    L10544;
-                    if (VAR2506.RE12 = VAR53462) or ((VAR2506.RE02 = '      ') and (VAR2506.RE12 = VAR53472)) then begin
-                      L10562('.CSECT');
-                      L10544;
-                      L11602(VAR2506.RE02);
-                    end else begin
-                      L10562('.PSECT');
-                      L10544;
-                      L11602(VAR2506.RE02);
-                      if VAR2506.RE12 <> VAR53472 then begin
-                        if (BIT4 in VAR2506.RE12) then begin
-                          L10562(', RO\ ');
-                        end else begin
-                        end;
-                        if (BIT7 in VAR2506.RE12) then begin
-                          L10562(', D\  ');
-                        end else begin
-                        end;
-                        if (BIT2 in VAR2506.RE12) then begin
-                          L10562(', OVR\');
-                        end else begin
-                        end;
-                        if (BIT5 in VAR2506.RE12) then begin
-                        end else begin
-                          L10562(', ABS\');
-                        end;
-                        if (BIT6 in VAR2506.RE12) then begin
-                          L10562(', GBL\');
-                        end else begin
-                        end;
-                      end;
-                    end;
-                    L10516;
-                    VAR53402 := VAR2506.RE02;
-                    VAR53410 := 0;
-                    L15214(VAR2506.RE02, 0);
-                    L10442(':');
-                    if VAR2506.RE22 <> VAR3712[VAR4370].RB12 then begin
-                      L10544;
-                      L10562('.BLKB\');
-                      L10544;
-                      L11032(VAR2506.RE22);
-                      VAR53410 := VAR2506.RE22;
-                    end;
-                    L10516;
-                  end;
-                end;
-                GSDPVI: begin {L43770}
-                  L10544;
-                  L10562('.IDENT');
-                  L10544;
-                  L10442('/');
-                  L10562(VAR2506.RE02);
-                  L10442('/');
-                  L10516;
-                end;
-              end;
-            end;
-            TXT: begin
-              L16656;
-              if VAR2506.RE30 <> VAR53410 then begin
+	end;
+        case VAR2506.RE00 of
+          GSD: begin {L40500}
+            case VAR2506.RE10 of
+              GSDMN: begin {L40536}
+                L10544;
+                L10562('.ENABL');
+                L10544;
+                L10562('LC\   ');
                 L10516;
-                L10562('.ERROR');
-                L10442(' ');
-                L11032(VAR53410);
-                L10562(' ; BAD');
-                L10562(' LOCTN');
+                L10544;
+                L10562('.NLIST');
+                L10544;
+                L10562('BEX\  ');
                 L10516;
-                L37004(VAR53402, VAR2506.RE30);
+                L10516;
+                L10544;
+                L10562('.TITLE');
+                L10544;
+                L10562(VAR2506.RE02);
+                L10516;
               end;
-              if ((VAR53410 and 1) = 0) and (VAR2506.RE26 = 0) or
-                (VAR53414 <> [VS2]) and not (VS7 in VAR53414) and
-                not (VS10 in VAR53414) and not (VAR53410 + 1 <> VAR53424) then begin
-                L30060;
-              end else begin {L44610}
-                L35532;
+              GSDTA: begin {L41004}
+                VAR53446 := VAR2506.RE02;
+                VAR53454 := VAR2506.RE22;
               end;
-            end;
-            RLD: begin
-              case VAR2506.RE36 of
-                RLDLCD: begin
-                  L37004(VAR2506.RE02, VAR2506.RE44);
-                  L15034(VAR53402, VAR53410);
-                  L12262(VAR53402);
-                  with VAR7204[VAR52350] do begin
-                    if RD04 = VAR4370 then
-                      VAR53424 := RD06
-                    else
-                      VAR53424 := -1;
-                  end;
-                  VAR53412 := 0;
-                  VAR53414 := [];
-                end;
-                RLDLCM: begin {L45126}
-                  L16656;
-                  if VAR2506.RE44 <= VAR53424 then
-                    VAR53460 := VAR2506.RE44 - VAR53410
-                  else begin
-                    VAR53460 := VAR53424 - VAR53410;
-                    VAR53400 := true;
-                  end;
-                  if (VAR53460 < 0) or (16 < VAR53460) then begin
-                    L10562('  . = ');
-                    L12056('.     ', VAR53460);
-                    L10516;
-                  end else begin
-                    if VAR53460 and 1 = 0 then begin
-                      L10544;
-                      L10562('.BLKW ');
-                      L10544;
-                      L11032(VAR53460 div 2);
-                      L10516
-                    end else begin {L45452}
-                      if VAR53460 = 1 then begin {L45466}
-                        if (VAR53410 and 1) <> 0 then begin
-                          L10544;
-                          L10562('.EVEN\');
-                          L10516;
-                        end else begin {L45544}
-                          L10544;
-                          L10562('.ODD\ ');
-                          L10516;
-                        end;
-                      end else begin {L45604}
-                        L10544;
-                        L10562('.BLKB ');
-                        L10544;
-                        L11032(VAR53460);
-                        L10516;
-                      end;
-                    end;
-                  end;
-                  VAR53410 := VAR53410 + VAR53460; {L45654}
-                end;
-                RLDIR, RLDGR, RLDIDR, RLDGDR, RLDGAR, RLDGADR,
-                RLDPDR, RLDPAR, RLDPADR, RLDCR: begin
-                  L16656;
-                  L10544;
-                  if VAR2506.RE40 = 0 then begin
-                    L10442(' '); {L45710}
-                  end else begin
-                    L10562('.BYTE\');
+              GSDGSN: begin {L41040}
+                if not (BIT3 IN VAR2506.RE12) then begin
+                  if VAR53456 = 0 then begin {L41104}
                     L10544;
+                    L10562('.GLOBL');
+                    L10544;
+                    L11602(VAR2506.RE02);
+                    VAR53456 := 1;
+                  end else begin
+                    L10442(',');
+                    L10544;
+                    L11602(VAR2506.RE02);
+                    VAR53456 := VAR53456 + 1;
                   end;
-                  VAR52356 := [VS1];
-                  L22640;
-                  L10516;
-                  VAR53410 := 2 - VAR2506.RE40 + VAR53410;
-		end;
-		RLDLIM: begin
-                  L16656;
-                  L10544; {L46040}
-                  L10562('.LIMIT');
-                  L10516;
-                  L10104(VAR52366);
-                  VAR53410 := 4 + VAR53410;
-                end;
-                {RLDLIM, RLDPR, RLD13: L46122}
-              end;
-            end;
-            ENDMOD: begin {L46170}
-              if VAR2676 = 2 then begin
-                WRITE('?DEC-I-LABELS USED : '); {L46204}
-                WRITELN(VAR52346:4);
-                if L13314(STRABS, 0) then ;
-                VAR52350 := VAR52352; {L46302}
-                VAR53456 := 0;
-                repeat
-                  if VAR53456 = 6 then begin
-                    WRITELN;
+                  if VAR53456 >= 6 then begin
+                    L10516;
                     VAR53456 := 0;
                   end;
-                  with VAR7204[VAR52350] do
-                    if not (VS11 in RD10) then begin {L46440}
-                      L37004(VAR3712[RD04].RB00, RD06);
-                      L16656;
+                end else begin
+                  case VAR2676 of {L41276}
+                    0: {L41334}
+                      if VAR53402 <> STRABS then begin
+                        L13120(VAR2506.RE02, VAR53402, VAR2506.RE22);
+                        if VAR7202 <> 0 then begin
+                          VAR52356 := [VS0];
+                          if VAR2506.RE22 and 1 <> 0 then begin
+                            VAR52356 := VAR52356 + [VS2];
+                          end;
+                          L13666(VAR53402, VAR2506.RE22);
+                          if L13314(VAR53402, VAR2506.RE22) then
+                            VAR7204[VAR52350].RD20 := VAR7202;
+                        end;
+                      end;
+                    2: {L41736}
+                      if VAR53402 = STRABS then begin {L41772}
+                        L12056(VAR2506.RE02, 0);
+                        L10562(' == \ ');
+                        L11032(VAR2506.RE22);
+                        L10516;
+                      end else begin {L42066}
+                        if ORD(not L13314(VAR53402, VAR2506.RE22)) <> 0 then begin
+                          L37004(VAR53402, VAR2506.RE22);
+                          L16656;
+                        end else begin
+                        end;
+                      end;
+                  end;
+                end;
+              end;
+              GSDPSN: begin {L42224}
+                if VAR2506.RE02 = STRABS then begin
+                  L10516;
+                  L10544;
+                  L10562('.ASECT');
+                  L10544;
+                  L10544;
+                  L10516;
+                  if VAR2506.RE22 <> 0 then begin
+                    L10544;
+                    L10562('.BLKB\');
+                    L10544;
+                    L11032(VAR2506.RE22);
+                    L10516;
+                  end;
+                  VAR53402 := STRABS;
+                  VAR53410 := VAR2506.RE22;
+                end else begin
+                  L12262(VAR2506.RE02);
+                  VAR3712[VAR4370].RB06 := VAR2506.RE22;
+                  L10516;
+                  L10544;
+                  if (VAR2506.RE12 = VAR53462) or ((VAR2506.RE02 = '      ') and (VAR2506.RE12 = VAR53472)) then begin
+                    L10562('.CSECT');
+                    L10544;
+                    L11602(VAR2506.RE02);
+                  end else begin
+                    L10562('.PSECT');
+                    L10544;
+                    L11602(VAR2506.RE02);
+                    if VAR2506.RE12 <> VAR53472 then begin
+                      if (BIT4 in VAR2506.RE12) then begin
+                        L10562(', RO\ ');
+                      end else begin
+                      end;
+                      if (BIT7 in VAR2506.RE12) then begin
+                        L10562(', D\  ');
+                      end else begin
+                      end;
+                      if (BIT2 in VAR2506.RE12) then begin
+                        L10562(', OVR\');
+                      end else begin
+                      end;
+                      if (BIT5 in VAR2506.RE12) then begin
+                      end else begin
+                        L10562(', ABS\');
+                      end;
+                      if (BIT6 in VAR2506.RE12) then begin
+                        L10562(', GBL\');
+                      end else begin
+                      end;
                     end;
-                  L14576(VAR52350); {L46550}
-                until VAR52350 = 0;
-                if VAR53456 <> 0 then
-                  WRITELN; {L46604}
-                WRITE('?DEC-I-MRKED INSTR : '); {L46610}
-                WRITELN(VAR53426:4);
-                WRITE('?DEC-I-MKD NO INST : ');
-                WRITELN(VAR53430:4);
+                  end;
+                  L10516;
+                  VAR53402 := VAR2506.RE02;
+                  VAR53410 := 0;
+                  L15214(VAR2506.RE02, 0);
+                  L10442(':');
+                  if VAR2506.RE22 <> VAR3712[VAR4370].RB12 then begin
+                    L10544;
+                    L10562('.BLKB\');
+                    L10544;
+                    L11032(VAR2506.RE22);
+                    VAR53410 := VAR2506.RE22;
+                  end;
+                  L10516;
+                end;
               end;
-              L10516; {L46704}
-              L10544;
-              L10562('.END\ ');
-              L10544;
-              if (VAR53446 <> STRABS) or (VAR53454 <> 1) then begin
-                VAR52356 := [VS4]; {L47034}
-                L15350(VAR53446, VAR53454);
+              GSDPVI: begin {L43770}
+                L10544;
+                L10562('.IDENT');
+                L10544;
+                L10442('/');
+                L10562(VAR2506.RE02);
+                L10442('/');
+                L10516;
               end;
-              L10516; {L47112}
             end;
+          end;
+          TXT: begin
+            L16656;
+            if VAR2506.RE30 <> VAR53410 then begin
+              L10516;
+              L10562('.ERROR');
+              L10442(' ');
+              L11032(VAR53410);
+              L10562(' ; BAD');
+              L10562(' LOCTN');
+              L10516;
+              L37004(VAR53402, VAR2506.RE30);
+            end;
+            if ((VAR53410 and 1) = 0) and (VAR2506.RE26 = 0) or
+               (VAR53414 <> [VS2]) and not (VS7 in VAR53414) and
+               not (VS10 in VAR53414) and not (VAR53410 + 1 <> VAR53424) then begin
+              L30060;
+            end else begin {L44610}
+              L35532;
+            end;
+          end;
+          RLD: begin
+            case VAR2506.RE36 of
+              RLDLCD: begin
+                L37004(VAR2506.RE02, VAR2506.RE44);
+                L15034(VAR53402, VAR53410);
+                L12262(VAR53402);
+                with VAR7204[VAR52350] do begin
+                  if RD04 = VAR4370 then
+                    VAR53424 := RD06
+                  else
+                    VAR53424 := -1;
+                end;
+                VAR53412 := 0;
+                VAR53414 := [];
+              end;
+              RLDLCM: begin {L45126}
+                L16656;
+                if VAR2506.RE44 <= VAR53424 then
+                  VAR53460 := VAR2506.RE44 - VAR53410
+                else begin
+                  VAR53460 := VAR53424 - VAR53410;
+                  VAR53400 := true;
+                end;
+                if (VAR53460 < 0) or (16 < VAR53460) then begin
+                  L10562('  . = ');
+                  L12056('.     ', VAR53460);
+                  L10516;
+                end else begin
+                  if VAR53460 and 1 = 0 then begin
+                    L10544;
+                    L10562('.BLKW ');
+                    L10544;
+                    L11032(VAR53460 div 2);
+                    L10516
+                  end else begin {L45452}
+                    if VAR53460 = 1 then begin {L45466}
+                      if (VAR53410 and 1) <> 0 then begin
+                        L10544;
+                        L10562('.EVEN\');
+                        L10516;
+                      end else begin {L45544}
+                        L10544;
+                        L10562('.ODD\ ');
+                        L10516;
+                      end;
+                    end else begin {L45604}
+                      L10544;
+                      L10562('.BLKB ');
+                      L10544;
+                      L11032(VAR53460);
+                      L10516;
+                    end;
+                  end;
+                end;
+                VAR53410 := VAR53410 + VAR53460; {L45654}
+              end;
+              RLDIR, RLDGR, RLDIDR, RLDGDR, RLDGAR, RLDGADR,
+              RLDPDR, RLDPAR, RLDPADR, RLDCR: begin
+                L16656;
+                L10544;
+                if VAR2506.RE40 = 0 then begin
+                  L10442(' '); {L45710}
+                end else begin
+                  L10562('.BYTE\');
+                  L10544;
+                end;
+                VAR52356 := [VS1];
+                L22640;
+                L10516;
+                VAR53410 := 2 - VAR2506.RE40 + VAR53410;
+              end;
+              RLDLIM: begin
+                L16656;
+                L10544; {L46040}
+                L10562('.LIMIT');
+                L10516;
+                L10104(VAR52366);
+                VAR53410 := 4 + VAR53410;
+              end;
+              {RLDLIM, RLDPR, RLD13: L46122}
+            end;
+          end;
+          ENDMOD: begin {L46170}
+            if VAR2676 = 2 then begin
+              WRITE('?DEC-I-LABELS USED : '); {L46204}
+              WRITELN(VAR52346:4);
+              if L13314(STRABS, 0) then ;
+              VAR52350 := VAR52352; {L46302}
+              VAR53456 := 0;
+              repeat
+                if VAR53456 = 6 then begin
+                  WRITELN;
+                  VAR53456 := 0;
+                end;
+                with VAR7204[VAR52350] do
+                  if not (VS11 in RD10) then begin {L46440}
+                    L37004(VAR3712[RD04].RB00, RD06);
+                    L16656;
+                  end;
+                L14576(VAR52350); {L46550}
+              until VAR52350 = 0;
+              if VAR53456 <> 0 then
+                WRITELN; {L46604}
+              WRITE('?DEC-I-MRKED INSTR : '); {L46610}
+              WRITELN(VAR53426:4);
+              WRITE('?DEC-I-MKD NO INST : ');
+              WRITELN(VAR53430:4);
+            end;
+            L10516; {L46704}
+            L10544;
+            L10562('.END\ ');
+            L10544;
+            if (VAR53446 <> STRABS) or (VAR53454 <> 1) then begin
+              VAR52356 := [VS4]; {L47034}
+              L15350(VAR53446, VAR53454);
+            end;
+            L10516; {L47112}
           end;
         end;
       end until VAR2506.RE00 = ENDMOD; {TODO L47142}
