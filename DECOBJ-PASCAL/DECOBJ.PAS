@@ -439,7 +439,7 @@ end;
 
 procedure L16656;
 begin
- if L13314(VAR53402,VAR53410) then
+ if L13314(VAR53402,VAR53410) then begin
   with VAR7204[VAR52350] do
    begin
     if VAR2676=2 then
@@ -450,7 +450,7 @@ begin
         begin
          for VAR7202:=1 to 100 do
           with VAR4372[VAR7202] do
-           if VAR53402=RC06 then
+           if RC06 = VAR53402 then
             if RC14=VAR53410 then
              begin
               L10516;
@@ -513,6 +513,7 @@ begin
      VAR53424:=RD06
     else
      VAR53424:=-1;
+ end;
 end;
 
 procedure L21124(var VAL:integer);
@@ -654,7 +655,7 @@ begin
   BR       1$
 2$:  MOV      R2,R1
   BR       1$
-3$:  ADD      #<TBBEG-10>,R0
+3$:  ADD      #<TBBEG-8>,R0
   MOV      (R0)+,VAR53434(R5)
   MOV      (R0)+,VAR53436(R5)
   MOV      (R0)+,VAR53440(R5)
