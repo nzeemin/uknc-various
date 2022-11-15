@@ -1237,13 +1237,33 @@ end;
 
 procedure L37004(STR: STR6; VAL: integer);
 begin
-  {TODO}
-end;
-
-procedure GAP0;
-begin
-{$C
-      .BLKW 213 }
+ if (VAR53402<>STR) or (VAL<>VAR53410) then
+  L10516;
+ if VAR53402<>STR then
+  begin
+   L12262(VAR53402);
+   VAR3712[VAR4370].RB10:=VAR53410;
+   L10544;
+   if STRABS<>STR then
+    L10562('.ASECT')
+   else
+    begin
+     L10562('.CSECT');
+     L10544;
+     L11602(STR);
+    end;
+   L10516;
+   VAR53402:=STR;
+   L12262(VAR53402);
+   VAR53410:=VAR3712[VAR4370].RB10;
+  end;
+ if VAL<>VAR53410 then
+  begin
+   L10562('. = \ ');
+   L15214(STR,VAL);
+   L10516;
+   VAR53410:=VAL;
+  end;
 end;
 
 BEGIN {L37702}
