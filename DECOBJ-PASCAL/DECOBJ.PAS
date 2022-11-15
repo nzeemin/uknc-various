@@ -318,14 +318,14 @@ begin
          L:=true;
       end;
    end;
- until (VAR52350<VAR52352) or L;
+ until (VAR52350 <= VAR52352) or L;
  L13314:=L;
 end;
 
 procedure L13666(STR: STR6; VAL: UINT);
 begin
  L12262(STR);
- if ((VAL<VAR3712[VAR4370].RB06) and (VAL<=32767)) then
+ if ((VAL <= VAR3712[VAR4370].RB06) and (VAL <= 32767)) then
   if not L13314(STR,VAL) then begin
    if VAR52346 < 1000 then begin
      VAR52346:=VAR52346+1;
