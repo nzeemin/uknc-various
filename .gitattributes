@@ -2,3 +2,4 @@
 *.MAC linguist-language=Assembly
 *.MAC text working-tree-encoding=KOI8-R eol=crlf
 *.PAS text working-tree-encoding=KOI8-R eol=crlf
+*.OBJ binary

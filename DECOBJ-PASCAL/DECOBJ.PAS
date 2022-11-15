@@ -1008,7 +1008,7 @@ begin
      if ((LOC10=6) or (not LOC16) and (LOC00=6)) then
       if L26010(VAR2556) then
        VAR53436:=TY15;
-     if (LOC00=6) and LOC16 then
+     if LOC16 and (LOC00=6) then
       if L26010(VAR2626) then
        VAR53436:=TY15;
     end;
@@ -1095,7 +1095,7 @@ begin
             if LOC06>=128 then
              LOC06:=LOC06-256;
             VAR52356:=[VS5];
-            L15350(VAR53402,LOC14*2+VAR53410);
+            L15350(VAR53402,LOC06*2+VAR53410);
            end;
      TY13: begin
             L26502;
@@ -1105,7 +1105,7 @@ begin
             L10562(', \   ');
             LOC06:=VAR53432 and 77B;
             VAR52356:=[VS5];
-            L15350(VAR53402,VAR53410-LOC14*2);
+            L15350(VAR53402,VAR53410-LOC06*2);
            end;
      TY10: L11032(L05122(VAR53432));
     end;
