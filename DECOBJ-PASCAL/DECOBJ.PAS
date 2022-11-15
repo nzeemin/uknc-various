@@ -881,7 +881,7 @@ var LOC00,LOC02,LOC04,LOC06,LOC10,LOC12,LOC14: integer; LOC16,LOC17: boolean;
  function L25600(REC: RECE50): boolean;
  begin
   with REC do
-   L25600:=((RE00=TXT) or (RE00=RLD) and (RE36 in [RLDLCD,RLDLCM,RLDLIM])) and (RE26=0);
+   L25600:=((RE00=TXT) or (RE00=RLD) and not (RE36 in [RLDLCD,RLDLCM,RLDLIM])) and (RE26=0);
  end;
 
  function L26010(REC: RECE50): boolean;
@@ -1463,9 +1463,9 @@ BEGIN {L37702}
               L10516;
               L37004(VAR53402, VAR2506.RE30);
             end;
-            if ((VAR53410 and 1) = 0) and (VAR2506.RE26 = 0) or
-               (VAR53414 <> [VS2]) and not (VS7 in VAR53414) and
-               not (VS10 in VAR53414) and not (VAR53410 + 1 <> VAR53424) then begin
+            if (((VAR53410 and 1) = 0) and (VAR2506.RE26 = 0)) and
+	       ((VAR53414 <> [VS2]) and not (VS7 in VAR53414) or (VS10 in VAR53414)) and
+	       (not (VAR53410 + 1 = VAR53424)) then begin
               L30060;
             end else begin {L44610}
               L35532;
