@@ -1464,41 +1464,106 @@ BEGIN {L37702}
 								VAR53412 := 0;
 								VAR53414 := [];
 							end;
-							RLDLCM:
-								{TODO L45126} ;
-							RLDLIM, RLDPR, RLD13:
-								{TODO L46122} ;
+							RLDLCM: begin {L45126}
+								L16656;
+								if VAR2506.RE44 < VAR53424 then
+									VAR53460 := VAR2506.RE44 - VAR53410
+								else begin
+									VAR53460 := VAR53424 - VAR53410;
+									VAR53400 := true;
+								end;
+								if (VAR53460 < 0) or (16 < VAR53460) then begin
+									L10562('  . = ');
+									L12056('.     ', VAR53460);
+									L10516;
+								end else begin
+									if VAR53460 and 1 = 0 then begin
+										L10544;
+										L10562('.BLKW ');
+										L10544;
+										L11032(VAR53460 div 2);
+										L10516
+									end else begin {L45452}
+										if VAR53460 = 1 then begin {L45466}
+											if (VAR53410 and 1) <> 0 then begin
+												L10544;
+												L10562('.EVEN\');
+												L10516;
+											end else begin {L45544}
+												L10544;
+												L10562('.ODD\ ');
+												L10516;
+											end;
+										end else begin {L45604}
+											L10544;
+											L10562('.BLKB ');
+											L10544;
+											L11032(VAR53460);
+											L10516;
+										end;
+									end;
+								end;
+								VAR53410 := VAR53410 + VAR53460; {L45654}
+							end;
 							RLDIR, RLDGR, RLDIDR, RLDGDR, RLDGAR, RLDGADR,
-							RLDPDR, RLDPAR, RLDPADR, RLDCR:
-								{TODO L45666} ;
+							RLDPDR, RLDPAR, RLDPADR, RLDCR: begin
+								L16656;
+								L10544;
+								if VAR2506.RE40 = 0 then begin
+									L10442(' '); {L45710}
+								end else begin
+									L10562('.BYTE\');
+									L10544;
+								end;
+								VAR52356 := [VS1];
+								L22640;
+								L10516;
+								VAR53410 := 2 - VAR2506.RE40 + VAR53410;
+								{TODO L46030}
+								{$C .BLKW 27 }
+							end;
+							{RLDLIM, RLDPR, RLD13: L46122}
 						end;
 					end;
-					ENDMOD: begin
-						{TODO L46170}
-						WRITE('?DEC-I-LABELS USED : '); {L46204}
-						WRITELN(VAR52346);
-						if not L13314('. ABS.', 0) then begin
-							{TODO L46302}
+					ENDMOD: begin {L46170}
+						if VAR2676 = 2 then begin
+							WRITE('?DEC-I-LABELS USED : '); {L46204}
+							WRITELN(VAR52346);
+							if not L13314('. ABS.', 0) then ;
+							VAR52350 := VAR52352; {L46302}
+							VAR53456 := 0;
+							if VAR53456 = 5 then begin
+								WRITELN;
+								VAR53456 := 0;
+							end;
+							{TODO L46340}
+							{$C .BLKW 82 }
+							WRITELN; {L46604}
+							WRITE('?DEC-I-MRKED INSTR : '); {L46610}
+							WRITELN(VAR53426);
+							WRITE('?DEC-I-MKD NO INST : ');
+							WRITELN(VAR53430);
 						end;
-						{TODO}
-						WRITE('?DEC-I-MRKED INSTR : '); {L46610}
-						WRITELN(VAR53426);
-						WRITE('?DEC-I-MKD NO INST : ');
-						WRITELN(VAR53430);
-						L10516;
+						L10516; {L46704}
 						L10544;
 						L10562('.END\ ');
 						L10544;
-						{TODO L46744}
+						if (VAR53446 = '. ABS.') or (VAR53454 = 1) then begin
+							VAR52356 := [VS4]; {L47034}
+							L15350(VAR53446, VAR53454);
+						end;
+						L10516; {L47112}
 					end;
 				end;
 				{TODO L47142}
+				{$C .BLKW 6 }
+				L02276(VAR2700); {L47156}
+				L02276(VAR52366);
+				{TODO L47206}
+				{$C .BLKW 4 }
 			end;
 		end;
 		{TODO}
-
-		{$C
-			.BLKW 411 }
 
 	end until false;
 END.
