@@ -326,13 +326,11 @@ procedure L13666(STR: STR6; VAL: UINT);
 begin
  L12262(STR);
  if ((VAL<VAR3712[VAR4370].RB06) and (VAL<=32767)) then
-  if not L13314(STR,VAL) then
-   if VAR52346<1000 then
-    begin
+  if not L13314(STR,VAL) then begin
+   if VAR52346 < 1000 then begin
      VAR52346:=VAR52346+1;
      VAR52350:=VAR52346;
-     with VAR7204[VAR52350] do
-      begin
+     with VAR7204[VAR52350] do begin
        RD00:=0;
        if VAR52354<0 then
         RD02:=VAR52352
@@ -341,14 +339,14 @@ begin
        RD04:=VAR4370;
        RD06:=VAL;
        RD10:=VAR52356;
-      end;
+     end;
      with VAR7204[VAR52352] do
-      if VAR52354<0 then
-       RD00:=VAR52350
-      else
-       RD02:=VAR52350;
-    end
-  else
+       if VAR52354<0 then
+         RD00:=VAR52350
+       else
+         RD02:=VAR52350;
+   end;
+  end else
    with VAR7204[VAR52350] do
     RD10:=RD10+VAR52356;
 end;
