@@ -137,7 +137,7 @@ procedure L10104(var RECIO: RECF1012); external;
 procedure L10442(CH: char);
 begin
   if VAR2676 = 2 then
-    L02020(VAR2700, CH);
+    L02020(VAR2700, CHR(ORD(CH)));
 end;
 
 procedure L10516;
@@ -164,7 +164,7 @@ begin
 end;
 
 procedure L11032(VAL: UINT);
-var X,I: integer; OCTNUM: array [1..6] of integer;
+var X: UINT; I: integer; OCTNUM: array [1..6] of integer;
 begin
  if VAL=0 then
   L10442('0')
@@ -173,8 +173,8 @@ begin
    X:=VAL;
    for I:=6 downto 1 do
     begin
-     OCTNUM[I]:=VAL MOD 8;
-     VAL:= VAL DIV 8;
+     OCTNUM[I] := X MOD 8;
+     X := X DIV 8;
     end;
    I:=1;
    while OCTNUM[I]=0 do
@@ -192,7 +192,7 @@ end;
 
 procedure L11510(VAL: UINT);
 begin
- if VAL<32768 then
+ if VAL <= 32768 then
   L11032(VAL)
  else
   begin
@@ -243,7 +243,7 @@ begin
    while ((VAR4370<VAR4366) and (not A)) do
     begin
      VAR4370:=VAR4370+1;
-     A:=STR=VAR3712[VAR4370].RB00;
+     A := VAR3712[VAR4370].RB00 = STR;
     end;
    if not A then
     if VAR4366<24 then
