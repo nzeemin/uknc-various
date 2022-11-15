@@ -1244,7 +1244,7 @@ begin
    L12262(VAR53402);
    VAR3712[VAR4370].RB10:=VAR53410;
    L10544;
-   if STRABS<>STR then
+   if STR = STRABS then
     L10562('.ASECT')
    else
     begin
@@ -1289,7 +1289,7 @@ BEGIN {L37702}
       VAR53400 := false;
       VAR53456 := 0;
       repeat begin {L40250}
-        if ((not ORD(VAR53400)) and 1) <> 0 then
+        if not(VAR53400) <> false then
           L10104(VAR52366);
         VAR53400 := false;
         if VAR53456 > 0 then begin

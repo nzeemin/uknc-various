@@ -287,7 +287,7 @@ procedure L06772(var RECIO: RECF);
 begin
   with VAR402 do begin
     with VAR2436 do begin
-      if VAR2426 and RG1010 then begin
+      if RG1010 and VAR2426 then begin
         RE00 := RLD;
         VAR2426 := false;
       end else begin
@@ -314,7 +314,7 @@ begin
                   L05740(VAR1414, VAR2436);
                   VAR2426 := true;
                 end;
-                if (RE36 in [RLDIR,RLDGR,RLDIDR,RLDGDR,RLDGAR,RLDGADR,RLDLIM,RLDPDR,RLDPAR,RLDPADR,RLDCR])  and VAR2426 then
+                if VAR2426 and (RE36 in [RLDIR,RLDGR,RLDIDR,RLDGDR,RLDGAR,RLDGADR,RLDLIM,RLDPDR,RLDPAR,RLDPADR,RLDCR]) then
                   if RE42 = RE30 then begin
                     if RE40 = 1 then
                       if RE26 = 0 then begin
