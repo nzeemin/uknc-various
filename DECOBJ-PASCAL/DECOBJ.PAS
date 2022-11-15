@@ -1322,7 +1322,7 @@ BEGIN {L37702}
 								end else begin
 									case VAR2676 of {L41276}
 										0: {L41334}
-											if VAR53402 <> '. ABS.' then begin
+											if VAR53402 <> STRABS then begin
 												L13120(VAR2506.RE02, VAR53402, VAR2506.RE22);
 												if VAR7202 <> 0 then begin
 													VAR52356 := [VS0];
@@ -1335,7 +1335,7 @@ BEGIN {L37702}
 												end;
 											end;
 										2: {L41736}
-											if VAR53402 = '. ABS.' then begin {L41772}
+											if VAR53402 = STRABS then begin {L41772}
 												L12056(VAR2506.RE02, 0);
 												L10562(' == \ ');
 												L11032(VAR2506.RE22);
@@ -1351,7 +1351,7 @@ BEGIN {L37702}
 								end;
 							end;
 							GSDPSN: begin {L42224}
-								if VAR2506.RE02 = '. ABS.' then begin
+								if VAR2506.RE02 = STRABS then begin
 									L10516;
 									L10544;
 									L10562('.ASECT');
@@ -1365,7 +1365,7 @@ BEGIN {L37702}
 										L11032(VAR2506.RE22);
 										L10516;
 									end;
-									VAR53402 := '. ABS.';
+									VAR53402 := STRABS;
 									VAR53410 := VAR2506.RE22;
 								end else begin
 									L12262(VAR2506.RE02);
@@ -1520,7 +1520,12 @@ BEGIN {L37702}
 								L10516;
 								VAR53410 := 2 - VAR2506.RE40 + VAR53410;
 								{TODO L46030}
-								{$C .BLKW 27 }
+								{$C .BLKW 4 }
+								L10544; {L46040}
+								L10562('.LIMIT');
+								L10516;
+								L10104(VAR52366);
+								VAR53410 := 4 + VAR53410;
 							end;
 							{RLDLIM, RLDPR, RLD13: L46122}
 						end;
@@ -1528,27 +1533,35 @@ BEGIN {L37702}
 					ENDMOD: begin {L46170}
 						if VAR2676 = 2 then begin
 							WRITE('?DEC-I-LABELS USED : '); {L46204}
-							WRITELN(VAR52346);
-							if not L13314('. ABS.', 0) then ;
+							WRITELN(VAR52346:4);
+							if L13314(STRABS, 0) then ;
 							VAR52350 := VAR52352; {L46302}
 							VAR53456 := 0;
-							if VAR53456 = 5 then begin
-								WRITELN;
-								VAR53456 := 0;
-							end;
-							{TODO L46340}
-							{$C .BLKW 82 }
+							repeat
+								if VAR53456 = 5 then begin
+									WRITELN;
+									VAR53456 := 0;
+								end;
+								with VAR7204[VAR52350] do
+									if VS11 in RD10 then begin {L46440}
+										L37004(VAR3712[RD04].RB00, RD06);
+										L16656;
+									end;
+								L14576(VAR52350); {L46550}
+							until VAR52350 = 0;
+							{TODO L46572}
+							{$C .BLKW 5 }
 							WRITELN; {L46604}
 							WRITE('?DEC-I-MRKED INSTR : '); {L46610}
-							WRITELN(VAR53426);
+							WRITELN(VAR53426:4);
 							WRITE('?DEC-I-MKD NO INST : ');
-							WRITELN(VAR53430);
+							WRITELN(VAR53430:4);
 						end;
 						L10516; {L46704}
 						L10544;
 						L10562('.END\ ');
 						L10544;
-						if (VAR53446 = '. ABS.') or (VAR53454 = 1) then begin
+						if (VAR53446 = STRABS) or (VAR53454 = 1) then begin
 							VAR52356 := [VS4]; {L47034}
 							L15350(VAR53446, VAR53454);
 						end;
@@ -1560,7 +1573,6 @@ BEGIN {L37702}
 				L02276(VAR2700); {L47156}
 				L02276(VAR52366);
 				{TODO L47206}
-				{$C .BLKW 4 }
 			end;
 		end;
 		{TODO}
