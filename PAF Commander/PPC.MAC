@@ -1,0 +1,1017 @@
+	.TITLE	PP
+	.DSABL	GBL
+	.GLOBL	INCL
+
+HEIGHT	=	24.
+WIDTH	=	80.
+WIDTH2	=	WIDTH / 2
+
+R.ADDR	=	177010
+R.P0	=	177012
+R.P12	=	177014
+R.COL	=	177016
+R.CF0	=	177020
+R.CF1	=	177022
+R.OCT	=	177024
+R.MASK	=	177026
+
+FONT	=	14142
+SIZEF	=	11.
+
+CON1	=	2460
+CON12	=	2462
+
+PAL0	=	2400
+PAL1	=	2470
+PAL2	=	6750
+
+RULON	=	2476
+
+BEGRUL	=	2500
+ENDRUL	=	4670
+
+SCRUL	=	23170
+
+CURPTR	=	22710
+CURDIS	=	7134
+
+PSBBKL	=	104054
+;PUTB	=	104160
+TBPKKL	=	7234
+PRKRA	=	7214
+PRKRF	=	7216
+
+SERV0	=	175700
+SERV1	=	176570
+
+UNDERW	=	<<HEIGHT+2>*SIZEF*WIDTH>+100000
+
+C1.DAT	=	177072
+
+C1DAT	=	177062
+C1VEC	=	330
+
+...	=	0
+.MACRO	.REL	COMMAND	ARG1,ARG2	?PAF
+...	=	...	+ 1
+$'PAF	==	.	+ 2
+	COMMAND	ARG1,ARG2
+.ENDM
+.MACRO	$REL	COMMAND	ARG		?PAF
+...	=	...	+ 1
+$'PAF	==	.
+	COMMAND	ARG
+.ENDM
+
+LO$BEG::
+	TST	@#SCRUL
+	BNE	LO$BEG
+
+	CALL	WTIM
+	MOV	#SIZEF*<HEIGHT+2>,R0
+	MOV	#2500,R1
+1$:	TST	(R1)+
+	BIC	#1,(R1)+
+	SOB	R0,1$
+
+.REL	MOV	#VEC,$VEC
+	mov	@#100,tim+2
+.REL	MOV	#repeat,@#100
+
+;	MOV	#2,@#7136	;\
+;	MOV	#2,@#22752	; *- Rulon
+;	MOV	#1,@#7170	;/
+
+	mov	@#300,sv+2
+.REL	MOV	#vector,@#300
+	CALL	@#PSBBKL
+
+	MOV	#TBPKKL,@#PRKRA
+	MOV	#TBPKKL,@#PRKRF
+
+	BISB	#100,@#177700
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+.REL	MOV	#TOCNG,R1
+.REL	MOV	#TOSTO,R2
+.REL	MOV	#SVDREG,R3
+	MOV	#NSVD,R4
+2$:	MOV	(R1)+,R0
+	MOV	@R0,(R3)+
+	MOV	(R2)+,@R0
+	SOB	R4,2$
+
+	MOVB	#6,@#R.COL
+	CLR	@#R.CF0
+	CLR	@#R.CF1
+
+	MOV	@#RULON,R1
+.REL	MOV	#SVDPTR,R2
+	MOV	#SIZEF-1,R0
+	CALL	GLIDE
+	MOV	#HEIGHT-1,R3
+3$:	MOV	2(R1),(R2)+
+	MOV	#SIZEF,R0
+	CALL	GLIDE
+	SOB	R3,3$
+
+	CALL	GAB
+	MOV	@B,OLD.B
+	CALL	GRPTRS
+	CALL	RT2AT
+
+	MOV	@#RULON,R1
+	MOV	#<HEIGHT-2>*SIZEF,R2
+	MOV	#R.P12,R3
+	MOV	#R.P0,R4
+	MOV	#R.ADDR,R5
+4$:	MOV	(R1)+,@R5
+	MOV	@R1,R1
+	MOV	#WIDTH,R0
+5$:	MOVB	@R3,@R4
+	INC	@R5
+	SOB	R0,5$
+	SOB	R2,4$
+
+	MOV	#SERV1-SERV0,R0
+	MOV	#SERV0,R1
+	MOV	#UNDERW,R2
+	MOV	#R.P0,R4
+	MOV	#R.ADDR,R5
+6$:	MOV	R1,@R5
+	MOVB	2(R4),R3
+	MOV	R2,@R5
+	MOVB	R3,@R4
+	INC	R1
+	INC	R2
+	SOB	R0,6$
+
+	MOV	#' ,R0
+	MOV	#FONT,R1
+.REL	MOV	#SLSP,R2
+.REL	MOV	#LSP,R3
+7$:	MOV	@R1,(R2)+
+	MOV	R3,@R1
+	MOV	'@*2(R1),R4
+	TST	(R1)+
+	MOV	#SIZEF,R5
+8$:	MOVB	(R4)+,@R3
+	COMB	(R3)+
+	SOB	R5,8$
+	SOB	R0,7$
+
+MZ:
+
+CSR	=	177130
+DAT	=	177132
+
+	MOV	#INCL/2,@#R.ADDR
+	MOV	#^RMZ0,R5
+	MOV	#2003,R4
+	MOV	#4,R1
+
+1$:	MOV	R4,@#CSR
+
+	MOV	#10,R0
+2$:	TSTB	@#CSR
+	BPL	2$
+	TST	@#DAT
+	SOB	R0,2$
+
+	MOV	#460,R0
+3$:	TSTB	@#CSR
+	BPL	3$
+	TST	@#DAT
+	BNE	4$
+	SOB	R0,3$
+	BR	5$
+
+4$:	MOV	R5,@#R.P12
+	INC	@#R.ADDR
+
+5$:	DEC	R4
+	INC	R5
+	SOB	R1,1$
+
+	CLRB	@#C1.DAT
+	MOV	@#10554,PC
+
+R.UNLO:
+	CALL	R.RUL
+	MOV	OLD.B,@B
+
+	MOV	@#RULON,R1
+	MOV	#HEIGHT*SIZEF,R2
+	MOV	#WIDTH,R3
+	MOV	#R.P0,R4
+	MOV	#R.ADDR,R5
+1$:	MOV	(R1)+,@R5
+	MOV	@R1,R1
+	BIC	#^B11,R1
+	MOV	R3,R0
+2$:	MOVB	#-1,@R4
+	INC	@R5
+	SOB	R0,2$
+	SOB	R2,1$
+
+10$:	MOV	@A,R0
+	BIC	#^B11,R0
+	MOV	R0,@R5
+	MOV	#WIDTH*SIZEF,R0
+11$:	CLR	@R4
+	INC	@R5
+	SOB	R0,11$
+
+	MOV	#SERV1-SERV0,R0
+	MOV	#SERV0,R1
+	MOV	#UNDERW,R2
+3$:	MOV	R2,@R5
+	MOVB	@R4,R3
+	MOV	R1,@R5
+	MOVB	R3,@R4
+	MOVB	R3,2(R4)
+	MOVB	R3,3(R4)
+	INC	R1
+	INC	R2
+	SOB	R0,3$
+
+4$:	MOV	#NSVD,R0
+.REL	MOV	#SVDREG,R1
+.REL	MOV	#TOCNG,R2
+5$:	MOV	(R1)+,@(R2)+
+	SOB	R0,5$
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	CALL	WTIM
+	CLR	@#CURDIS
+	CALL	R.HCUR
+	MOVB	#7,@#CON1
+	mov	tim+2,@#100
+
+sv:	mov	#0,@#300
+
+	MOV	#106632,@#10554
+ICU	==	. + 2
+	MOV	#0,@#22552
+
+	MOV	#' ,R0
+.REL	MOV	#SLSP,R1
+	MOV	#FONT,R2
+6$:	MOV	(R1)+,(R2)+
+	SOB	R0,6$
+	RETURN
+
+	.enabl	lsb
+vector:
+	mov	r0,-(sp)
+	mov	r1,-(sp)
+	movb	@#177702,r0
+	cmpb	r0,(pc)+
+msh:	.word	105
+	beq	shift
+	cmpb	r0,(pc)+
+mctr0:	.word	46
+	beq	ctrl0
+	cmpb	r0,(pc)+
+mctr1:	.word	107
+	beq	ctrl1
+	tstb	r0
+	bmi	clr.k
+.REL	movb	keys(r0),r0
+	cmpb	r0,#100
+	blo	1$
+	movb	(pc)+,r1
+xor2:	.word
+	br	2$
+1$:	movb	(pc)+,r1
+xor1:	.word
+2$:	xor	r1,r0
+3$:	tstb	r0
+	beq	rti
+	movb	#27,count
+	movb	r0,key.r
+4$:	movb 	r0,@#177070
+	br	rti
+ctrl0:	mov	#240,r0
+	xor	r0,mctr0
+	BR	CTRL
+ctrl1:	mov	#300,r0
+	xor	r0,mctr1
+CTRL:	mov	#7,r0
+	xor	r0,(pc)+
+5$:	.word	224
+	movb	5$,r0
+	br	4$
+shift:	mov	#300,r0
+	xor	r0,msh
+	mov	#20,r0
+	xor	r0,xor1
+	asl	r0
+	xor	r0,xor2
+rti:	mov	(sp)+,r1
+	mov	(sp)+,r0
+	rti
+clr.k:	clrb	key.r
+	br	rti
+
+;	201	K1
+;	202	K2
+;	203	K3
+;	204	K4
+;	205	K5
+;	206	'pom'
+;	207	'ust'
+;	210	'isp'
+;	211	'sbros'
+;	212	'stop'
+;	214	U
+;	215	D
+;	216	L
+;	217	R
+;	220	+
+;	221	-
+;	222	,
+;	223	Alt-pressed  'upr'
+;	224	Alt-released
+
+keys:
+.BYTE	 00, 00, 00, 00,212,222, 33, ';,201,202,203, '4,204,205, '7, '8
+.BYTE	 00, 00, 00, 00, 00,221, 11, 'J, '1, '2, '3, 'E, '5, '6, '[, ']
+.BYTE	 00, 00, 00, 00, 00, 00, 00, 'F, 'C, 'U, 'K, 'P, 'N, 'G, 'L, 'D
+.BYTE	 00, 00, 00, 00, 00, 00, 00, 'Q, 'Y, 'W, 'A, 'I, 'R, 'O, 'B, '@
+.BYTE	 00, 00, 00, 00, 00, 00, 00, 00, '^, 'S, 'M, ' , 'T, 'X,216, ',
+.BYTE	 00, 00, 00, 00, 00, '7, '0, '1, '4,220,230,217,215, '., '\, 'V
+.BYTE	 00, 00, 00, 00, 00, '8, '., '2, '5,210,207,200,214, '_, 'H, 'Z
+.BYTE	 00, 00, 00, 00, 00, '9,200, '3, '6,211,206, '/, ':, '-, '0, '9
+
+repeat:
+	MFPS	-(SP)
+$VEC	=	. + 2
+	MOV	#0,-(SP)
+
+	MOV	#2,@#CURDIS
+tim:	jmp	@#0
+
+VEC:
+	COMB	#0
+	BEQ	BR.IF
+IF.BR:	NOP
+	MOV	R0,-(SP)
+
+	BICB	#7,@#CON1
+COL	=	. + 2
+	BISB	#0,@#CON1
+INCDEC:	INCB	COL
+	BITB	#10,COL
+	BEQ	8$
+	MOV	#100,R0
+	XOR	R0,INCDEC
+	BR	INCDEC
+8$:	MOV	(SP)+,R0
+BR.IF:
+key.r	=	. + 2
+	tstb	#0
+	beq	7$
+	CMPB	KEY.R,#201
+	BLO	6$
+	CMPB	KEY.R,#212
+	BLOS	7$
+count	=	. + 2
+6$:	decb	#0
+	bne	7$
+	movb	key.r,@#177070
+	movb	#2,count
+7$:	RTI
+	.DSABL	LSB
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+	C	=	2
+.MACRO	.LST	NAME
+	.WORD	R.'NAME-LST
+	C.'NAME	==	C
+	C	=	C + 2
+.ENDM	
+
+C1INT:
+	.IRPC	N	<012345>
+	MOV	R'N,-(SP)
+	.ENDR
+
+.REL	MOV	#.RTI,-(SP)
+
+	MOVB	@#C1DAT,R0
+	ADD	PC,R0
+	ADD	@R0,PC
+LST:	.LST	UNLO 
+	.LST	HCUR
+	.LST	SCUR
+	.LST	GCUR
+	.LST	UP
+	.LST	DOWN
+	.LST	RUL
+	.LST	CLRE
+	.LST	PUT
+	.LST	GET
+	.LST	RES
+	.LST	CLR
+	.LST	INV
+	.LST	SWAB
+	.LST	BRIT
+	.LST	DARK
+	.LST	CCLR
+	.LST	0
+	.LST	1
+	.LST	01
+	.LST	ATTR
+
+.RTI:	.IRPC	N	<543210>
+	MOV	(SP)+,R'N
+	.ENDR
+	CLRB	@#C1.DAT
+	RTI
+
+WTIM:
+.REL	MOV	#TIMER,R0
+	MOV	@#100,-(SP)
+	MOV	R0,@#100
+	BR	.
+TIMER:	TST	(SP)+
+	MTPS	(SP)+
+	MOV	(SP)+,@#100
+	RETURN
+
+GLIDE:
+	MOV	2(R1),R1
+	BIC	#^B11,R1
+	SOB	R0,GLIDE
+	RETURN
+
+GAB:
+	MOV	@#RULON,R0
+	SUB	#SIZEF*4,R0
+	CMP	R0,#BEGRUL
+	BHIS	1$
+	ADD	#ENDRUL-BEGRUL,R0
+1$:	MOV	R0,A
+	MOV	@R0,.A
+	ADD	#SIZEF*4-2,R0
+	MOV	R0,B	
+	RETURN
+
+GRPTRS:
+	MOV	@#RULON,R1
+.REL	MOV	#RPTRS,R5
+.REL	MOV	#OFFTAB,R4
+	MOV	#4,R3
+1$:	MOV	(R4)+,R0
+	CALL	GLIDE
+	TST	(R1)+
+	MOV	R1,(R5)+
+	TST	-(R1)
+	SOB	R3,1$
+	RETURN
+
+R.HCUR:
+	MOV	#377+<<BR.IF-IF.BR>/2>,IF.BR
+HCUR:	MOV	#1,R5
+OLDCUR	=	. + 2
+	MOV	#0,R1
+	BICB	R5,2+<<SIZEF-3>*4>(R1)
+	BICB	R5,2+<<SIZEF-1>*4>(R1)
+	RETURN
+
+R.SCUR:
+	MOV	#240,IF.BR
+	MOV	#1,R5
+
+SCUR:
+.XY	=	. + 2
+	MOVB	#0,@#CON1+1
+
+	MOV	@#RULON,R1
+	MOVB	.XY+1,R3
+	MUL	#SIZEF,R3
+	MOV	R3,R0
+	CALL	GLIDE
+	MOV	R1,OLDCUR
+
+	BISB	R5,2+<<SIZEF-3>*4>(R1)
+	BISB	R5,2+<<SIZEF-1>*4>(R1)
+	RETURN
+
+R.GCUR:
+	CALL	WTIM
+	CALL	HCUR
+	MOV	P0,.XY
+	BR	SCUR
+
+R.RUL:
+	CALL	WTIM
+	CALL	R.HCUR
+
+	MOV	@#RULON,R1
+.REL	MOV	#SVDPTR,R2
+	MOV	#SIZEF-1,R0
+	CALL	GLIDE
+	MOV	#HEIGHT-1,R3
+1$:	MOV	(R2)+,2(R1)
+	MOV	#SIZEF,R0
+	CALL	GLIDE
+	SOB	R3,1$
+
+	CALL	GAB
+	CALL	GRPTRS
+	BR	RT2AT
+
+R.UP:
+	CALL	COMBEG
+	MOV	(R5)+,R0
+	MOV	(R5)+,R1
+	TST	(R5)+
+	MOV	@R5,R2
+	CALL	COMMID
+	BR	UD
+
+R.DOWN:
+	CALL	COMBEG
+	MOV	(R5)+,R2
+	TST	(R5)+
+	MOV	(R5)+,R0
+	MOV	@R5,R1
+	CALL	COMMID
+
+UD:	CALL	GRPTRS
+
+	CMP	IF.BR,#240
+	BNE	1$
+	CALL	R.SCUR
+1$:
+RT2AT:
+	MOV	@#RULON,R1
+.REL	MOV	#AT,R2
+	MOV	#HEIGHT,R3
+1$:	MOV	@R1,(R2)+
+	MOV	#SIZEF,R0
+	CALL	GLIDE
+	SOB	R3,1$
+	RETURN
+
+COMBEG:
+	CALL	WTIM
+	CMP	IF.BR,#240
+	BNE	1$
+	CALL	R.HCUR
+1$:
+.REL	MOV	#RPTRS,R5
+	RETURN
+
+COMMID:
+	MOV	@R0,R3
+	MOV	@R1,R4
+	MOV	@R2,R5
+
+	MOV	R4,@R0
+	MOV	A,@R2
+	MOV	R5,@B
+
+	MOV	R1,B
+	MOV	R3,A
+	MOV	@R3,.A
+	RETURN
+R.CLRE:
+	MOV	#R.OCT,R5
+	MOV	#R.ADDR,R3
+	MOV	@R3,R1
+	MOV	#WIDTH,R2
+	ADD	R2,R1
+
+.X	=	. + 2
+	MOV	#0,R4
+	NEG	R4
+	ADD	R2,R4
+
+1$:	MOV	#SIZEF,R0
+	ADD	#1-<SIZEF*WIDTH>,R1
+
+2$:	MOV	R1,@R3
+	ADD	R2,R1
+	CLR	@R5
+	SOB	R0,2$
+
+	SOB	R4,1$
+	RETURN
+
+R.PUT:
+	MOV	P0,.X
+	ADD	P2,.X
+
+	MOV	#R.ADDR,R3
+.REL	MOV	#STR,R5
+	MOV	P0,R1
+	MOV	P1,R2
+
+	ASL	R2
+.AT	=	. + 2
+.REL	ADD	AT(R2),R1
+	MOV	#WIDTH,R2
+
+1$:	MOVB	(R5)+,R0
+	BIC	#^C377,R0
+	ASL	R0
+	MOV	FONT(R0),R4
+
+	MOV	R5,-(SP)
+	MOV	#R.OCT,R5
+	MOV	#SIZEF,R0
+2$:	MOV	R1,@R3
+	ADD	R2,R1
+	CLR	@R5
+	MOVB	(R4)+,@R5
+	SOB	R0,2$
+	MOV	(SP)+,R5
+
+	ADD	#1-<SIZEF*WIDTH>,R1
+	DEC	P2
+	BNE	1$
+	RETURN
+
+R.GET:
+	TST	-(SP)
+
+	ASL	P1
+	ADD	.AT,P1
+
+	MOV	#R.ADDR,R3
+	MOV	#R.P12,R4
+
+	MOV	@SRADDR,R2
+	ADD	#2,SRADDR
+	MOV	R2,@R3
+	MOV	P0,@R4
+	INC	@R3
+	MOV	P1,@R4
+	INC	@R3
+	MOV	P2,@R4
+	INC	@R3
+	MOV	P3,@R4
+	ADD	#4,R2
+
+1$:	MOV	@P1,R1
+	ADD	#2,P1
+	ADD	P0,R1
+	MOV	#SIZEF,@SP
+
+2$:	MOV	P2,R0
+
+3$:	MOV	R1,@R3
+	INC	R1
+	MOV	@R4,R5
+	MOV	R2,@R3
+	INC	R2
+	MOV	R5,@R4
+	SOB	R0,3$
+
+	SUB	P2,R1
+	ADD	#WIDTH,R1
+	DEC	@SP
+	BNE	2$
+
+	DEC	P3
+	BNE	1$
+
+	MOV	R2,@SRADDR
+
+	TST	(SP)+
+	RETURN
+
+R.RES:
+	TST	-(SP)
+
+	MOV	#R.ADDR,R3
+	MOV	#R.P12,R4
+
+	SUB	#2,SRADDR
+	MOV	@SRADDR,R2
+	MOV	R2,@R3
+	MOV	@R4,P0
+	INC	@R3
+	MOV	@R4,P1
+	INC	@R3
+	MOV	@R4,P2
+	INC	@R3
+	MOV	@R4,P3
+	ADD	#4,R2
+
+1$:	MOV	@P1,R1
+	ADD	#2,P1
+	ADD	P0,R1
+	MOV	#SIZEF,@SP
+
+2$:	MOV	P2,R0
+
+3$:	MOV	R2,@R3
+	INC	R2
+	MOV	@R4,R5
+	MOV	R1,@R3
+	INC	R1
+	MOV	R5,@R4
+	SOB	R0,3$
+
+	SUB	P2,R1
+	ADD	#WIDTH,R1
+	DEC	@SP
+	BNE	2$
+
+	DEC	P3
+	BNE	1$
+
+	TST	(SP)+
+	RETURN
+
+R.CLR:	MOV	#.CLR,-(SP)
+	BR	R.COMM
+
+R.INV:	MOV	#.INV,-(SP)
+	BR	R.COMM
+
+R.SWAB:	MOV	#.SWAB,-(SP)
+	BR	R.COMM
+
+R.BRIT:	MOV	#.BRIT,-(SP)
+	BR	R.COMM
+
+R.DARK:	MOV	#.DARK,-(SP)
+	BR	R.COMM
+
+R.CCLR:	MOV	#.CCLR,-(SP)
+R.COMM:
+.PPADR	==	. + 2
+	ADD	#0,@SP
+	MOV	(SP)+,.JMP
+
+	MOV	P0,R1
+	MOV	P1,R0
+	ASL	R0
+.REL	ADD	AT(R0),R1
+
+	MOV	P2,R2
+	MOV	#R.ADDR,R3
+	MOV	#R.P12,R4
+	MOV	#SIZEF,R5
+
+1$:	MOV	R2,R0
+
+2$:	MOV	R1,@R3
+	INC	R1
+.JMP	=	. + 2
+	JMP	@#0
+CONT	=	.
+	SOB	R0,2$
+
+	SUB	R2,R1
+	ADD	#WIDTH,R1
+	SOB	R5,1$
+	RETURN
+
+.CLR:	CLR	@R4
+	BR	CONT
+
+.INV:	COM	@R4
+	BR	CONT
+
+.SWAB:	SWAB	@R4
+	BR	CONT
+
+.BRIT:	MOVB	#-1,1(R4)
+	BR	CONT
+
+.DARK:
+RN	=	. + 2
+	MOVB	@R4,#0
+	MOVB	1(R4),@R4
+	BICB	RN,@R4
+	COMB	RN
+	BICB	RN,1(R4)
+	BR	CONT
+
+.CCLR:	CLR	@#R.OCT
+	BR	CONT
+
+R01:
+	MOV	@#RULON,R1
+	MOV	#<HEIGHT-2>*SIZEF,R2
+	MOV	#R.P12,R3
+	MOV	#R.P0,R4
+	MOV	#R.ADDR,R5
+	RETURN
+
+R.01:	CALL	R01
+
+1$:	MOV	(R1)+,@R5
+	MOV	@R1,R1
+	BIC	#^B11,R1
+	MOV	#WIDTH,R0
+2$:	MOVB	@R4,@R3
+	MOVB	@R4,1(R3)
+	INC	@R5
+	SOB	R0,2$
+	SOB	R2,1$
+	RETURN
+
+R.0:
+	CALL	R01
+
+1$:	MOV	(R1)+,@R5
+	MOV	@R1,R1
+	BIC	#^B11,R1
+	MOV	#WIDTH2,R0
+2$:	MOVB	@R4,@R3
+	MOVB	@R4,1(R3)
+	INC	@R5
+	SOB	R0,2$
+	ADD	#WIDTH2,@R5
+	SOB	R2,1$
+	RETURN
+
+R.1:
+	CALL	R01
+
+1$:	MOV	(R1)+,@R5
+	ADD	#WIDTH2,@R5
+	MOV	@R1,R1
+	BIC	#^B11,R1
+	MOV	#WIDTH2,R0
+2$:	MOVB	@R4,@R3
+	MOVB	@R4,1(R3)
+	INC	@R5
+	SOB	R0,2$
+	SOB	R2,1$
+	RETURN
+
+R.ATTR:
+	MOVB	P0,R1
+	ASL	R1
+	MOVB	R1,@#R.COL
+	ASH	#-3,R1
+	ASL	R1
+	MOV	R1,R2
+	MOV	#3,R0
+1$:	ASH	#4,R2
+	BISB	R1,R2
+	SOB	R0,1$
+	MOV	R2,@#R.CF0
+	MOV	R2,@#R.CF1
+	RETURN
+
+TRINT:
+	MOV	#100/2,@#R.ADDR
+	MOV	#160000,@#R.P12
+	BR	.
+
+NSVD	=	15.+2
+
+TOCNG:	.WORD	C1VEC
+	.WORD	C1VEC+2
+	.WORD	4
+	.WORD	6
+	.WORD	CON12	,R.MASK
+	.WORD	PAL0	,PAL0+2
+	.WORD	PAL1	,PAL1+2
+	.WORD	PAL2	,PAL2+2
+	.WORD	CURPTR
+	.WORD	FONT+<200*2>
+	.WORD	FONT+<201*2>
+	.WORD	FONT+<202*2>
+	.WORD	FONT+<203*2>
+	.WORD	FONT+<204*2>
+
+TOSTO:
+$REL	.WORD	C1INT
+	.WORD	0
+$REL	.WORD	TRINT
+	.WORD	0
+	.WORD	0	,1
+	.WORD	0	,0
+;010400
+;114400
+; 1 001 100 100 000 000
+; 1001 1001 0000 0000
+
+; 052567
+; 156777
+
+; 1 101 110 111 111 111
+; 1101 1101 1111 1111
+
+	.WORD	114400	,156777
+	.WORD	0	,0
+	.WORD	4710
+$REL	.WORD	FNT200
+$REL	.WORD	FNT201
+$REL	.WORD	FNT202
+$REL	.WORD	FNT203
+$REL	.WORD	FNT204
+
+OFFTAB:	.WORD	SIZEF-1,SIZEF,SIZEF*<HEIGHT-4>,SIZEF
+
+SRADDR::
+$REL	.WORD	1$
+1$:	.WORD	UNDERW,0,0
+
+	.RADIX	2
+FNT200:
+	.BYTE	11111111
+	.BYTE	11111111
+	.BYTE	11111111
+	.BYTE	11111111
+	.BYTE	11111111
+	.BYTE	11111111
+	.BYTE	11111111
+	.BYTE	11111111
+	.BYTE	11111111
+	.BYTE	11111111
+	.BYTE	11111111
+FNT201:
+	.BYTE	01010101
+	.BYTE	10101010
+	.BYTE	01010101
+	.BYTE	10101010
+	.BYTE	01010101
+	.BYTE	10101010
+	.BYTE	01010101
+	.BYTE	10101010
+	.BYTE	01010101
+	.BYTE	10101010
+	.BYTE	01010101
+FNT202:
+	.BYTE	00100010
+	.BYTE	10001000
+	.BYTE	00100010
+	.BYTE	10001000
+	.BYTE	00100010
+	.BYTE	10001000
+	.BYTE	00100010
+	.BYTE	10001000
+	.BYTE	00100010
+	.BYTE	10001000
+	.BYTE	00000000
+FNT203:
+	.BYTE	00000000
+	.BYTE	11100000
+	.BYTE	01100000
+	.BYTE	01100000
+	.BYTE	01100000
+	.BYTE	01100000
+	.BYTE	01101100
+	.BYTE	01111000
+	.BYTE	01110000
+	.BYTE	01100000
+	.BYTE	00000000
+FNT204:
+	.BYTE	00000000
+	.BYTE	00000000
+	.BYTE	00000000
+	.BYTE	00100100
+	.BYTE	01001000
+	.BYTE	10010000
+	.BYTE	01001000
+	.BYTE	00100100
+	.BYTE	00000000
+	.BYTE	00000000
+	.BYTE	00000000
+	.EVEN
+	.RADIX
+
+LO$DAT::
+	..	=	.
+.MACRO	.ENUM	LABEL	SIZE
+		LABEL	=	..
+	.IF B <SIZE>
+		..	=	.. + 2
+	.IFF
+		..	=	.. + <<SIZE>*2>
+	.ENDC
+.ENDM
+
+.ENUM	SVDREG	NSVD
+.ENUM	SVDPTR	HEIGHT-1
+.ENUM	AT	HEIGHT
+.ENUM	.A
+.ENUM	A
+.ENUM	B
+.ENUM	RPTRS	4.
+.ENUM	OLD.B
+
+PP$PACK	==	..
+.ENUM	P0
+.ENUM	P1
+.ENUM	P2
+.ENUM	P3
+.ENUM	STR	WIDTH/2
+
+.ENUM	SLSP	<' >
+.ENUM	LSP	<<' >*SIZEF/2>
+
+LO$END	==	..
+
+	.PRINT	...
+	.END
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                

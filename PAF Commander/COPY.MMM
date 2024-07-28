@@ -1,0 +1,453 @@
+        .TITLE  COPY
+        .MCALL  .RENAM  .DELET
+        .MCALL  .PURGE  .CLOSE
+        .MCALL  .LOOKU  .READW
+        .MCALL  .ENTER  .WRITW
+        .MCALL  .FPROT  .SFDAT
+        .DSABL  GBL
+        .GLOBL  .10
+        .GLOBL  AREA
+        .GLOBL  UPACK   UNPACK  PRPACK
+        .GLOBL  DEFS    SCANS   FUNC    BREAK
+        .GLOBL  TOASZ   FFILE
+        .GLOBL  FLAG    FLAG1
+        .GLOBL  MODE    PTRS    DEV     RREAD   DEVTR1
+        .GLOBL  ENTRY
+        .GLOBL  COPY2
+        .GLOBL  BRKS
+        .GLOBL  FILE    FILE1   F4FIL1
+        .GLOBL  TOP     SWORDS  SBLOCKS
+        .GLOBL  UNCACHE
+        .GLOBL  KILKEY
+
+        .INCLU  "SCRMAC"
+        .INCLU  "DIAMAC"
+
+GBX     =       28.
+GBY     =       11.
+GLEN    =       24.
+
+ERRBYT  =       52
+
+$LEN    =       6
+$X      =       12
+
+$SIZE   =       10
+$DATE   =       14
+
+T123:   .WORD   T.C123+5.       ,T.RM123+15.
+TCRM:   .WORD   T.C+6.          ,T.RM+16.
+SELDIA: .WORD   D.SELCOP        ,D.SELRM
+DIAGS:  .WORD   D.COPY          ,D.RENMOV
+DING:   .WORD   D.COPING        ,D.MOVING
+
+S.RENMOV::
+RENMOV::
+IFRM    =       . + 4
+        MOV     #2,#0
+        BR      CONT
+
+S.COPY::
+COPY::
+        CLR     IFRM
+
+CONT:   CALL    UNCACHE
+        CLR     FLAG
+        CLR     FLAG1
+        CLRB    AL
+        CLRB    .AL
+        CLRB    ..AL
+        ADD     -(R5),R5
+        TST     MODE(R5)
+        BMI     1$
+        TSTB    MODE(R5)
+        BMI     1$
+
+        MOV     #4.,S.F2+$LEN
+        MOV     #4.,S.F2+$X
+
+        MOV     #L.F2,R1
+        CALL    DEVTR1
+1$:     ADD     -(R5),R5
+
+        CALL    DEFS
+        BEQ     NOSEL
+
+        MOV     IFRM,R1
+        MOV     T123(R1),R1
+        MOV     #3.,R3
+        CALL    .10
+
+        MOV     IFRM,R1
+        .DIALOG SELDIA(R1)
+        DEC     R1
+        BNE     ENT
+
+        DEC     R2
+        BEQ     3$
+        MOV     #T.F2,R1
+2$:     CMPB    (R1),#'*
+        BEQ     3$
+        TSTB    (R1)+
+        BNE     2$
+        .DIALOG #D.YTTC
+        BR      ENT
+
+3$:     MOV     #.COPY,FUNC
+        CALL    SCANS
+        BR      EX
+
+NOSEL:
+        MOV     #T.F3,R3
+        CALL    UPACK
+        CALL    PRPACK
+        CALL    TOASZ
+
+        MOV     #T.F3,R3
+        MOV     IFRM,R4
+        MOV     TCRM(R4),R4
+1$:     MOVB    (R3)+,(R4)+
+        BNE     1$
+        TSTB    -(R4)
+        MOV     #T.ADD,R3
+2$:     MOVB    (R3)+,(R4)+
+        BNE     2$
+
+        MOV     IFRM,R1
+        .DIALOG DIAGS(R1)
+        DEC     R1
+        BNE     ENT
+
+        CALL    .COPY
+EX:     TSTB    ING
+        BEQ     RERE
+        CLRB    ING
+        .WRES
+        .WSCUR
+
+RERE:   CMP     FLAG,@DEV(R5)
+        BEQ     2$
+1$:     CMP     FLAG1,@DEV(R5)
+        BNE     3$
+2$:     INCB    RREAD(R5)
+3$:     ADD     -(R5),R5
+        COMB    #0
+        BNE     RERE
+ENT:    CALL    KILKEY
+        JMP     ENTRY
+
+.MACRO  .IFERR  LABEL N
+        JSR     R5,IFERR
+        .WORD   LABEL, D.'LABEL, T.F'N
+.ENDM
+
+.MACRO  .BREAK  ?LABEL
+        TSTB    BREAK
+        BEQ     LABEL
+        RETURN
+LABEL:
+.ENDM
+
+.COPY:
+ALL     =       . + 4
+        MOV     $SIZE(R2),#0
+BLOCK   =       . + 2
+        CLR     #0
+BLOCK1  =       . + 2
+        MOV     $...(R2),#0
+GBLOCK  =       . + 2
+        CLR     #0
+
+        CALL    UNPACK
+        CALL    PRPACK
+        MOV     #T.F3,R3
+        CALL    TOASZ
+        CALL    FFILE
+
+        MOV     R2,-(SP)
+        MOV     #T.F2,R1
+        MOV     #T.F3,R3
+        MOV     #T.F4,R2
+        CALL    COPY2
+        MOV     (SP)+,R2
+        BCC     1$
+
+        CALL    BRKS
+        .DIALOG #D.IUOW
+        INCB    BREAK
+        RETURN
+
+1$:     CALL    F4FIL1
+        TSTB    IFRM
+        BEQ     4$
+        CMP     FILE,FILE1
+        BNE     4$
+        MOV     #3,R0
+        MOV     #FILE+2,R4
+        MOV     #FILE1+2,R1
+2$:     CMP     (R1)+,(R4)+
+        BNE     3$
+        SOB     R0,2$
+        JMP     CLSEL
+
+3$:     .DIALOG #D.RENING
+        INCB    ING
+        CLR     ALL
+        BR      TFFE
+
+4$:     MOV     IFRM,R1
+        .DIALOG DING(R1)
+        MOV     IFRM,R1
+        INCB    ING
+
+        .WATTR  #^B1000
+        .WPUT   #T.GRAD,#GBX,#GBY,#GLEN
+
+        MOV     #4,R0
+        MOV     #FILE,R4
+        MOV     #FILE1,R1
+5$:     CMP     (R1)+,(R4)+
+        BNE     LOOKU
+        SOB     R0,5$
+        .DIALOG #D.YCCF
+        INCB    BREAK
+        RETURN
+
+LOOKU:  .BREAK
+        .PURGE  #0
+        .LOOKU  #AREA,#0,DEV(R5)
+        .IFERR  LOOKU 3
+
+TFFE:   .BREAK
+        .PURGE  #1
+        .LOOKU  #AREA,#1,#FILE1
+        .IFERR  TFFE 4
+        BCS     ENTER
+
+AL      =       . + 2
+        TSTB    #0
+        BNE     ENTER
+        .DIALOG #D.TFFE
+        TST     R1
+        BEQ     .RET
+        CMP     R1,#3
+        BEQ     .RET
+        DEC     R1
+        BEQ     ENTER
+        COMB    AL
+
+ENTER:  .BREAK
+        .PURGE  #1
+        .ENTER  #AREA,#1,#FILE1,ALL
+        .IFERR  ENTER 4
+        BCC     ..COPY
+
+.AL     =       . + 2
+        TSTB    #0
+        BNE     1$
+        .DIALOG #D.YSWC
+        TST     R1
+        BEQ     .RET
+        CMP     R1,#3
+        BEQ     .RET
+        DEC     R1
+        BEQ     1$
+        COMB    .AL
+
+1$:     .PURGE  #1
+        .FPROT  #AREA,#1,#FILE1,#0
+        BCS     2$
+        MOV     FILE1,FLAG1
+        BR      ENTER
+2$:     MOV     #D.CCUPF,R1
+        MOV     #T.F4,14(R1)
+        .DIALOG
+        DEC     R1
+        BEQ     1$
+.RET:   RETURN
+
+..COPY:
+        TSTB    IFRM
+        BEQ     ...COP
+        CMP     FILE,FILE1
+        BEQ     RENAME
+        TST     (R2)
+        BPL     ...COP
+..AL    =       . + 2
+        TSTB    #0
+        BNE     ...COP
+        .DIALOG #D.RONLY
+        TST     R1
+        BEQ     .RET
+        CMP     R1,#3
+        BEQ     .RET
+        DEC     R1
+        BEQ     ...COP
+        COMB    ..AL
+        BR      ...COP
+
+RENAME: .PURGE  #1
+CRF:    .BREAK
+        .PURGE  #0
+        .RENAM  #AREA,#0,#FILE
+        .IFERR  CRF 3
+        MOV     FILE1+2,2(R2)
+        MOV     FILE1+4,4(R2)
+        MOV     FILE1+6,6(R2)
+        MOV     FILE,FLAG
+        JMP     CLSEL
+
+...COP:
+LEFT    =       . + 4
+        MOV     ALL,#0
+        BNE     CP1
+        JMP     CLOSE
+
+CP1:    CMP     LEFT,SBLOCKS
+        BLO     CP2
+
+READW0: .BREAK
+        .READW  #AREA,#0,TOP,SWORDS,BLOCK1
+        .IFERR  READW0 3
+
+        ADD     SBLOCKS,GBLOCK
+        CALL    SHOWGRAD
+
+WRITW0: .BREAK
+        .WRITW  #AREA,#1,TOP,SWORDS,BLOCK
+        .IFERR  WRITW0 4
+
+        ADD     SBLOCKS,GBLOCK
+        CALL    SHOWGRAD
+
+        ADD     SBLOCKS,BLOCK
+        ADD     SBLOCKS,BLOCK1
+        SUB     SBLOCKS,LEFT
+        BR      CP1
+
+CP2:    TST     LEFT
+        BEQ     CLOSE
+        ADD     LEFT,GBLOCK
+        SWAB    LEFT
+
+READW1: .BREAK
+        .READW  #AREA,#0,TOP,LEFT,BLOCK1
+        .IFERR  READW1 3
+
+        CALL    SHOWGRAD
+
+WRITW1: .BREAK
+        .WRITW  #AREA,#1,TOP,LEFT,BLOCK
+        .IFERR  WRITW1 4
+
+CLOSE:  .CLOSE  #1
+        .IFERR  CLOSE 4
+        MOV     FILE1,FLAG1
+
+        .WCLR   #GBX,#GBY,#GLEN
+
+SFDAT:  .PURGE  #0
+        .SFDAT  #AREA,#0,#FILE1,$DATE(R2)
+        .IFERR  SFDAT 4
+        MOV     FILE1,FLAG1
+
+        TST     (R2)
+        BPL     NOPRO
+FPROT:  .PURGE  #0
+        .FPROT  #AREA,#0,#FILE1,#1
+        .IFERR  FPROT 4
+        MOV     FILE1,FLAG1
+
+NOPRO:  TSTB    IFRM
+        BEQ     CLSEL
+
+        TST     (R2)
+        BPL     CDF
+CCUPF:  .PURGE  #0
+        .FPROT  #AREA,#0,#FILE,#0
+        .IFERR  CCUPF 3
+        MOV     FILE,FLAG
+
+CDF:    .PURGE  #0
+        .DELET  #AREA,#0,#FILE
+        .IFERR  CDF 3
+        MOV     FILE,FLAG
+
+CLSEL:  BIT     #1,(R2)
+        BEQ     RET
+        MOV     FILE,FLAG
+        BIC     #1,(R2)
+RET:    RETURN
+
+SHOWGRAD:
+        MOV     #GLEN,R4
+        CLR     R0
+        MOV     ALL,R1
+        DIV     R4,R0
+        BNE     1$
+        MOV     R4,R0
+        BR      2$
+
+1$:     MOV     R0,R3
+        CLR     R0
+        MOV     GBLOCK,R1
+        DIV     R3,R0
+2$:     ASR     R0
+        BEQ     3$
+        CMP     R0,R4
+        BHI     3$
+        .WCLR   #GBX,#GBY,R0
+3$:     RETURN
+
+IFERR:  BCS     1$
+        ADD     #<3*2>,R5
+        CLC
+        RTS     R5
+
+1$:     MOVB    @#ERRBYT,R0
+        BMI     HARD
+
+        CMP     (R5),#TFFE
+        BNE     3$
+2$:     ADD     #<3*2>,R5
+        SEC
+        RTS     R5
+
+3$:     CMP     (R5),#ENTER
+        BNE     4$
+        CMPB    R0,#3
+        BEQ     2$
+
+4$:     MOV     2(R5),R1
+        MOV     4(R5),14(R1)
+        .DIALOG
+        CMP     R5,#CP1
+        BLO     ABORT
+        BR      RC
+
+HARD:   CMPB    R0,#-3
+        BNE     NR
+        MOV     4(R5),D.DIOE+14
+        .DIALOG #D.DIOE
+RC:     DEC     R1
+        BEQ     RETRY
+CANCEL: MOV     (SP)+,R5
+        RETURN
+RETRY:  MOV     (R5),R5
+        RTS     R5
+
+NR:     MOV     4(R5),D.NRFF+14
+        .DIALOG #D.NRFF
+ABORT:  MOV     (SP)+,R5
+        INCB    BREAK
+        RETURN
+
+T.GRAD: .REPT   GLEN
+        .BYTE   201
+        .ENDR
+
+T.ADD:  .ASCIZ  '" to'
+        .EVEN
+
+        .END
+                                                                                                                                                                                                                                                                                                                                           

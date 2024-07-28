@@ -1,0 +1,772 @@
+	.TITLE	DIAL
+	.DSABL	GBL
+
+Y0	=	5
+YC	=	Y0 + 2
+Y1	=	Y0 + 4
+Y2	=	Y1 + 2
+Y3	=	Y2 + 1
+
+;--------------------------------------------------------
+
+T.F1::	.ASCIZ	"XX0:MYFILE.MAC"
+T.F2::	.ASCIZ	"XX1:MYFILE.OBJ"
+
+T.F3::	.ASCIZ	"XX2:MYFILE.MAP567890123456789012345678901" ; BRKS  /SELECT/
+T.F4::	.ASCIZ	"XX3:MYFILE.SAV"
+
+;--------------------------------------------------------
+
+TL.TPC::	.ASCIZ	" The PAF Commander "
+TL.ERR:		.ASCIZ	" Error "
+TL.DEL::	.ASCIZ	" Delete "
+TL.PRO::	.ASCIZ	" Protect "
+TL.UNP::	.ASCIZ	" Unprotect "
+TL.SEL:		.ASCIZ	" Select "
+TL.USEL:	.ASCIZ	" Unselect "
+TL.COP::	.ASCIZ	" Copy "
+TL.MOV::	.ASCIZ	" Move "
+TL.REN::	.ASCIZ	" Rename "
+TL.CRM::	.ASCIZ	" Copy/Rename "
+TL.VIE:		.ASCIZ	" View "
+TL.CMP:		.ASCIZ	" Compare "
+TL.SVS:		.ASCIZ	" Setup "
+
+;--------------------------------------------------------
+
+M.ABRT:	.ASCIZ	" Cancel "
+M.YN:	.ASCIZ	" Yes  No "
+M.RDC:	.ASCIZ	" Retry  Device  Cancel "
+M.OK:	.ASCIZ	" Ok "
+M.RC:	.ASCIZ	" Retry  Cancel "
+M.DC:	.ASCIZ	" Delete  Cancel "
+M.DAC:	.ASCIZ	" Delete  All  Cancel "
+M.PC:	.ASCIZ	" Protect  Cancel "
+M.UPC:	.ASCIZ	" Unprotect  Cancel "
+M.OAS:	.ASCIZ	" Overwrite  All  Skip "
+M.SC:	.ASCIZ	" Save  Cancel "
+
+;--------------------------------------------------------
+
+	.GLOBL	T.MEM	T.TLDH
+
+T.ERDH:	.ASCIZ	"Error reading device driver"
+
+T.DYWQ:	.ASCIZ	"Do you want to quit the PAF Commander?"
+
+T.ERD:	.ASCIZ	"Error reading directory"
+
+T.YHS::	.ASCIZ	"You have selected 123 files."
+
+T.DYWD:	.ASCIZ	"Do you wish to delete"
+
+T.DF:	.ASCIZ	"Deleting the file"
+
+T.TFIM:	.ASCIZ	"The following file is marked read-only."
+T.DYSW:	.ASCIZ	"Do you still wish to delete it?"
+
+T.CPF:	.ASCIZ	"Can't protect the file"
+T.CUPF:	.ASCIZ	"Can't unprotect the file"
+
+T.CDF:	.ASCIZ	"Can't delete the file"
+
+T.PF:	.ASCIZ	"Protecting the file"
+T.UPF:	.ASCIZ	"Unprotecting the file"
+
+T.CFM:	.ASCIZ	"Could not find a match:"
+T.STF:	.ASCIZ	"Select the files"
+T.USTF:	.ASCIZ	"Unselect the files"
+
+T.DTF::	.ASCIZ	"Delete the file:"
+T.PTF::	.ASCIZ	"Protect the file:"
+T.UTF::	.ASCIZ	"Unrotect the file:"
+
+T.CFFS:	.ASCIZ	"Can't find file(s):"
+
+T.C::	.ASCIZ	'Copy "MYFILE.MAC" to'
+T.RM::	.ASCIZ	'Rename or move "MYFILE.MAC" to'
+
+T.C123::.ASCIZ	"Copy 123 files to"
+T.RM12::.ASCIZ	"Rename or move 123 files to"
+
+T.CF:	.ASCIZ	"Copying the file"
+T.MF:	.ASCIZ	"Moving the file"
+T.RF:	.ASCIZ	"Renaming the file"
+T.TO:	.ASCIZ	"to"
+
+T.TFFE:	.ASCIZ	"The following file exists"
+T.DYWO:	.ASCIZ	"Do you wish to write over the old file?"
+T.IROF:	.ASCIZ	"is a read-only file."
+T.YSWC:	.ASCIZ	"Do you still wish to overwrite it?"
+
+T.IUOW:	.ASCIZ	"Invalid use of wildcards"
+
+T.DIOE:	.ASCIZ	"Directory input/output error"
+T.DFUL:	.ASCIZ	"Disk full"
+T.FNF:	.ASCIZ	"File not found"
+T.NRFF:	.ASCIZ	"Directory full"
+T.ER:	.ASCIZ	"Error reading file"
+T.EW:	.ASCIZ	"Error writing file"
+T.CC:	.ASCIZ	"Can't close file"
+T.CSD:	.ASCIZ	"Can't set date for file"
+T.CPRO:	.ASCIZ	"Can't protect file"
+
+T.YCCF:	.ASCIZ	"You can't copy a file to itself"
+T.YTTC:	.ASCIZ	"You tried to copy more than one file"
+
+T.CRF:	.ASCIZ	"Can't rename the file"
+
+T.RTF:	.ASCIZ	"Reading the file"
+
+T.STS:	.ASCIZ	"Search for the string"
+T.SF:	.ASCIZ	"Searching for"
+T.CFTS:	.ASCIZ	"Could not find the string"
+
+T.CMP:	.ASCIZ	" Comparing... "
+
+T.TTD:	.ASCIZ	"The two directories appear"
+T.ABI:	.ASCIZ	"to be identical."
+
+T.YN2P:	.ASCIZ	"You need two file panels to use"
+T.TUCD:	.ASCIZ	"the Compare Directories commmand."
+
+T.DYWT:	.ASCIZ	"Do you wish to save"
+T.TSCS:	.ASCIZ	"the current setup?"
+
+T.SING:	.ASCIZ	"Saving the current setup to"
+T.PE::	.ASCIZ	"XX0:PC.INI"
+
+T.ESS:	.ASCIZ	"Error saving the current setup to"
+
+;--------------------------------------------------------
+	.EVEN
+
+D.ABRT::
+	.WORD	^B1100
+	.WORD	28.,4
+	.WORD	Y0
+	.WORD	TL.ERR
+	.WORD	T.MEM
+	.WORD	T.TLDH
+	.WORD	T.F2
+	.WORD
+	.WORD	M.ABRT
+
+D.FETC::
+	.WORD	^B1100
+	.WORD	30.,3
+	.WORD	Y0
+	.WORD	TL.ERR
+	.WORD	T.ERDH
+	.WORD	T.F2
+	.WORD
+	.WORD	M.RC
+
+D.QUIT::
+	.WORD	^B1000
+	.WORD	41.,2
+	.WORD	Y0
+	.WORD	TL.TPC
+	.WORD	T.DYWQ
+	.WORD
+	.WORD	M.YN
+
+D.EREAD::
+	.WORD	^B1100
+	.WORD	26.,3
+	.WORD	Y0
+	.WORD	TL.ERR
+	.WORD	T.ERD
+	.WORD	T.F3
+	.WORD
+	.WORD	M.RDC
+
+D.DELETE::
+	.WORD	^B1000
+	.WORD	24.,3
+	.WORD	Y0
+	.WORD	TL.DEL
+	.WORD	T.DYWD
+	.WORD	T.F3
+	.WORD
+	.WORD	M.DC
+
+D.SELDEL::
+	.WORD	^B1000
+	.WORD	30.,2
+	.WORD	Y0
+	.WORD	TL.DEL
+	.WORD	T.YHS
+	.WORD
+	.WORD	M.DC
+
+D.DELING::
+	.BYTE	^B1000,1
+	.WORD	20.,2
+	.WORD	Y0
+	.WORD	TL.DEL
+	.WORD	T.DF
+	.WORD	T.F3
+	.WORD
+	.WORD
+
+D.RONLY::
+	.WORD	^B1100
+	.WORD	42.,4
+	.WORD	Y1
+	.WORD	TL.DEL
+	.WORD	T.TFIM
+	.WORD	T.F3
+	.WORD	T.DYSW
+	.WORD
+	.WORD	M.DAC
+
+D.CPF::
+	.WORD	^B1100
+	.WORD	28.,3
+	.WORD	Y1
+	.WORD	TL.PRO
+	.WORD	T.CPF
+	.WORD	T.F3
+	.WORD
+	.WORD	M.RC
+
+D.CUPF::
+	.WORD	^B1100
+	.WORD	28.,3
+	.WORD	Y1
+	.WORD	TL.UNP
+	.WORD	T.CUPF
+	.WORD	T.F3
+	.WORD
+	.WORD	M.RC
+
+D.CDF::
+	.WORD	^B1100
+	.WORD	24.,3
+	.WORD	Y1
+	.WORD	TL.DEL
+	.WORD	T.CDF
+	.WORD	T.F3
+	.WORD
+	.WORD	M.RC
+
+D.CRF::
+	.WORD	^B1100
+	.WORD	24.,3
+	.WORD	Y1
+	.WORD	TL.REN
+	.WORD	T.CRF
+	.WORD	T.F3
+	.WORD
+	.WORD	M.RC
+
+D.SELPRO::
+	.WORD	^B1000
+	.WORD	30.,2
+	.WORD	Y0
+	.WORD	TL.PRO
+	.WORD	T.YHS
+	.WORD
+	.WORD	M.PC
+
+D.SELUNP::
+	.WORD	^B1000
+	.WORD	30.,2
+	.WORD	Y0
+	.WORD	TL.UNP
+	.WORD	T.YHS
+	.WORD
+	.WORD	M.UPC
+
+D.PROING::
+	.BYTE	^B1000,1
+	.WORD	22.,2
+	.WORD	Y0
+	.WORD	TL.PRO
+	.WORD	T.PF
+	.WORD	T.F3
+	.WORD
+	.WORD
+
+D.UNPING::
+	.BYTE	^B1000,1
+	.WORD	24.,2
+	.WORD	Y0
+	.WORD	TL.UNP
+	.WORD	T.UPF
+	.WORD	T.F3
+	.WORD
+	.WORD
+
+D.COPING::
+	.BYTE	^B1000,1
+	.WORD	26.,5
+	.WORD	Y0
+	.WORD	TL.COP
+	.WORD	T.CF
+	.WORD	T.F3
+	.WORD	T.TO
+	.WORD	T.F4
+	.WORD
+	.WORD
+
+D.MOVING::
+	.BYTE	^B1000,1
+	.WORD	26.,5
+	.WORD	Y0
+	.WORD	TL.MOV
+	.WORD	T.MF
+	.WORD	T.F3
+	.WORD	T.TO
+	.WORD	T.F4
+	.WORD
+	.WORD
+
+D.RENING::
+	.BYTE	^B1000,1
+	.WORD	26.,4
+	.WORD	Y0
+	.WORD	TL.REN
+	.WORD	T.RF
+	.WORD	T.F3
+	.WORD	T.TO
+	.WORD	T.F4
+	.WORD
+	.WORD
+
+D.SMAT::
+	.WORD	^B1100
+	.WORD	26.,3
+	.WORD	Y0
+	.WORD	TL.SEL
+	.WORD	T.CFM
+	.WORD	T.F3
+	.WORD
+	.WORD	M.OK
+
+D.USMAT::
+	.WORD	^B1100
+	.WORD	26.,3
+	.WORD	Y0
+	.WORD	TL.USEL
+	.WORD	T.CFM
+	.WORD	T.F3
+	.WORD
+	.WORD	M.OK
+
+D.IUOW::
+	.WORD	^B1100
+	.WORD	26.,3
+	.WORD	Y0
+	.WORD	TL.CRM
+	.WORD	T.IUOW
+	.WORD	T.F3
+	.WORD
+	.WORD	M.OK
+
+D.ERDR::
+	.WORD	^B1100
+	.WORD	26.,3
+	.WORD	Y0
+	.WORD	TL.ERR
+	.WORD	T.ERD
+	.WORD	T.F3
+	.WORD
+	.WORD	M.RC
+
+D.CFFS::
+	.WORD	^B1100
+	.WORD	21.,3
+	.WORD	Y0
+	.WORD	;	TL.DEL	TL.PRO	TL.UNP
+	.WORD	T.CFFS
+	.WORD	T.F1
+	.WORD
+	.WORD	M.OK
+
+D.TFFE::
+	.WORD	^B1100
+	.WORD	41.,4
+	.WORD	Y2
+	.WORD	TL.CRM
+	.WORD	T.TFFE
+	.WORD	T.F4+4
+	.WORD	T.DYWO
+	.WORD
+	.WORD	M.OAS
+
+D.YSWC::
+	.WORD	^B1100
+	.WORD	36.,4
+	.WORD	Y2
+	.WORD	TL.CRM
+	.WORD	T.F4+4
+	.WORD	T.IROF
+	.WORD	T.YSWC
+	.WORD
+	.WORD	M.OAS
+
+D.CCUPF::
+	.WORD	^B1100
+	.WORD	30.,3
+	.WORD	Y2
+	.WORD	TL.CRM
+	.WORD	T.CUPF
+	.WORD	;	T.F3 T.F4
+	.WORD
+	.WORD	M.RC
+
+D.DIOE::
+	.WORD	^B1100
+	.WORD	30.,3
+	.WORD	Y3
+	.WORD	TL.CRM
+	.WORD	T.DIOE
+	.WORD	;	T.F3 T.F4
+	.WORD
+	.WORD	M.RC
+
+D.NRFF::
+	.WORD	^B1100
+	.WORD	30.,3
+	.WORD	Y2
+	.WORD	TL.CRM
+	.WORD	T.NRFF
+	.WORD	;	F.F3 T.F4
+	.WORD
+	.WORD	M.OK
+
+D.LOOKU::
+	.WORD	^B1100
+	.WORD	30.,3
+	.WORD	Y2
+	.WORD	TL.CRM
+	.WORD	T.FNF
+	.WORD	;	T.F3 T.F4
+	.WORD
+	.WORD	M.OK
+
+D.ENTER::
+	.WORD	^B1100
+	.WORD	30.,3
+	.WORD	Y2
+	.WORD	TL.CRM
+	.WORD	T.DFUL
+	.WORD	;	T.F3 T.F4
+	.WORD
+	.WORD	M.OK
+
+D.READW::
+	.WORD	^B1100
+	.WORD	30.,3
+	.WORD	Y3
+	.WORD	TL.CRM
+	.WORD	T.ER
+	.WORD	;	T.F3 T.F4
+	.WORD
+	.WORD	M.RC
+
+D.WRITW::
+	.WORD	^B1100
+	.WORD	30.,3
+	.WORD	Y3
+	.WORD	TL.CRM
+	.WORD	T.EW
+	.WORD	;	T.F3 T.F4
+	.WORD
+	.WORD	M.RC
+
+D.CLOSE::
+	.WORD	^B1100
+	.WORD	30.,3
+	.WORD	Y3
+	.WORD	TL.CRM
+	.WORD	T.CC
+	.WORD	;	T.F3 T.F4
+	.WORD
+	.WORD	M.RC
+
+D.SFDAT::
+	.WORD	^B1100
+	.WORD	30.,3
+	.WORD	Y3
+	.WORD	TL.CRM
+	.WORD	T.CSD
+	.WORD	;	T.F3 T.F4
+	.WORD
+	.WORD	M.RC
+
+D.FPROT::
+	.WORD	^B1100
+	.WORD	30.,3
+	.WORD	Y3
+	.WORD	TL.CRM
+	.WORD	T.CPRO
+	.WORD	;	T.F3 T.F4
+	.WORD
+	.WORD	M.RC
+
+D.YCCF::
+	.WORD	^B1100
+	.WORD	34.,2
+	.WORD	Y2
+	.WORD	TL.COP
+	.WORD	T.YCCF
+	.WORD
+	.WORD	M.OK
+
+D.YTTC::
+	.WORD	^B1100
+	.WORD	38.,4
+	.WORD	Y0
+	.WORD	TL.CRM
+	.WORD	T.YTTC
+	.WORD	T.TO
+	.WORD	T.F2
+	.WORD
+	.WORD	M.OK
+
+D.RTF::
+	.BYTE	^B1000,1
+	.WORD	18.,2
+	.WORD	Y0
+	.WORD	TL.VIE
+	.WORD	T.RTF
+	.WORD	T.F4
+	.WORD
+	.WORD
+
+D.VFNF::
+	.WORD	^B1100
+	.WORD	22.,3
+	.WORD	Y1
+	.WORD	TL.VIE
+	.WORD	T.FNF
+	.WORD	T.F4
+	.WORD
+	.WORD	M.OK
+
+D.VRE::
+	.BYTE	^B1100,1
+	.WORD	22.,3
+	.WORD	Y1
+	.WORD	TL.VIE
+	.WORD	T.ER
+	.WORD	T.F4
+	.WORD
+	.WORD	M.RC
+
+D.SF::
+	.BYTE	^B1000,1
+.SF::	.WORD	0,2
+	.WORD	Y0
+	.WORD	TL.VIE
+	.WORD	T.SF
+	.WORD	T.F3
+	.WORD
+	.WORD
+
+D.CFTS::
+	.BYTE	^B1100,1
+.CFTS::	.WORD	0,3
+	.WORD	Y0
+	.WORD	TL.VIE
+	.WORD	T.CFTS
+	.WORD	T.F3
+	.WORD
+	.WORD	M.OK
+
+D.YN2::
+	.WORD	^B1100
+	.WORD	35.,3
+	.WORD	YC
+	.WORD	TL.CMP
+	.WORD	T.YN2P
+	.WORD	T.TUCD
+	.WORD
+	.WORD	M.OK
+
+D.CMPING::
+	.BYTE	^B1000,1
+	.WORD	14.,1
+	.WORD	YC
+	.WORD	TL.CMP
+	.WORD	T.CMP
+	.WORD
+	.WORD
+
+D.TDI::
+	.WORD	^B1000
+	.WORD	28.,3
+	.WORD	YC
+	.WORD	TL.CMP
+	.WORD	T.TTD
+	.WORD	T.ABI
+	.WORD
+	.WORD	M.OK
+
+D.SVS::
+	.WORD	^B1000
+	.WORD	21.,3
+	.WORD	Y0
+	.WORD	TL.SVS
+	.WORD	T.DYWT
+	.WORD	T.TSCS
+	.WORD
+	.WORD	M.SC
+
+D.SAVING::
+	.BYTE	^B1000,1
+	.WORD	29.,2
+	.WORD	Y0
+	.WORD	TL.SVS
+	.WORD	T.SING
+	.WORD	T.PE
+	.WORD
+	.WORD
+
+D.ESAVING::
+	.WORD	^B1100
+	.WORD	35.,3
+	.WORD	Y1
+	.WORD	TL.SVS
+	.WORD	T.ESS
+	.WORD	T.PE
+	.WORD
+	.WORD	M.RC
+
+;--------------------------------------------------------
+
+LE.F	=	6+1+3 +25 +1
+L.F1::	.BLKB	LE.F
+L.F2::	.BLKB	LE.F
+
+LE.GRAY	=	6+1+3 +1
+L.GRAY::
+	.ASCII	"*.*"
+	.BLKB	LE.GRAY-<.-L.GRAY>
+
+LE.S	=	40.
+L.S::	.BLKB	LE.S
+
+	.EVEN
+
+;--------------------------------------------------------
+
+S.F1::	.WORD	L.F1
+	.BLKW	2
+	.WORD
+	.WORD	LE.F
+	.WORD
+	.WORD	T.F1
+	.WORD
+
+S.F2::	.WORD	L.F2
+	.BLKW	2
+	.WORD
+	.WORD	LE.F
+	.WORD
+	.WORD	T.F2
+	.WORD
+
+S.GRAY:	.WORD	L.GRAY
+	.BLKW	2
+	.WORD
+	.WORD	LE.GRAY
+	.WORD
+	.WORD	T.F1
+	.WORD
+
+S.S::	.WORD	L.S
+	.BLKW	2
+	.WORD
+	.WORD	LE.S
+	.WORD
+	.WORD
+	.WORD
+
+;--------------------------------------------------------
+
+D.SEL::
+	.WORD	^B1000
+	.WORD	18.,2
+	.WORD	Y0
+	.WORD	TL.SEL
+	.WORD	T.STF
+	.WORD	-S.GRAY
+	.WORD
+	.WORD
+
+D.UNSEL::
+	.WORD	^B1000
+	.WORD	20.,2
+	.WORD	Y0
+	.WORD	TL.USEL
+	.WORD	T.USTF
+	.WORD	-S.GRAY
+	.WORD
+	.WORD
+
+D.SDPU::
+	.WORD	^B1000
+	.WORD	LE.F+2,2
+	.WORD	Y0
+	.WORD	TL.DEL
+	.WORD	T.DTF
+	.WORD	-S.F1
+	.WORD
+	.WORD
+
+D.COPY::
+	.WORD	^B1000
+	.WORD	LE.F+2,2
+	.WORD	Y0
+	.WORD	TL.COPY
+	.WORD	T.C
+	.WORD	-S.F2
+	.WORD
+	.WORD
+
+D.RENMOV::
+	.WORD	^B1000
+	.WORD	LE.F+2,2
+	.WORD	Y0
+	.WORD	TL.REN
+	.WORD	T.RM
+	.WORD	-S.F2
+	.WORD
+	.WORD
+
+D.SELCOP::
+	.WORD	^B1000
+	.WORD	LE.F+2,2
+	.WORD	Y0
+	.WORD	TL.COPY
+	.WORD	T.C123
+	.WORD	-S.F2
+	.WORD
+	.WORD
+
+D.SELRM::
+	.WORD	^B1000
+	.WORD	LE.F+2,2
+	.WORD	Y0
+	.WORD	TL.REN
+	.WORD	T.RM123
+	.WORD	-S.F2
+	.WORD
+	.WORD
+
+D.STS::
+	.BYTE	^B1000,1
+	.WORD	LE.S+2,2
+	.WORD	Y0
+	.WORD	TL.VIE
+	.WORD	T.STS
+	.WORD	-S.S
+	.WORD
+	.WORD
+
+	.END
+                

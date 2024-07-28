@@ -1,0 +1,472 @@
+	.TITLE	TRK
+	.DSABL	GBL
+
+...	=	0
+.MACRO	.REL	COMMAND	ARG1,ARG2	?PAF
+...	=	...	+ 1
+$'PAF	==	.	+ 2
+	COMMAND	ARG1,ARG2
+.ENDM
+.MACRO	$REL	COMMAND	ARG		?PAF
+...	=	...	+ 1
+$'PAF	==	.
+	COMMAND	ARG
+.ENDM
+
+.MACRO	.PRI	LABEL
+	EMT	56
+$REL	.WORD	T'LABEL
+.ENDM
+.MACRO	.EPRI	LABEL
+	.PRI	LABEL
+.ENDM
+
+LO$BEG::
+	MOV	SECTOR,R0
+	.WORD	105060
+$REL	.WORD	SUBSEC
+
+	MOV	#-1,@#NTRACK
+	MOV	#-1,@#NTRACK+2
+	CALL	DISK
+	RETURN
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+CSR	=	23204
+
+STEPTM	=	23260
+HEADTM	=	23264
+SECTRS	=	23270
+REGALL	=	23274
+
+MOTDLY	=	23216
+TRKCOR	=	23226
+NTRACK	=	23254
+
+TDEV	=	135406
+TSS	=	135412
+TSPERT	=	135422
+TGAP	=	135426
+
+SAVERG	=	134316
+RESTRG	=	134356
+
+GETPT	=	176376
+PUTPT	=	176422
+TIME	=	175400
+
+STEP	=	132276
+MARKER	=	134132
+TIMER	=	134210
+CTIMER	=	134242
+WCRC	=	134256
+RCRC	=	134300
+
+DISK:	.PRI	0
+	MOVB	#-1,CODERR
+
+	CALL  @#GETPT	  		; @131204
+	JSR   R5,@#TIMER		; @131210
+	.WORD	10                     	; @131214
+$REL	.WORD	LAB1                   	; @131216
+	.WORD	107                    	; @131220
+
+2$:	TSTB	CODERR
+	BMI	2$
+	RETURN
+
+LAB1:	CALL  @#CTIMER         		; @131224
+	CLRB  @#177710         		; @131230
+	CALL  @#SAVERG			; @131234
+	BIC   #175754,@#CSR    		; @131240
+
+1$:	TSTB  DRIVE            		; @131272
+	BPL   2$               		; @131276
+	BIS   #40,@#CSR        		; @131300
+	MOVB  #1,ID           		; @131306
+	BR    3$               		; @131314
+
+2$:	BIC   #40,@#CSR        		; @131316
+	CLRB  ID              		; @131324
+3$:	BICB  #374,DRIVE       		; @131330
+	MOVB  TRACK,ID+1      		; @131336
+	CLR   R1               		; @131344
+	MOVB  DRIVE,R1         		; @131346
+	MOVB  STEPTM(R1),STPDLY		; @131352
+	MOVB  HEADTM(R1),LOADLY		; @131360
+	MOVB  REGALL(R1),REGIM 		; @131366
+	MOVB  SECTRS(R1),MAXSCT		; @131374
+	TSTB  SEC           		; @131402
+	BMI   E11              		; @131406
+	CMPB  SEC,MAXSCT    		; @131410
+	BHI   E11              		; @131416
+	CMPB  #5,MAXSCT        		; @131420
+	BEQ   4$               		; @131426
+	MOV   #2,CODSEC        		; @131430
+	BR    5$               		; @131436
+
+4$:	MOV   #3,CODSEC        		; @131440
+
+5$:	MOV   CODSEC,R0        		; @131446
+	MOVB  TGAP(R0),GAP     		; @131452
+	ASL   R0               		; @131460
+	MOV   TSS(R0),SECSIZ   		; @131462
+	BR	.OK1
+
+E11:	.EPRI	E11
+	MOVB  #11,CODERR       		; @131516
+	JMP   EXIT             		; @131524
+
+.OK1:	MOVB  DRIVE,R1         		; @131542
+	MOV   R1,.TRACK        		; @131546
+	ADD   #NTRACK,.TRACK   		; @131552
+	JSR   R5,@#TIMER		; @131560
+	.WORD	101                    	; @131564
+$REL	.WORD	LAB2                   	; @131566
+	.WORD	107                    	; @131570
+	BIT   #2000,@#CSR      		; @131572
+	BNE   1$               		; @131600
+	BIS   #20,@#CSR        		; @131602
+	MOV   @#MOTDLY,DLY       	; @131610
+	BR    ..OK1            		; @131616
+1$:	MOVB  @#CSR,R0         		; @131620
+	BICB  #374,R0          		; @131624
+	CMPB  TDEV(R1),R0      		; @131630
+	BNE   2$               		; @131634
+	CALL  @#RESTRG	 		; @131636
+	BR    .LAB2            		; @131642
+
+2$:	MOV   LOADLY,DLY       		; @131644
+..OK1:	BIC   #3,@#CSR         		; @131652
+	BISB  TDEV(R1),@#CSR   		; @131660
+	BIS   #2000,@#CSR      		; @131666
+	MOV   @#CSR,@#177130   		; @131674
+	CALL  @#RESTRG			; @131702
+	RTI                    		; @131706
+
+LAB2:	CALL  @#CTIMER         		; @131710
+	DEC   DLY              		; @131714
+	BNE   1$               		; @131720
+	BR    .LAB2            		; @131722
+1$:	RTI                    		; @131724
+
+.LAB2:	JSR   R5,@#TIMER		; @131726
+	.WORD	101                    	; @131732
+$REL	.WORD	LAB3                   	; @131734
+	.WORD	107                    	; @131736
+	TSTB  @.TRACK          		; @131740
+	BPL   OK2              		; @131744
+	MOVB  #200,@.TRACK     		; @131746
+	BIC   #100,@#CSR       		; @131754
+	MOV   @#CSR,@#177130   		; @131762
+	BIS   #200,@#CSR       		; @131770
+INT1    =     .
+	BIT   #1,@#177130      		; @131776
+	BEQ   3$               		; @132004
+	BIC   #200,@#CSR       		; @132006
+	CLRB  @.TRACK          		; @132014
+	BR    OK2              		; @132020
+
+3$:	DECB  @.TRACK          		; @132022
+	BNE   4$               		; @132026
+	BIC   #200,@#CSR       		; @132030
+	MOVB  #377,@.TRACK  		; @132036
+	.EPRI	E7
+	MOVB  #7,CODERR        		; @132044
+	JMP   EXIT             		; @132052
+
+4$:	MOV   @#CSR,@#177130  		; @132056
+	MOV   STPDLY,DLY       		; @132064
+	RTI                    		; @132072
+
+LAB3:	CALL  @#CTIMER         		; @132074
+	DEC   DLY              		; @132100
+	BNE   1$               		; @132104
+	BR    INT1             		; @132106
+1$:	RTI                    		; @132110
+
+OK2:	CMPB  @.TRACK,TRACK    		; @132112
+	BEQ   OK3              		; @132120
+	BHI   OK4              		; @132122
+	INCB  @.TRACK          		; @132124
+	BMI   E10              		; @132130
+	BIT   #100,@#CSR       		; @132132
+	BNE   OK7              		; @132140
+	BIS   #100,@#CSR       		; @132142
+	BR    OK6              		; @132150
+E10:	.EPRI	E10
+	MOVB  #10,CODERR       		; @132152
+	JMP   EXIT             		; @132160
+
+OK4:	DECB  @.TRACK          		; @132164
+	BIT   #1,@#177130      		; @132170
+	BEQ   OK5              		; @132176
+	CLRB  @.TRACK          		; @132200
+	BR    OK2              		; @132204
+
+OK5:	BIT   #100,@#CSR       		; @132206
+	BEQ   OK7              		; @132214
+	BIC   #100,@#CSR       		; @132216
+OK6:	MOV   @#CSR,@#177130   		; @132224
+.REL	MOV   #LAB4,@#304      		; @132232
+	RTI                    		; @132240
+
+LAB4:	CALL  @#CTIMER         		; @132242
+OK7:	MOVB  REGIM,CX       		; @132246
+OK8:	MOV   STPDLY,DLY       		; @132254
+.REL	MOV   #LAB5,@#304      		; @132262
+	CALL  @#STEP           		; @132270
+	RTI                    		; @132274
+
+LAB5:	CALL  @#CTIMER         		; @132322
+	DEC   DLY              		; @132326
+	BNE   1$               		; @132332
+	DECB  CX             		; @132334
+	BNE   OK8              		; @132340
+	BR    OK2              		; @132342
+1$:	RTI                    		; @132344
+
+OK3:	BIC   #14,@#CSR        		; @132346
+	MOV   @#TRKCOR,CX      		; @132354
+	CMPB  #1,REGIM         		; @132362
+	BEQ   1$               		; @132370
+	ASRB  CX             		; @132372
+	ASRB  CX+1           		; @132376
+1$:	CMPB  CX,@.TRACK     		; @132402
+	BHI   3$               		; @132410
+	CMPB  CX+1,@.TRACK   		; @132412
+	BHI   2$               		; @132420
+	BIS   #4,@#CSR         		; @132422
+	BR    3$               		; @132430
+
+2$:	BIS   #10,@#CSR        		; @132432
+3$:	MOV   @#CSR,@#177130   		; @132440
+.REL	MOV   #LAB6,@#304      		; @132446
+	RTI                    		; @132454
+
+LAB6:	CALL  @#CTIMER         		; @132456
+	CLRB  @#177710         		; @132462
+	CALL  @#SAVERG			; @132466
+
+	MOV	#177130,R4       		; @132472
+	MOV	#177132,R5
+	BIT   #4,(R4)          		; @132512
+	BEQ   FORMAT               		; @132516
+	.EPRI	E6
+	MOVB  #6,CODERR        		; @132520
+	JMP   EXIT             		; @132526
+
+FORMAT:	MOV   @#CSR,R3			; @134474
+	MOV	#177130,R4       		; @134500
+	MOV	#177132,R5
+	SWAB  ID              		; @134510
+	MOVB  SEC,R2        		; @134514
+	BIC   #177774,R2       		; @134520
+	BNE   1$               		; @134524
+	.EPRI	E13
+	MOV   #13,CODERR       		; @134526
+	JMP   EXIT             		; @134534
+
+1$:	MOVB  TSPERT(R2),CX  		; @134540
+	MOVB  TGAP(R2),GAP     		; @134546
+	MOV   R2,R1            		; @134554
+	ASL   R1               		; @134556
+	MOV   TSS(R1),R1       		; @134560
+	MOV	#1,R2	;;
+	;SWAB  R2               		; @134564
+	;INC   R2               		; @134566
+	MOV   #1750,R0         		; @134570
+2$:	TST   (R4)             		; @134574
+	BPL   4$               		; @134576
+	SOB   R0,2$            		; @134600
+3$:	TST   (R5)             		; @134602
+	.EPRI	E14
+	MOVB  #14,CODERR       		; @134604
+	JMP   EXIT             		; @134612
+
+4$:	MOV   #6200,R0         		; @134616
+	MOV   #47116,(R5)      		; @134622
+5$:	TST   (R4)             		; @134626
+	BMI   7$               		; @134630
+6$:	TSTB  (R4)             		; @134632
+	BPL   6$               		; @134634
+	MOV   #47116,(R5)      		; @134636
+	SOB   R0,5$            		; @134642
+	BR    3$               		; @134644
+
+7$:	MOV   #20,R0           		; @134646
+22$:	MOV   #47116,(R5)      		; @134652
+8$:	TSTB  (R4)             		; @134656
+	BPL   8$               		; @134660
+	MOV   #47116,(R5)      		; @134662
+	SOB   R0,8$            		; @134666
+
+	MOV   #6,R0            		; @134670
+9$:	TSTB  (R4)             		; @134674
+	BPL   9$               		; @134676
+	MOV   #0,(R5)          		; @134700
+	SOB   R0,9$            		; @134704
+
+	BIS   #1000,R3         		; @134706
+10$:	TSTB  (R4)             		; @134712
+	BPL   10$              		; @134714
+	MOV   #120641,(R5)     		; @134716
+	MOV   R3,(R4)          		; @134722
+	BIC   #1000,R3         		; @134724
+
+11$:	TSTB  (R4)             		; @134730
+	BPL   11$              		; @134732
+	MOV   #177241,(R5)     		; @134734
+
+12$:	TSTB  (R4)             		; @134740
+	BPL   12$              		; @134742
+	MOV   ID,(R5)         		; @134744
+	MOV   R3,(R4)          		; @134750
+
+13$:	TSTB  (R4)             		; @134752
+	BPL   13$              		; @134754
+.REL	MOVB	SUBSEC(R2),R0
+	MOV	R0,@R5
+	;MOV   R2,(R5)          		; @134756\\
+	MOV   #13,R0           		; @134760
+14$:	BIT   #40000,(R4)      		; @134764
+	BEQ   14$              		; @134770
+	MOV   #47116,(R5)      		; @134772
+
+15$:	TSTB  (R4)             		; @134776
+	BPL   15$              		; @135000
+	MOV   #47116,(R5)      		; @135002
+	SOB   R0,15$           		; @135006
+
+	MOV   #6,R0            		; @135010
+16$:	TSTB  (R4)             		; @135014
+	BPL   16$              		; @135016
+	MOV   #0,(R5)          		; @135020
+	SOB   R0,16$           		; @135024
+
+	BIS   #1000,R3         		; @135026
+17$:	TSTB  (R4)             		; @135032
+	BPL   17$              		; @135034
+	MOV   #120641,(R5)     		; @135036
+	MOV   R3,(R4)          		; @135042
+	BIC   #1000,R3         		; @135044
+
+18$:	TSTB  (R4)             		; @135050
+	BPL   18$              		; @135052
+	MOV   #175641,(R5)     		; @135054
+
+	MOV   R1,R0            		; @135060
+19$:	TSTB  (R4)             		; @135062
+	BPL   19$              		; @135064
+	MOV   DATA,(R5)      		; @135066
+	MOV   R3,(R4)          		; @135072
+	DEC   R0               		; @135074
+
+20$:	TSTB  (R4)             		; @135076
+	BPL   20$              		; @135100
+	MOV   DATA,(R5)      		; @135102
+	SOB   R0,20$           		; @135106
+
+	INC   R2               		; @135110
+	MOVB  GAP,R0           		; @135112
+21$:	BIT   #40000,(R4)      		; @135116
+	BEQ   21$              		; @135122
+
+	DECB  CX             		; @135124
+	BNE   22$              		; @135130
+	MOV   #1750,R0         		; @135132
+23$:	TST   (R4)             		; @135136
+	BMI   OK13             		; @135140
+24$:	TSTB  (R4)             		; @135142
+	BPL   24$              		; @135144
+	MOV   #47116,(R5)      		; @135146
+	SOB   R0,23$           		; @135152
+	TST   (R5)             		; @135154
+	.PRI	.E14
+	MOVB  #14,CODERR       		; @135156
+	JMP   EXIT             		; @135164
+
+OK13:	MOV   #5,R0            		; @135170
+1$:	TSTB  (R4)             		; @135174
+	BPL   1$               		; @135176
+	MOV   #47116,(R5)      		; @135200
+	SOB   R0,1$            		; @135204
+	TST   (R5)             		; @135206
+;	JMP   OKEXIT           		; @135210
+
+OKEXIT:	CLRB  CODERR           		; @134416
+	BR	.OKEXIT
+EXIT:	;CALL  @#CHNL3            	; @134422
+	.PRI	EXIT
+.OKEXIT:
+	JSR   R5,@#TIME			; @134426
+	.WORD	372                    	; @134432
+$REL	.WORD	LAB9                   	; @134434
+	CALL  @#RESTRG			; @134436
+	CLR   @#177710         		; @134442
+	CALL  @#PUTPT            	; @134446
+	RTI                    		; @134452
+
+LAB9:	BIC   #2037,@#CSR      		; @134454
+	MOV   @#CSR,@#177130   		; @134462
+	RETURN                 		; @134470
+
+;TDEV: 		.BYTE	3,2,1,0        	; @135406
+;TSS:  		.WORD	0,200,400,1000 	; @135412
+;TSPERT:	.BYTE	0,20,12,5      	; @135422
+;TGAP:		.BYTE	0,33,22,72     	; @135426
+
+SUBSEC:	.BYTE
+	.BYTE	1,2,3,4,5,6,7,8.,9.,10.
+	.EVEN
+
+SECTOR::.WORD	123
+CODERR:	.BYTE	-1
+			;COMAND:	.BYTE	30
+			;DEVICE:	.BYTE	2 
+DRIVE::	.BYTE	123
+TRACK::	.BYTE	80.
+SEC:	.BYTE	2
+DATA:	.RAD50	"PAF"
+			;AMOUNT:	.WORD	400
+ID:	.WORD
+CX:	.WORD
+
+REGIM:	.WORD
+MAXSCT:	.WORD
+SECSIZ:	.WORD
+GAP:	.WORD
+CODSEC:	.WORD
+.TRACK:	.WORD
+
+STPDLY:	.WORD
+LOADLY:	.WORD
+DLY:	.WORD
+
+TE11:	.ASCIZ	<20.>"E11 "
+TE7:	.ASCIZ	<20.>"E7  "
+TE10:	.ASCIZ	<20.>"E10 "
+TE6:	.ASCIZ	<20.>"E6  "
+TE100:	.ASCIZ	<20.>"E100"
+TE101:	.ASCIZ	<20.>"E101"
+TE102:	.ASCIZ	<20.>"E102"
+TE2:	.ASCIZ	<20.>"E2  "
+TE1:	.ASCIZ	<20.>"E1  "
+TE4:	.ASCIZ	<20.>"E4  "
+
+TE13:	.ASCIZ	<20.>"E13 "
+TE14:	.ASCIZ	<20.>"E14 "
+T.E14:	.ASCIZ	<20.>".E14"
+
+TEXIT:	.ASCIZ	<30.>"EXIT"
+
+T0:	.ASCIZ	<0>"                                        "
+	.EVEN
+
+LO$END::
+
+	.PRINT	...
+
+	.END
+                                                                                                                                                                                                                                                                                                                                                                                                          
