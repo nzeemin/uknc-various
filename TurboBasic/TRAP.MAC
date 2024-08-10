@@ -1,0 +1,1091 @@
+	
+	.INCLUDE /GENUKD.MAC/
+	.SBTTL	TRAPLIB
+	.ENABLE	LC
+
+	.MACRO	.BJSR	N
+		CALL	N
+	.ENDM
+	;
+	.GLOBL	EQ,GT,LT,GE,LE,NE
+	.GLOBL	XOR,SUB,NEG
+	.GLOBL	JMP,JSR,RI,IR,TYPE
+
+		.PSECT	BASIC
+	;
+	TRAP::	MOV	R0,-(SP)
+		MOV	R2,-(SP)
+		MOV	4(SP),R0
+		MOV	-2(R0),R2
+		BIC	#177400,R2
+		SUB	#100,R2
+		BLT	ERROR
+		CMP	SP,#502
+		
+	1$:	ASL	R2
+		CALL	@ATRAP(R2)
+		MOV	R0,4(SP)
+	TREND:	MOV	(SP)+,R2
+		MOV	(SP)+,R0
+		RTI
+	;
+	ERROR::
+		CLR	IODEV
+		MOV	R2,R5
+		ADD	#100,R5
+		MOV	R5,PERR
+		JMP	CPEND
+		
+
+
+
+	;
+	;
+	ATRAP::	.WORD	T100
+		.WORD	T101
+		.WORD	T102
+		.WORD	T103
+		.WORD	T104
+		.WORD	T105
+		.WORD	T106
+		.WORD	T107
+		.WORD	T110
+
+		.WORD	T111
+		.WORD	T112
+		.WORD	T113
+		.WORD	T114
+		.WORD	T115
+		.WORD	T116
+		.WORD	T117
+		.WORD	T120
+		.WORD	T121
+		.WORD	T122
+		.WORD	T123
+		.WORD	T124
+		.WORD	T125
+		.WORD	T126
+		.WORD	T127
+		.WORD	T130
+	;
+	RWMOD:	.ASCII	/MOD /
+	RWLOG:	.ASCII	/NOT IMP EQV XOR OR AND /
+	
+	RELAT:	.BYTE	'=,'>,'<,0
+	PLMI::	.BYTE	'+,'-,0
+	PRSPEC::.BYTE	'"
+		.BYTE	'&,'.,'(,0
+	DGDL:	.BYTE	'/,'*,0
+	TYPCHR::.BYTE	'$,'!,'%,0
+		.EVEN
+	;
+	ADDRBR::.WORD	EQ,GT,LT,GE,LE,NE,0
+	;
+	ADLOG::	.WORD	IMP,EQV,XOR,OR,AND
+	;
+	T100:
+		CMP	SP,#500
+		BLO	5$
+		MOV	#-1,R5
+	1$:	MOV	R5,-(SP)
+		CALL	SANT
+		TRAP	113
+		.WORD	RWLOG+4
+		.BYTE	3,10
+		BR	4$
+		CALL	CINT
+	2$:	CMP	R5,@SP
+		BGT	1$
+		MOV	(SP)+,R2
+		MOV	ADLOG(R2),(R1)+
+		BR	2$
+	3$:	CALL	CINT
+		MOV	ADLOG(R2),(R1)+
+
+	4$:	MOV	(SP)+,R2
+		BGE	3$
+		RETURN
+	5$:	TRAP	16.
+	;
+	SANT:	TRAP	112
+		CLR	-(SP)
+		TRAP	113
+		.WORD	RWLOG,3
+		INC	@SP
+		TRAP	115
+		BR	1$
+		CALL	LYGOP
+		BCS	10$
+		TRAP	115
+	10$:	TRAP	13.
+		MOV	#$CMP,(R1)+
+		BR	7$
+	1$:	CALL	SUDAT
+	2$:	CALL	LYGOP
+		BMI	8$
+		MOV	R2,-(SP)
+		MOV	TYPE,-(SP)
+		CALL	CSNG
+		MOV	R1,-(SP)
+		CALL	SUDAT
+		MOV	(SP)+,R4
+		TST	(SP)+
+		BEQ	4$
+		TST	TYPE
+		BEQ	5$
+		CALL	SUSP
+		MOV	#ICMP,(R1)+
+		BR	6$
+	4$:	CALL	CSNG
+	5$:	MOV	#SCMP,(R1)+
+	6$:	MOV	(SP)+,R2
+	7$:	MOV	#1,TYPE
+		MOV	ADDRBR (R2),(R1)+
+		BR	2$
+	8$:	TST	(SP)+
+		BNE	9$
+		CALL	CINT
+		MOV	#NOT,(R1)+
+	9$:	RETURN
+	;
+	;
+	LYGOP:	TRAP	101
+		.WORD	RELAT
+		BR	1$
+		MOV	R4,R2
+		TRAP	101
+		.WORD	RELAT
+		RETURN
+		CMP	R4,R2
+		BEQ	2$
+		CMP	(R4)+,(R4)+
+
+		ADD	R4,R2
+		RETURN
+	1$:	COM	R4
+		RETURN
+	2$:	TRAP	2
+	;
+	SUDAT:	CALL	LIEK
+	3$:	TRAP	101
+		.WORD	PLMI
+		RETURN
+		MOV	TYPE,-(SP)
+		MOV	R4,-(SP)
+		CALL	CSNG
+		MOV	R1,-(SP)
+		CALL	LIEK
+		MOV	(SP)+,R4
+		MOV	(SP)+,R2
+		TST	(SP)+
+		BEQ	1$
+		TST	TYPE
+		BEQ	2$
+		CALL	SUSP
+		CMP	(R2)+,(R2)+
+		BR	2$
+	1$:	CALL	CSNG
+	2$:	MOV	APLMI(R2),(R1)+
+		BR	3$
+	;
+	LIEK:	CALL	SDAL
+	1$:	TRAP	113
+		.WORD	RWMOD
+		.WORD	3
+		RETURN
+		CALL	CINT
+		CALL	SDAL
+		CALL	CINT
+		MOV	#MOD,(R1)+
+		BR	1$
+	;
+	SDAL:	CALL	DAUG
+	1$:	TRAP	112
+		CMPB	@R3,#'\
+		BNE	D3
+		INC	R3
+		CALL	CINT
+		CALL	DAUG1
+		CALL	CINT
+		MOV	#IDIV,(R1)+
+		BR	1$
+	;
+	DAUG:	CLR	-(SP)
+		TRAP	101
+		.WORD	PLMI
+		BR	DAUG2
+		MOV	R4,@SP
+		BR	DAUG2
+	DAUG1:	CLR	-(SP)
+
+	DAUG2:	CALL	LAIPS
+		TST	(SP)+
+		BEQ	D2
+		TST	TYPE
+		BEQ	D1
+		MOV	#INEG,(R1)+
+		BR	D2
+	D1:	MOV	#NEG,(R1)+
+	D2:	TRAP	101
+		.WORD	DGDL
+	D3:	RETURN
+		MOV	TYPE,-(SP)
+		MOV	R4,-(SP)
+		CALL	CSNG
+		MOV	R1,-(SP)
+		CALL	LAIPS
+		MOV	(SP)+,R4
+		MOV	(SP)+,R2
+		BEQ	1$
+		TST	@SP
+		BEQ	1$
+		TST	TYPE
+		BEQ	2$
+		CALL	SUSP
+		TST	(R2)+
+		BR	2$
+	1$:	CALL	CSNG
+	2$:	MOV	ADGDL(R2),(R1)+
+		TST	(SP)+
+		BR	D2
+	;
+	LAIPS:	CALL	OPER
+	1$:	TRAP	112
+		CMPB	(R3),#'^
+		BNE	D3
+		INC	R3
+		CALL	CSNG
+		CALL	OPER
+		MOV	TYPE,R5
+		ASL	R5
+		MOV	APOW(R5),(R1)+
+		CLR	TYPE
+		BR	1$
+	;
+	APOW:	.WORD	ROTG,ROTI
+	;
+	SUSP:	MOV	R4,R5
+		TST	-(R5)
+	3$:	MOV	(R4)+,(R5)+
+		CMP	R4,R1
+		BLO	3$
+		TST	-(R1)
+		RETURN
+	;
+	OPER:
+		CALL	CISLO
+		TRAP	24.	;SPEC
+
+		BR	3$	;RAIDE
+		BR	2$	; (
+		MOV	R4,TYPE
+		BNE	13$
+		MOV	#SCONST,(R1)+
+		MOV	2(SP),(R1)+
+		MOV	(SP)+,(R1)+
+		TST	(SP)+
+		RETURN
+	13$:	MOV	#ICONST,(R1)+
+		MOV	R5,(R1)+
+		RETURN
+	2$:
+		JMP	OP2
+	3$:
+		TRAP	105
+		BR	31$
+		TRAP	13.
+		TRAP	13.
+		TRAP	121
+		TRAP	103
+	30$:	RETURN
+	31$:
+		CMP	R5,#66	;-2 BE INSTR
+		BLT	4$
+		BEQ	34$	;TIK SU VARPTR
+		CALL	USR	;USR IR FN
+		BMI	32$
+		RETURN
+	32$:	TRAP	13.
+	;
+	
+	;    ..  ВАШУ МАТЬ !!
+	;----------TIK SU VARPTR------------
+	33$:	TRAP	5
+	34$:	TRAP	127	;(
+		CLR	R4
+		TRAP	107
+		NOP
+		TST	R5
+		BEQ	33$
+		MOV	#1,TYPE
+		TSTB	R5
+		BMI	36$
+		MOV	#ICONST,(1)+
+		MOV	R4,(1)+
+	36$:	JMP	OP3
+	;------------------------------------
+	;
+;			        Warning :
+;	         Оставь надежду, всяк сюда смотрящий.
+
+
+
+;	   В виду того что синтаксические конструкции БЕЙСИКа  
+; 	не поддаются синтаксическому анализу, а мозговые процессы
+;	Вильнюских разработчиков логическому анализу, нижеследующий
+;	текст не рекомендуется рассматривать на трезвую голову, а
+;	тем более пытаться разобраться в нем.
+;				   	              Доброжелатель.
+
+
+
+;	Эта часть модуля занимается распознаванием фактических параметров
+;	функций и их типов, при чем в командах типа :
+;	CMP	R5,#NNN
+;	#NNN, является номером функции в таблице. Из чего следует, что любые
+;	изменения в таблице фунцкций повлекут за собой необходимость 
+;	тотального изменения таковых команд.
+ 
+
+
+
+4$:	MOV	R5,-(SP)		; R5 == Код функции
+	BEQ	6$			; R5 = PI --> 6$
+	CMP	R5,#44			; 44 == EOF
+	BLT	5$			; Параметры типа INT или FLOAT --> 5$
+	CMP	R5,#56			; 56 == LEN
+	BGE	40$			; Параметры типа STRING --> 40$
+					; Параметры VOID
+	INC	TYPE
+	CMP	R5,#44			; 
+	BEQ	6$			; EOF --> 6$
+	CMPB	@R3,#'(
+
+	BNE	6$
+	SUB	#60,R5
+	ADD	R5,@SP
+40$:	ADD	#22,@SP
+	TRAP	127	;(
+	CMP	@SP,#70
+	BGT	42$
+41$:	TRAP	100
+	MOV	TYPE,R5
+	MOV	#1,TYPE
+	ASL	R5
+	ADD	@SP,R5
+	BR	46$
+42$:	TRAP	122
+	BR	47$
+	CLR	TYPE
+	CMP	@SP,#104
+	BEQ	45$
+;
+;---------TIK SU INSTR--------
+	BLT	44$
+	TRAP	126
+	TRAP	115
+43$:	TRAP	13.
+	CLR	TYPE
+;------------------------------
+44$:	INC	TYPE
+45$:	MOV	@SP,R5
+46$:	TRAP	130	;)
+	BR	6$
+47$:	ADD	#2,@SP
+	CMP	@SP,#74
+	BEQ	41$
+	CMP	@SP,#110
+	BNE	43$	;BE INSTR 32$
+;
+;----------TIK SU INSTR-----------
+	TRAP	125
+	TRAP	126
+	BR	42$
+;---------------------------------
+48$:	TRAP	124
+	BR	45$
+49$:	TRAP	125
+	BR	45$
+5$:	TRAP	127
+	CMP	R5,#6
+	BLT	48$
+	BEQ	49$
+	TRAP	100
+	TRAP	130
+	MOV	(SP),R5
+	CMP	R5,#26
+	BLE	52$
+	MOV	TYPE,R4
+	ASL	R4
+	CMP	R5,#36
+
+	BGT	7$	;CSNG,CINT
+	BNE	51$
+	TST	(R4)+	;SGN
+50$:	ADD	R4,R5
+	BR	6$
+51$:	CMP	R5,#34
+	BEQ	50$	;ABS
+	TST	R4	;INT,FIX
+	BNE	60$
+52$:	CALL	CSNG
+6$:	MOV	AFUN(R5),(R1)+
+60$:	TST	(SP)+
+	RETURN
+7$:	SUB	#40,R5
+	CALL	@ATCONV(R5)
+	BR	60$
+OP2:	TRAP	100
+
+T130:
+OP3:	CMPB	(R3)+,#')
+	BEQ	SKLUZ
+OP4:	TRAP	2
+	;
+T127:
+	TRAP	112
+	CMPB	(R3)+,#'(
+	BNE	OP4
+SKLUZ:	TRAP	112
+	RETURN
+	;
+CINT::	TST	TYPE
+	BNE	1$
+	MOV	#RI,(R1)+
+	INC	TYPE
+1$:	RETURN
+	;
+CSNG::	TST	TYPE
+	BEQ	1$
+	MOV	#IR,(R1)+
+	CLR	TYPE
+1$:	RETURN
+	;
+	;
+T101:	TRAP	112
+	MOV	(R0)+,R2
+	MOV	#-2,R4
+1$:	TSTB	@R2
+	BEQ	2$
+	ADD	#2,R4
+	CMPB	(R2)+,@R3
+	BNE	1$
+	INC	R3
+	TST	(R0)+
+2$:	RETURN
+;
+	MZ:	BICB	#40,@R3
+	T102:
+		MOVB	@R3,R4
+
+		CMPB	R4,#172
+		BHI	2$
+		CMPB	R4,#140
+		BHI	MZ
+		CMPB	R4,#132
+		BHI	2$
+		CMPB	R4,#100
+		BHI	1$
+		CMPB	R4,#71
+		BHI	2$
+		CMPB	R4,#60
+		BLO	2$
+		TST	(R0)+
+	1$:	TST	(R0)+
+	2$:	RETURN
+	;
+	T103:
+		TRAP	112
+		CLR	R2
+		CMPB	@R3,#'(
+		BNE	2$
+		TST	(R4)+
+		INC	R3
+		MOV	TYPE,-(SP)
+		MOV	R5,-(SP)
+		MOV	R4,-(SP)
+		TRAP	125
+	6$:	TRAP	116
+		BR	1$
+		INC	R2
+		CALL	CINT
+		BR	6$
+	1$:	MOV	(SP)+,R4
+		MOV	(SP)+,R5
+		MOV	(SP)+,TYPE
+		TRAP	130
+		BR	8$
+	2$:	TST	R4
+		BEQ	7$
+	8$:	INC	R2
+		BIS	#200,R5
+		BIC	#100000,R5
+		BR	4$
+	7$:
+		MOVB	TYPE,R4
+		INC	R4
+		ASL	R4
+		BEQ	4$
+		TST	(R4)+
+	4$:	MOV	AKINPP(R4),(R1)+
+		TRAP	104
+		MOV	R4,(R1)+
+		TSTB	R5
+		BPL	3$
+		MOV	R2,(R1)+
+		MOV	TYPE,R2
+		INC	R2
+
+		ASL	R2
+	9$:
+		MOV	AXKINP(R2),(R1)+
+	3$:	RETURN
+	;
+	AKINPP:	.WORD	$VAR,	INDEX
+		.WORD			SVAR,	IVAR
+		.WORD	ARR10,	ARRAY
+	;
+	AXKINP:	.WORD	$XVAR,SXVAR,IXVAR
+	;
+	T104:	MOV	LENT,R4
+	1$:	CMP	R4,TABTOP
+		BHIS	2$
+		CMP	R5,@R4
+		BEQ	3$
+		TST	(R4)+
+		BMI	11$
+	10$:	TST	(R4)+
+	11$:	TST	(R4)+
+		BR	1$
+	2$:	TST	LYGIS
+		BMI	50$
+		MOV	LENT,R4
+		CMP	-(4),-(4)
+		TST	R5
+		BMI	20$
+		TST	-(4)
+	20$:	CMP	R4,R1
+		BLOS	4$
+		MOV	R4,LENT
+		MOV	R4,LIMIT
+		MOV	R4,CIKL
+		MOV	R4,R2
+		MOV	R5,(2)+
+		BMI	33$
+	30$:	CLR	(R2)+
+	33$:	CLR	(R2)+
+		TSTB	R5
+		BPL	3$
+		MOVB	#2,-(R2)
+		TST	TYPE
+		BGT	3$
+		BMI	35$
+		INCB	@R2
+	35$:	INCB	@R2
+	3$:	TST	(4)+
+		RETURN
+	50$:	CLR	R4
+		RETURN
+	4$:	TRAP	7
+	;
+	T105:	MOV	R3,-(SP)
+		CLR	TYPE
+		TRAP	102
+		TRAP	5
+		BR	10$
+
+		TRAP	5
+	
+	10$:	JSR	R0,SEEK
+		.WORD	F0000 / 2 ! 100000
+		.WORD	7
+		BR	2$
+		TST	(SP)+
+		CMP	R5,#74		;72,70
+		BLT	1$
+		SUB	#74,R5		;72,70
+		
+		BR	6$
+		TRAP	13.
+	2$:	MOV	(SP)+,R3
+		CMP	(R0)+,(R0)+
+		CLR	R5		;MOV	#20000,R5	TRACE
+		BISB	(R3)+,R5
+		BIC	#100,R5
+		SWAB	R5
+		TRAP	102
+		BR	4$
+		NOP			;CLRB	R5		TRACE
+		BISB	(R3),R5
+		BIC	#100,R5
+	3$:	INC	R3
+		TRAP	102
+		BR	4$
+		BR	3$
+		BR	3$
+	4$:	TRAP	101
+		.WORD	TYPCHR
+		BR	8$	;8$	SU DEFTYP
+	9$:	ADD	R4,PC
+		BR	5$	;$
+		BR	6$
+		BIS	#140000,R5	;%
+		INC	TYPE
+	6$:	TST	(R0)+
+	1$:	RETURN
+
+	8$:	MOV	R5,R4
+		CLRB	R4
+		SWAB	R4
+		MOVB	APRL-1(R4),R4
+		BR	9$
+	
+	5$:	BIS	#20000,R5
+		DEC	TYPE
+		RETURN
+	APLMI::	.WORD	ADR,SUB,SUM,SKIRT
+	ADGDL::	.WORD	DVR,MLR,SAND
+	
+	AFUN::	.WORD	PI,POINT,INP,PEEK,RAN,SQRG,SING,KOS,TANG,ATANG,EXPG
+		.WORD	ALNG,INT,SVD1
+		.WORD	ABS,IABS,SGN,ISGN
+		.WORD	EOF,LOCY,LOCX,LPOS,FRE
+		.WORD	SLOCY,ILOCY,SLOCX,ILOCX
+		.WORD	SLPOS,ILPOS,$FRE,SFRE,IFRE
+		.WORD	LEN,ASC,VAL,INSTR2,INSTR
+	;
+	T106:
+
+		TRAP	112
+		RETURN
+	
+	T107:
+		MOV	R4,R2
+		TRAP	112
+		TRAP	102
+		TRAP	2
+		BR	2$
+	3$:	TRAP	2
+	1$:	SUB	#2,R5
+		BNE	3$
+		RETURN
+	2$:	TRAP	105
+		TRAP	2
+		BR	1$
+		TST	-(R0)
+		TST	(R0)+
+		TRAP	121
+		BR	5$
+		CMP	-(1),-(1)
+		MOV	#APAR,(1)+
+		MOV	-6(4),(1)+
+		NEGB	R5
+		RETURN
+	5$:	MOV	R2,R4
+		TRAP	103
+		TSTB	R5
+		BMI	4$
+		TST	-(R1)
+	4$:	TST	-(R1)
+		RETURN
+	;
+	T110:	CLR	R5
+		TRAP	112
+		TRAP	102
+		RETURN
+		RETURN
+	1$:	SUB	#60,R4
+		INC	R3
+		ASL	R5
+		ADD	R5,R4
+		ASL	R5
+		ASL	R5
+		ADD	R4,R5
+		BCS	2$
+		TRAP	102
+		BR	3$
+		BR	3$
+		CMP	R5,#14631
+
+		BLOS	1$
+	2$:
+		MOV	16(SP),R4	;12?!
+		TRAP	6
+	3$:	TST	(R0)+
+		RETURN
+	;
+	T111:
+		MOV	FCB,R4
+		TST	-(R4)
+	1$:	CMP	R4,TABTOP
+		BLO	2$
+		CMP	R5,(R4)
+		BEQ	3$
+		BLO	2$
+		SUB	#6,R4
+		BR	1$
+	2$:	TST	(R0)+
+	3$:	RETURN
+	;
+	T112:	CMPB	(R3)+,#40
+		BEQ	T112
+		DEC	R3
+		RETURN
+	;
+	T113:	MOV	R1,-(SP)
+		MOV	R3,-(SP)
+		MOV	#100000,-(SP)
+		MOV	#377,-(SP)
+		CLR	R1
+		CLR	R5
+		MOV	(R0)+,R2
+		TRAP	102
+		TRAP	112
+		BR	1$
+		BR	14$
+	1$:	CLRB	(SP)
+	2$:	CMPB	(R3),(R2)+
+		BNE	3$
+		INC	R3
+		INCB	@SP
+		CMPB	@R2,#40
+		BEQ	6$
+		TRAP	102
+		BR	3$
+		BR	2$
+	3$:	DECB	(SP)
+		BLE	4$
+		CMP	R1,R3
+		BHI	4$
+		BEQ	7$
+		MOV	R3,R1
+		MOV	R5,2(SP)
+	4$:	MOV	4(SP),R3
+		CMPB	R5,1(R0)
+		BEQ	11$
+	5$:	CMPB	(R2)+,#40
+		BNE	5$
+
+		TST	(R5)+
+		BR	1$
+	7$:	MOV	#-1,(SP)
+		BR	4$
+	11$:	MOV	2(SP),R5
+		BMI	14$
+		CMPB	@R0,#3
+		BGE	14$
+		MOV	R1,R3
+	6$:	TRAP	112
+		TST	(R0)+
+	14$:	TST	(R0)+
+		ADD	#6,SP
+		MOV	(SP)+,R1
+		RETURN
+	;
+	T114:	MOV	#BUFOUT,R3
+		CALL	I1
+		CALL	ISVEIL
+		RETURN
+	;
+	T115:
+		CMP	SP,#500
+		BHIS	2$
+		TRAP	16.
+	2$:	TRAP	112
+		CLR	R2
+		MOV	R3,-(SP)
+		TRAP	102
+		BR	1$
+		BR	6$
+		BR	NOT$
+	1$:	TRAP	120
+		BR	NOT$
+		BR	S10
+	6$:	TRAP	105
+		BR	SIMUSR
+		BR	SIMFUN
+		BR	8$
+		BR	NOT$
+	8$:	TRAP	121
+		TRAP	103
+		DEC	R2
+	S10:	TRAP	112
+		TST	(SP)+
+		CMPB	(R3),#'+
+		BNE	2$
+		TST	R2
+		BGT	3$
+	4$:	INC	R2
+		BLE	4$
+		MOV	#NEWSTR,(1)+
+	3$:	INC	R3
+		TRAP	115
+		TRAP	13.
+		TST	R4
+		BGT	1$
+
+		MOV	#NEWSTR,(R1)+
+	1$:	MOV	#CONCAT,(R1)+
+	2$:	TST	(R0)+
+		MOV	R2,R4
+		RETURN
+
+	SIMUSR:
+		CMP	R5,#70	;USR$
+		BLT	NOT$
+		MOV	R1,-(SP)
+		CALL	USR
+		BMI	S2
+		MOV	(SP)+,R1
+	NOT$:	MOV	(SP)+,R3
+		RETURN
+	S2:	TST	(SP)+
+		INC	R2
+		BR	S10
+	;
+	SIMFUN:	ASR	R5	;MID$
+		BEQ	10$
+		TRAP	127
+		DEC	R5
+		BNE	S30
+		TRAP	115
+		TRAP	13.
+		MOV	R4,R2
+	1$:	CALL	MIDEND
+		BR	S10
+	;
+	10$:	MOV	#INKEY,(R1)+	;INKEY$
+		BR	S10
+	;
+	S20:	DEC	R5	;CHR$,BIN$,OCT$,HEX$
+		ASL	R5
+		MOV	R5,-(SP)
+	21$:	TRAP	125
+		MOV	(SP)+,R5
+		MOV	ASFINT(R5),(R1)+
+		BR	S33
+	;
+	S30:	DEC	R5	;STRING$
+		BNE	S40
+		TRAP	125
+		TRAP	126
+		TRAP	122
+		BR	31$
+		MOV	#ALLSM,(R1)+
+		BR	S32
+	31$:	TRAP	125
+		MOV	#ALLSK,(R1)+
+	S32:	INC	R2
+	S33:	TRAP	130
+		BR	S10
+	;
+	S40:	DEC	R5	;STR$
+		BNE	S20
+
+		TRAP	100
+		MOV	TYPE,R4
+		ASL	R4
+		MOV	ASTR(R4),(R1)+
+		BR	S33
+	;
+	ASTR:	.WORD	SSTR,	ISTR
+	ASFINT:	.WORD	CHR,	BIN,	OCT,	HEX
+	;
+	LMID::	TRAP	127
+		CLR	R4
+		TRAP	107
+		BR	10$
+		TRAP	13.
+	10$:	TST	(R1)+
+		TSTB	R5
+		BMI	MIDEND
+		TST	(R1)+
+	MIDEND:	MOV	R5,-(SP)
+		TRAP	126
+		TRAP	125
+		TRAP	116
+		BR	11$
+		CALL	CINT
+		MOV	#STR,(R1)+
+		BR	12$
+	11$:	MOV	#STR2,(R1)+
+	12$:	TRAP	130
+		MOV	(SP)+,R5
+		RETURN
+	;
+	USR:	TRAP	112
+		CLR	R2
+		TRAP	102
+		BR	1$
+		BR	4$
+		MOVB	(R3)+,R2
+		SUB	#'0,R2
+		ASL	R2
+	1$:	CMP	R5,#72	;-2(4) VARPTR,INSTR
+		BEQ	SYNERR
+		TRAP	127
+		TRAP	122
+		BR	2$
+		TST	R4
+		BGT	3$
+		MOV	#NEWSTR,(1)+
+		BR	3$
+	2$:	TRAP	100
+	3$:	MOV	#$USR,(R1)+
+		MOV	R2,(R1)+
+		TRAP	130
+		MOV	TYPE,(R1)+
+		RETURN
+	4$:	CMP	R5,#72	;-2(4)
+		BNE	SYNERR
+		TRAP	105
+
+		TRAP	2
+		TRAP	2
+		NOP
+		BIS	#100,R5
+		BIC	#100000,R5
+		MOV	TYPE,-(SP)
+		MOV	#-1,TYPE
+		TRAP	104
+		MOV	R4,-(SP)
+		MOV	#FNST,(1)+
+		TRAP	112
+		CMPB	@R3,#'(
+		BNE	7$
+	40$:	INC	R3
+		TRAP	122
+		BR	41$
+		MOV	#-1,-(SP)
+		TST	R4
+		BGT	5$
+		MOV	#NEWSTR,(R1)+
+		BR	5$
+	41$:	TRAP	100
+		MOV	TYPE,-(SP)
+	5$:	INC	R2
+		CMPB	@R3,#',
+		BEQ	40$
+	6$:	TRAP	130
+	7$:	MOV	#FNCALL,(1)+
+		MOV	R1,R4
+		TST	(1)+
+		MOV	R2,(1)+
+		BEQ	9$
+	8$:	MOV	(SP)+,(R1)+
+		SOB	R2,8$
+	9$:	MOV	(SP)+,@R4
+		MOV	(SP)+,TYPE
+		RETURN
+	;
+	T116:
+		TRAP	112
+		CMPB	@R3,#',
+		BNE	2$
+		MOV	R3,-(SP)
+		INC	R3
+		TRAP	112
+		CMPB	@R3,#',
+		BEQ	1$
+		CMPB	@R3,#12
+		BEQ	1$
+		TRAP	100
+		TST	(R0)+
+		TST	(SP)+
+		RETURN
+	1$:	MOV	(SP)+,R3
+	2$:	RETURN
+	;
+	T117:	CLR	R2
+
+	1$:	TRAP	102
+		BR	3$
+		BR	4$
+	2$:	INC	R3
+		BR	1$
+	3$:	CMPB	R4,#'.
+		BNE	4$
+		INC	R2
+		BR	2$
+	4$:	DEC	R2
+		BGT	SYNERR
+		RETURN
+	SYNERR:	TRAP	2
+	;
+	T120:
+		CMPB	@R3,#'"
+		BNE	1$
+	3$:	INC	R3
+		MOV	#$CONST,(R1)+
+		MOV	R1,R4
+		TST	(R1)+
+		CLR	(R4)
+	4$:	CMPB	@R3,#12
+		BEQ	5$
+		CMPB	(R3)+,#'"
+		BEQ	5$
+		MOVB	-1(R3),(R1)+
+		INC	(R4)
+		BR	4$
+	5$:	CLRB	(r1)+
+		BIC	#1,r1
+
+		TST	(R0)+
+		MOV	#-1,TYPE
+	1$:	RETURN
+	;
+	
+	T121:	CLR	R4
+		MOV	PFACT,R2
+		BEQ	4$
+	1$:	TST	(2)+
+		BEQ	4$
+		TST	(2)+
+		CMP	(2)+,R5
+		BNE	1$
+		MOV	TYPE,R4
+		INC	R4
+		ASL	R4
+	3$:	MOV	PARMOV(R4),(1)+
+		MOV	(2),(1)+
+		TST	(0)+
+		MOV	R2,R4
+	4$:	RETURN
+	;
+	PARMOV:	.WORD	$PAR,SPAR,IPAR
+	;
+	T122:
+		MOV	R3,-(SP)
+		TRAP	115
+		BR	1$
+		TRAP	101
+		.WORD	RELAT
+
+		BR	2$
+	1$:	MOV	(SP)+,R3
+		RETURN
+	2$:	CMP	(SP)+,(R0)+
+		RETURN
+	;
+	T123:
+		TRAP	125
+		TRAP	126
+	T124:
+		TRAP	125
+		TRAP	126
+	T125:
+		TRAP	100
+		CALL	CINT
+		RETURN
+	;
+	T126:
+		TRAP	112
+		CMPB	(R3)+,#',
+		BNE	1$
+		TRAP	112
+		RETURN
+	1$:	TRAP	2
+	;
+		.END
+
+                                                                                                                                                                                                                                                                                                                                                                                             

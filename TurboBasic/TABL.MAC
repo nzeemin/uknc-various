@@ -1,0 +1,447 @@
+
+	.Psect	Trees$,i
+Trees$::
+
+	.Psect	Tails$,d
+Tails$::
+
+	.Psect	Trees$,i
+L0000::	.Word	0		; @
+	.Word	0		; A
+	.Word	L0010
+	.Word	L0020
+	.Word	L0207
+	.Word	L0248
+	.Word	L0249
+	.Word	L0304
+	.Word	0		; H
+	.Word	L0323
+	.Word	0		; J
+	.Word	L0328
+	.Word	L0329
+	.Word	0		; M
+	.Word	L0346
+	.Word	L0351
+	.Word	L0361
+	.Word	0		; Q
+	.Word	L0506
+	.Word	L0637
+	.Word	L0654
+	.Word	L0655
+	.Word	0		; V
+	.Word	L0656
+	.Word	0		; X
+	.Word	0		; Y
+	.Word	0		; Z
+	.Word	0		; [
+	.Word	0		; \
+	.Word	0		; ]
+	.Word	0		; ^
+	.Word	L0666
+
+	.Psect	Trees$
+L0010:	.Word	<'E & 37> ! < L0017-. * 40>
+	.Word	<'L & 37> ! < L0018-. * 40>
+	.Word	<'S & 37> ! < L0019-. * 40>
+	.Word	-1	; End of table
+
+	.Psect	Tails$
+L0017:	.Ascii	<41>/EP/<40>
+L0018:	.Ascii	<46>/OAD/<40>
+L0019:	.Ascii	<47>/AVE/<40>
+
+	.Psect	Trees$
+L0020:	.Word	<'I & 37> ! < L0176-. * 40>
+	.Word	<'L & 37> ! < L0177-. * 40>
+	.Word	<'O & 37> ! < L0206-. * 40>
+	.Word	-1	; End of table
+
+	.Psect	Tails$
+L0176:	.Ascii	<4>/RCLE/<40>
+
+	.Psect	Trees$
+L0177:	.Word	<'E & 37> ! < L0199-. * 40>
+	.Word	<'O & 37> ! < L0200-. * 40>
+	.Word	<'S & 37> ! < L0205-. * 40>
+	.Word	-1	; End of table
+
+	.Psect	Tails$
+L0199:	.Ascii	<37>/AR/<40>
+
+	.Psect	Trees$
+L0200:	.Word	<'A & 37> ! < L0203-. * 40>
+	.Word	<'S & 37> ! < L0204-. * 40>
+	.Word	-1	; End of table
+
+	.Psect	Tails$
+L0203:	.Ascii	<102>/D/<40>
+L0204:	.Ascii	<16>/E/<40>
+L0205:	.Byte	42, 40
+L0206:	.Ascii	<43>/LOR/<40>
+
+	.Psect	Trees$
+L0207:	.Word	<'A & 37> ! < L0240-. * 40>
+	.Word	<'E & 37> ! < L0241-. * 40>
+	.Word	<'I & 37> ! < L0246-. * 40>
+	.Word	<'R & 37> ! < L0247-. * 40>
+	.Word	-1	; End of table
+
+	.Psect	Tails$
+L0240:	.Ascii	<35>/TA/<40>
+
+	.Psect	Trees$
+L0241:	.Word	<'F & 37> ! < L0244-. * 40>
+	.Word	<'L & 37> ! < L0245-. * 40>
+	.Word	-1	; End of table
+
+	.Psect	Tails$
+L0244:	.Byte	5, 40
+L0245:	.Ascii	<66>/AY/<40>
+L0246:	.Ascii	<2>/M/<40>
+L0247:	.Ascii	<22>/AW/<40>
+L0248:	.Ascii	<34>/ND/<40>
+
+	.Psect	Trees$
+L0249:	.Word	<'G & 37> ! < L0295-. * 40>
+	.Word	<'L & 37> ! < L0296-. * 40>
+	.Word	<'O & 37> ! < L0297-. * 40>
+	.Word	<'P & 37> ! < L0298-. * 40>
+	.Word	<'S & 37> ! < L0299-. * 40>
+	.Word	-1	; End of table
+
+	.Psect	Tails$
+L0295:	.Ascii	<70>/ET/<40>
+L0296:	.Ascii	<72>/OAD/<40>
+L0297:	.Ascii	<6>/R/<40>
+L0298:	.Ascii	<67>/UT/<40>
+
+	.Psect	Trees$
+L0299:	.Word	<'A & 37> ! < L0302-. * 40>
+	.Word	<'O & 37> ! < L0303-. * 40>
+	.Word	-1	; End of table
+
+	.Psect	Tails$
+L0302:	.Ascii	<71>/VE/<40>
+L0303:	.Ascii	<63>/UND/<40>
+
+	.Psect	Trees$
+L0304:	.Word	<'E & 37> ! < L0317-. * 40>
+	.Word	<'O & 37> ! < L0318-. * 40>
+	.Word	-1	; End of table
+
+	.Psect	Tails$
+L0317:	.Ascii	<57>/T/<40>
+
+	.Psect	Trees$
+L0318:	.Word	<'S & 37> ! < L0321-. * 40>
+	.Word	<'T & 37> ! < L0322-. * 40>
+	.Word	-1	; End of table
+
+	.Psect	Tails$
+L0321:	.Ascii	<7>/UB/<40>
+L0322:	.Ascii	<10>/O/<40>
+
+	.Psect	Trees$
+L0323:	.Word	<'F & 37> ! < L0326-. * 40>
+	.Word	<'N & 37> ! < L0327-. * 40>
+	.Word	-1	; End of table
+
+	.Psect	Tails$
+L0326:	.Byte	11, 40
+L0327:	.Ascii	<12>/PUT/<40>
+L0328:	.Ascii	<40>/EY/<40>
+
+	.Psect	Trees$
+L0329:	.Word	<'E & 37> ! < L0342-. * 40>
+	.Word	<'I & 37> ! < L0343-. * 40>
+	.Word	<'O & 37> ! < L0344-. * 40>
+	.Word	<'P & 37> ! < L0345-. * 40>
+	.Word	-1	; End of table
+
+	.Psect	Tails$
+L0342:	.Ascii	<13>/T/<40>
+L0343:	.Ascii	<3>/NE/<40>
+L0344:	.Ascii	<36>/CATE/<40>
+L0345:	.Ascii	<31>/RINT/<40>
+
+	.Psect	Trees$
+L0346:	.Word	<'E & 37> ! < L0349-. * 40>
+	.Word	<'O & 37> ! < L0350-. * 40>
+	.Word	-1	; End of table
+
+	.Psect	Tails$
+L0349:	.Ascii	<17>/XT/<40>
+L0350:	.Ascii	<64>/SOUND/<40>
+
+	.Psect	Trees$
+L0351:	.Word	<'N & 37> ! < L0358-. * 40>
+	.Word	<'P & 37> ! < L0359-. * 40>
+	.Word	<'U & 37> ! < L0360-. * 40>
+	.Word	-1	; End of table
+
+	.Psect	Tails$
+L0358:	.Byte	32, 40
+L0359:	.Ascii	<14>/EN/<40>
+L0360:	.Ascii	<27>/T/<40>
+
+	.Psect	Trees$
+L0361:	.Word	<'A & 37> ! < L0488-. * 40>
+	.Word	<'O & 37> ! < L0498-. * 40>
+	.Word	<'R & 37> ! < L0499-. * 40>
+	.Word	<'S & 37> ! < L0504-. * 40>
+	.Word	<'U & 37> ! < L0505-. * 40>
+	.Word	-1	; End of table
+L0488:	.Word	<'G & 37> ! < L0495-. * 40>
+	.Word	<'I & 37> ! < L0496-. * 40>
+	.Word	<'L & 37> ! < L0497-. * 40>
+	.Word	-1	; End of table
+
+	.Psect	Tails$
+L0495:	.Ascii	<65>/E/<40>
+L0496:	.Ascii	<20>/NT/<40>
+L0497:	.Ascii	<61>/ETTE/<40>
+L0498:	.Ascii	<26>/KE/<40>
+
+	.Psect	Trees$
+L0499:	.Word	<'E & 37> ! < L0502-. * 40>
+	.Word	<'I & 37> ! < L0503-. * 40>
+	.Word	-1	; End of table
+
+	.Psect	Tails$
+L0502:	.Ascii	<45>/SET/<40>
+L0503:	.Ascii	<21>/NT/<40>
+L0504:	.Ascii	<44>/ET/<40>
+L0505:	.Ascii	<60>/T/<40>
+
+	.Psect	Trees$
+L0506:	.Word	<'E & 37> ! < L0611-. * 40>
+	.Word	-1	; End of table
+L0611:	.Word	<'A & 37> ! < L0632-. * 40>
+	.Word	<'M & 37> ! < L0633-. * 40>
+	.Word	<'P & 37> ! < L0634-. * 40>
+	.Word	<'S & 37> ! < L0635-. * 40>
+	.Word	<'T & 37> ! < L0636-. * 40>
+	.Word	-1	; End of table
+
+	.Psect	Tails$
+L0632:	.Ascii	<25>/D/<40>
+L0633:	.Byte	23, 40
+L0634:	.Ascii	<53>/EAT/<40>
+L0635:	.Ascii	<33>/TORE/<40>
+L0636:	.Ascii	<24>/URN/<40>
+
+	.Psect	Trees$
+L0637:	.Word	<'C & 37> ! < L0650-. * 40>
+	.Word	<'M & 37> ! < L0651-. * 40>
+	.Word	<'O & 37> ! < L0652-. * 40>
+	.Word	<'T & 37> ! < L0653-. * 40>
+	.Word	-1	; End of table
+
+	.Psect	Tails$
+L0650:	.Ascii	<50>/REEN/<40>
+L0651:	.Ascii	<73>/ODE/<40>
+L0652:	.Ascii	<62>/UND/<40>
+L0653:	.Ascii	<30>/OP/<40>
+L0654:	.Ascii	<52>/RAP/<40>
+L0655:	.Ascii	<54>/NTIL/<40>
+
+	.Psect	Trees$
+L0656:	.Word	<'E & 37> ! < L0663-. * 40>
+	.Word	<'H & 37> ! < L0664-. * 40>
+	.Word	<'I & 37> ! < L0665-. * 40>
+	.Word	-1	; End of table
+
+	.Psect	Tails$
+L0663:	.Ascii	<56>/ND/<40>
+L0664:	.Ascii	<55>/ILE/<40>
+L0665:	.Ascii	<51>/DTH/<40>
+
+	.Psect	Trees$
+L0666:	.Word	<'C & 37> ! < L0712-. * 40>
+	.Word	<'O & 37> ! < L0717-. * 40>
+	.Word	<'P & 37> ! < L0718-. * 40>
+	.Word	<'R & 37> ! < L0719-. * 40>
+	.Word	<'W & 37> ! < L0720-. * 40>
+	.Word	-1	; End of table
+L0712:	.Word	<'L & 37> ! < L0715-. * 40>
+	.Word	<'R & 37> ! < L0716-. * 40>
+	.Word	-1	; End of table
+
+	.Psect	Tails$
+L0715:	.Ascii	<75>/OSE/<40>
+L0716:	.Ascii	<74>/EATE/<40>
+L0717:	.Ascii	<76>/PEN/<40>
+L0718:	.Ascii	<101>/URGE/<40>
+L0719:	.Ascii	<77>/EAD/<40>
+L0720:	.Ascii	<100>/RITE/<40>
+
+	.Psect	Trees$,i
+F0000::	.Word	0		; `
+	.Word	F0010
+	.Word	F0014
+	.Word	F0015
+	.Word	0		; d
+	.Word	F0022
+	.Word	F0025
+	.Word	0		; g
+	.Word	F0029
+	.Word	F0030
+	.Word	0		; j
+	.Word	0		; k
+	.Word	F0036
+	.Word	F0040
+	.Word	0		; n
+	.Word	F0041
+	.Word	F0042
+	.Word	0		; q
+	.Word	F0048
+	.Word	F0049
+	.Word	F0057
+	.Word	F0058
+	.Word	F0059
+	.Word	0		; w
+	.Word	0		; x
+	.Word	0		; y
+	.Word	0		; z
+
+	.Psect	Trees$
+F0010:	.Word	<'B & 37> ! < F0011-. * 40>
+	.Word	<'S & 37> ! < F0012-. * 40>
+	.Word	<'T & 37> ! < F0013-. * 40>
+	.Word	-1	; End of table
+
+	.Psect	Tails$
+F0011:	.Ascii	<16>/S/<200>
+F0012:	.Ascii	<30>/C/<200>
+F0013:	.Ascii	<11>/N/<200>
+F0014:	.Ascii	<43>/IN$/<200>
+
+	.Psect	Trees$
+F0015:	.Word	<'H & 37> ! < F0016-. * 40>
+	.Word	<'I & 37> ! < F0017-. * 40>
+	.Word	<'O & 37> ! < F0018-. * 40>
+	.Word	<'S & 37> ! < F0019-. * 40>
+	.Word	-1	; End of table
+
+	.Psect	Tails$
+F0016:	.Ascii	<42>/R$/<200>
+F0017:	.Ascii	<21>/NT/<200>
+F0018:	.Ascii	<7>/S/<200>
+
+	.Psect	Trees$
+F0019:	.Word	<'N & 37> ! < F0020-. * 40>
+	.Word	<'R & 37> ! < F0021-. * 40>
+	.Word	-1	; End of table
+
+	.Psect	Tails$
+F0020:	.Ascii	<20>/G/<200>
+F0021:	.Ascii	<23>/LIN/<200>
+
+	.Psect	Trees$
+F0022:	.Word	<'O & 37> ! < F0023-. * 40>
+	.Word	<'X & 37> ! < F0024-. * 40>
+	.Word	-1	; End of table
+
+	.Psect	Tails$
+F0023:	.Ascii	<22>/F/<200>
+F0024:	.Ascii	<12>/P/<200>
+
+	.Psect	Trees$
+F0025:	.Word	<'I & 37> ! < F0026-. * 40>
+	.Word	<'N & 37> ! < F0027-. * 40>
+	.Word	<'R & 37> ! < F0028-. * 40>
+	.Word	-1	; End of table
+
+	.Psect	Tails$
+F0026:	.Ascii	<15>/X/<200>
+F0027:	.Byte	35, 200
+F0028:	.Ascii	<26>/E/<200>
+F0029:	.Ascii	<45>/EX$/<200>
+
+	.Psect	Trees$
+F0030:	.Word	<'N & 37> ! < F0031-. * 40>
+	.Word	-1	; End of table
+F0031:	.Word	<'K & 37> ! < F0032-. * 40>
+	.Word	<'P & 37> ! < F0033-. * 40>
+	.Word	<'S & 37> ! < F0034-. * 40>
+	.Word	<'T & 37> ! < F0035-. * 40>
+	.Word	-1	; End of table
+
+	.Psect	Tails$
+F0032:	.Ascii	<36>/EY$/<200>
+F0033:	.Byte	2, 200
+F0034:	.Ascii	<32>/TR/<200>
+F0035:	.Byte	14, 200
+
+	.Psect	Trees$
+F0036:	.Word	<'E & 37> ! < F0037-. * 40>
+	.Word	<'O & 37> ! < F0038-. * 40>
+	.Word	<'P & 37> ! < F0039-. * 40>
+	.Word	-1	; End of table
+
+	.Psect	Tails$
+F0037:	.Ascii	<27>/N/<200>
+F0038:	.Ascii	<13>/G/<200>
+F0039:	.Ascii	<25>/OS/<200>
+F0040:	.Ascii	<37>/ID$/<200>
+F0041:	.Ascii	<44>/CT$/<200>
+
+	.Psect	Trees$
+F0042:	.Word	<'E & 37> ! < F0043-. * 40>
+	.Word	<'I & 37> ! < F0044-. * 40>
+	.Word	<'O & 37> ! < F0045-. * 40>
+	.Word	-1	; End of table
+
+	.Psect	Tails$
+F0043:	.Ascii	<3>/EK/<200>
+F0044:	.Byte	0, 200
+
+	.Psect	Trees$
+F0045:	.Word	<'I & 37> ! < F0046-. * 40>
+	.Word	<'S & 37> ! < F0047-. * 40>
+	.Word	-1	; End of table
+
+	.Psect	Tails$
+F0046:	.Ascii	<1>/NT/<200>
+F0047:	.Byte	24, 200
+F0048:	.Ascii	<4>/ND/<200>
+
+	.Psect	Trees$
+F0049:	.Word	<'G & 37> ! < F0050-. * 40>
+	.Word	<'I & 37> ! < F0051-. * 40>
+	.Word	<'Q & 37> ! < F0052-. * 40>
+	.Word	<'T & 37> ! < F0053-. * 40>
+	.Word	-1	; End of table
+
+	.Psect	Tails$
+F0050:	.Ascii	<17>/N/<200>
+F0051:	.Ascii	<6>/N/<200>
+F0052:	.Ascii	<5>/R/<200>
+
+	.Psect	Trees$
+F0053:	.Word	<'R & 37> ! < F0054-. * 40>
+	.Word	-1	; End of table
+F0054:	.Word	<'$ & 37> ! < F0055-. * 40>
+	.Word	<'I & 37> ! < F0056-. * 40>
+	.Word	-1	; End of table
+
+	.Psect	Tails$
+F0055:	.Byte	41, 200
+F0056:	.Ascii	<40>/NG$/<200>
+F0057:	.Ascii	<10>/AN/<200>
+F0058:	.Ascii	<34>/SR/<200>
+
+	.Psect	Trees$
+F0059:	.Word	<'A & 37> ! < F0060-. * 40>
+	.Word	-1	; End of table
+F0060:	.Word	<'L & 37> ! < F0061-. * 40>
+	.Word	<'R & 37> ! < F0062-. * 40>
+	.Word	-1	; End of table
+
+	.Psect	Tails$
+F0061:	.Byte	31, 200
+F0062:	.Ascii	<33>/PTR/<200>
+
+
+	.End			; Конец модуля
+                                                                                                                                                                                                                                                 

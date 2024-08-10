@@ -1,0 +1,830 @@
+
+; new input/output module for basic
+; this unit handle IO operations of IDE
+.Inclu	/GenUkd.mac/
+
+.TITLE	PPIO
+
+.MCALL	.SERR .LOOKUP .CLOSE .ENTER .WRITW .READW .DELETE .CSISPC
+.MCALL	.PUSH .POP .RENAME .PURGE
+CHAN	= 15
+
+.MACRO	PUSH	ARG,R=SP
+	.IRP	A,<ARG>
+	MOV	A,-(R)
+	.ENDR
+.ENDM
+
+.MACRO	POP	ARG,R=SP
+	.IRP	A,<ARG>
+	MOV	(R)+,A
+	.ENDR
+.ENDM	
+	.PSECT	BASIC
+IOINI::	MOV	#INT104,@#104
+	CLR	@#26
+	.SERR
+	MOV	#DEFALT,R0
+	MOV	#DM,R1
+1$:	MOVB	(R1)+,(R0)+
+	BNE	1$
+	Call	ClrCod
+	
+	RETURN
+
+	
+UBRUK::
+	MOV	#376,PERR
+	JMP	CPEND
+	
+
+
+
+INT104::
+	MOV	#1000,SP
+	CALL	VRES
+	MOVB	PCOD,%0
+	ASL	%0
+	CLR	PERR
+	JMP	@JTAB(%0)
+
+
+JTAB:	.WORD	POPEN,PCLOSE,PREAD,PCREATE,PWRITE,PSWAP,PUNSWP,PCOMP
+	.WORD	PRUN,PCSIOP,PCSICR,PCSCRN,PGETFT,PTEST,PEXIT,PPRINT
+	.Word	PPrgRs,PLdTBO
+
+;	16.
+PprgRs:
+	Call	CloAll
+	Call	Vres
+	Mov	#Aprl,r0
+	Mov	#15,r1
+1$:	Mov	#1002,(r0)+
+	Sob	r1,1$
+	Mov	First,Last
+	Jsr	r4,Stand
+	.Word	Iconst
+	.Word	200.
+	.Word	ClrStr
+	.Word	CpEnd
+
+
+
+POPEN:						; ’›’ ”€‰‹ „‹ —’… (0)
+	.LOOKUP	#AREA,#CHAN,#PNAME
+	BCS	RT1E
+	MOV	R0,@#PLEN
+	JMP	CPEND
+
+
+PCLOSE:						; ‡€›’ ”€‰‹		  (1)
+	.CLOSE	#CHAN
+	BCS	RT1E
+	JMP	CPEND
+
+
+PREAD:						; ‘—’€’ „€›…	  (2)
+	.READW	#AREA,#CHAN,#TEXT,@#PLEN,@#PBLOCK
+	BCS	RT1E
+	JMP	CPEND
+	
+
+PCREAT:						; ‘‡„€’ ”€‰‹		  (3)
+	.ENTER	#AREA,#CHAN,#PNAME,#-1
+	BCS	RT1E
+	JMP	CPEND
+
+PWRITE:						; ‡€‘€’ „€›…	  (4)
+	.WRITW	#AREA,#CHAN,#TEXT,@#PLEN,@#PBLOCK
+	BCS	RT1E
+	JMP	CPEND
+
+
+PSWAP:						; … ‹€‘’           (5)
+	.ENTER	#AREA,#CHAN,#NTMP,#-1
+	.WRITW	#AREA,#CHAN,#TEXT,#512.*10.,#0
+	BCS	RT1E
+	JMP	PCLOSE
+
+RT1E:	MOV	#1,PERR
+	.PURGE	#CHAN
+	JMP	CPEND
+
+
+PUNSWP:						; ‚‘‘’€‚‹…… ‹€‘’  (6)  
+	.LOOKUP	#AREA,#CHAN,#NTMP
+	.READW	#AREA,#CHAN,#TEXT,#512.*10.,#0
+	.DELETE	#AREA,#CHAN,#NTMP
+	BCS	RT1E
+	JMP	CPEND
+
+CSI:	
+	MOV	SP,R5
+	.CSISPC	#BUF+120,R3,#BUF
+	MOV	R5,SP
+	RETURN
+
+
+
+PCSIOP:						;			  (9)
+	CALL	CSI
+	BCS	RT1E
+	.LOOKUP	#AREA,#CHAN,#BUF+156
+	BCS	RT1E
+	MOV	R0,@#PLEN
+	JMP	CPEND
+
+
+	
+PCSICR:						;			 (10)
+	CALL	CSI
+	BCS	RT1E
+$E:	.ENTER	#AREA,#CHAN,#BUF+156,#-1
+	BCS	RT1E
+	JMP	CPEND
+PCSCRN:						;			 (11)			
+	CALL	CSI
+	BCS	RT1E
+	MOV	#BUF+156,R0
+	MOV	#BUF+166,R1
+	MOV	(R0)+,(R1)+
+	MOV	(R0)+,(R1)+
+	MOV	(R0)+,(R1)+
+	MOV	(PC)+,(R1)+
+	.RAD50	/BAK/
+	.RENAME	#AREA,#CHAN,#BUF+156
+	BR	$E
+
+
+
+
+
+PCOMP:				; ‹– ƒ€›    (7)
+	Call	Csi
+	Mov	#Buf+156,r0
+	Mov	#TboNam,r1
+	Mov	(r0)+,(r1)+
+	Mov	(r0)+,(r1)+
+	Mov	(r0)+,(r1)+
+	Mov	#^RTBO,(r1)+
+
+	CALL	VRES
+	CLR	NUMBER
+	MOV	FCB,TABTOP
+	SUB	#6*600.,TABTOP	; ‚‰ …’„ …„…‹…
+				; €‡…€ ’€‹–› !!!!!
+	MOV	FCB,LABTOP	; R0 - …€‹›‰ €„…‘ ‚…› ’€‹–› ‘‘›‹
+	CALL	CLRCOD		; –€‹‚€’ ..
+	MOV	#DATBEG,DATPTR	; “€‡€’…‹ €—€‹€ ’€‹– DATA
+	MOV	#1,LYGIS	; “‘’€‚’ …† €’›
+	MOV	#TEXT,R1	; €„…‘ €—€‹€ .K.
+
+
+
+6$:	MOV	#10001,CPCD	; ‡€‘ ‚ . € —’…… ‘’ ‘•„ƒ ’.
+1$:	TSTB	CPCD		; ‘’“ ‘‹€‹
+	BNE	1$		; …’
+	Tstb	DbgId
+	Bne	18$
+	Mov	#D$Num,(r1)+
+	Mov	Number,(r1)+
+
+	
+18$:	
+	Mov	TabTop,MemAvl
+	Sub	r1,MemAvl
+	
+	INC	NUMBER
+	MOV	#BUF,R3		; ‹– ‘’
+	CMPB	#32,(R3)	; …– ’…‘’€ ƒ€›
+	BEQ	7$		; „€
+	TRAP	112		; “‘ …‹‚
+	TRAP	110		; …’€ …‘’
+	BR	9$		; …’
+	MOV	LABTOP,R0
+	JSR	R1,TSTLAB	; ‚…€ ‘‘›‹ € …’“
+	BR	10$		; ‘‘›‹ …’“.  
+	TST	-4(R4)		; „‚‰… …„…‹…… …’ ?
+	BNE	12$		; 
+	TRAP	23.		; „€. 
+12$:	MOV	-(R4),R5	; ‘‘›‹€ … 1
+11$:	MOV	(R5),R2		; ‘€‘’ €„…‘ ‘‹…„“™…‰ ‘‘›‹
+	MOV	R1,(R5)		; „‘’€‚’ €„…‘ € …‘’ ‘‘›‹
+	MOV	R2,R5		; ‚‘’€‚’ €„…‘ ‘‹…„. ‘‘›‹
+	BNE	11$		; …– ‘‘›‹ ? …’.
+	MOV	R1,(R4)		; „‘’€‚’ €„…‘ ‚ ’€‹–“
+	CLR	-(R4)		; ’…’ ‡€‘ € …’“
+	BR	9$
+
+
+
+
+
+10$:	MOV	R5,-(R0)	; ‡€…’ ‚ ’€‹–“ … ‘’
+	MOV	R1,-(R0)	; €„…‘ '…’ƒ „€ ‘’
+	CLR	-(R0)		; …„…‹’ ‘‹‚ ‘‘’ …’
+	MOV	R0,LABTOP	
+
+9$:	CMPB	#12,(R3)	; ‘’€ “‘’€ ?
+	BEQ	6$		; „€
+
+3$:	CALL	INSCMP		; ‘‹‚’ ‘’“–
+	CMPB	#12,(R3)	; …– ‘’ ?
+	BEQ	6$		; „€
+4$:	CMPB	#'',(R3)	; …’€‰
+	BEQ	6$		; „€
+	TRAP	2		; …‘‹ …’, ’ €
+
+				; “‘…… ‡€‚……… ‹–
+7$:	
+	MOV	LABTOP,R0
+14$:	CMP	R0,FCB
+	BHIS	13$
+	TST	(R0)+
+	BNE	15$
+	CMP	(R0)+,(R0)+
+	BR	14$	
+15$:	MOV	-2(R0),NUMBER
+	TRAP	8.
+
+
+
+
+13$:	MOV	#ENDPRG,(R1)+	; „‘’€‚’ ‚ …– ‘’‚“ ‘’“–
+	MOV	R1,ENDCOD	; €„…‘ —€ „€.
+	MOV	DATBEG,DATPTR	; €„…‘ ‹€ DATA
+	CALL	STRMEM		; €‘…„…‹’ €’
+	Call	TBOCre		; ‘®§¤ βμ Object δ ©«
+	CLR	PERR		; —‘’’ ”‹€ƒ  
+	JMP	CPEND		; ‚›‰’ ‡ –…‘‘€.
+
+
+PLdTbo::
+	Call	LdObj
+	Bcc	1$
+	Mov	#1,PErr
+1$:	Jmp	CpEnd
+
+
+LdObj::	Mov	#DefTbo,R3
+	Call	CSI
+	.LookUp	#Area,#Chan,#Buf+156
+	Bcs	LdErr
+	.ReadW	#Area,#Chan,#BufFil,#400,#0
+	Bcs	LdErr
+	Cmp	BufFil,#Text
+	Bne	LdErr
+	Cmp	BufFil+WHIMEM-LYGIS+400,WHIMEM
+	Bhi	LdErr
+	Mov	#BufFil+400,r0
+	Mov	#LYGIS,r1
+	Mov	#200,r2
+1$:	Mov	(r0)+,(r1)+
+	Sob	r2,1$
+	Mov	BufFil+2,r1
+	Asr	r1
+	Mov	#Text,r0			;¥΅®«μθ®¥ ¬¥ΰ®―ΰ¨οβ¨¥ ―®
+2$:	Clr	(r0)+				;®η¨αβª¥ ― ¬οβ¨
+	Cmp	r0,TabTop
+	Blo	2$
+	.ReadW	#Area,#Chan,#Text,r1,#1
+	Bcs	LdErr
+	Mov	EndCod,r1
+	Mov	Lent,r2
+3$:	Mov	(r1)+,(r2)+
+	Cmp	r2,TabTop
+	Blo	3$
+	.Close	#Chan
+	Clc
+	Return
+
+LdErr:	.Purge	#Chan
+	Sec
+	Return
+
+DefTbo:	.Rad50	/TBO/
+
+TboCre::
+	Tstb	TboId
+	Beq	11$
+	Mov	#BUFFIL,r0	;γδ¥ΰ δ ©« 
+	Mov	#Text,(r0)+	;€¤ΰ¥α ­ η « 
+	Clr	(r0)+
+	Mov	#"BO,(r0)+	;ΰ¨§­ ª δ ©« 
+2$:	Clrb	(r0)+
+	Cmp	r0,#BufFil+400
+	Bne	2$
+	Mov	#Stack,r1
+	Mov	#200,r2
+3$:	Mov	(r1)+,(r0)+
+	Sob	r2,3$
+	
+	Mov	Lent,r2
+	Mov	EndCod,r1
+4$:	Mov	(r2)+,(r1)+
+	Cmp	r2,TabTop
+	Blo	4$
+	Sub	#Text,r1
+	Mov	r1,BufFil+2
+	Asr	r1
+	.Enter	#Area,#Chan,#TBONAM,#-1
+	.WritW	#Area,#Chan,#BufFil,#400,#0
+	.WritW	#Area,#Chan,#Text,r1,#1
+	Bcs	12$
+	.Close	#Chan
+11$:	Return
+
+12$:	Trap	19.
+
+TBONAM:	.Blkw	4
+
+CPEND::				; —€… ‚›‹… –…‘‘‚ –
+	MOV	#1000,SP
+	MOV	SAV474,@#474	; ‚®αβ ­®Ά¨βμ Ά¥ªβ®ΰ ¤¨αª®Ά®¤ 
+	MOV	#340,@#476	; PSW
+	CLRB	PREADY
+	MTPS	#0	
+	BR	.
+	
+
+
+
+	
+INSCMP::			; ‹– ‹€ …€’‚
+
+1$:
+	TRAP	112		; “‘ …‚›• …‹‚
+	JSR	R0,SEEKOP	; …„…‹’ „ …€’€
+	.WORD	L0000 / 2 ! 100000
+	.WORD	2
+	CLR	R5		; … ‡€›‰ …€’
+	CALL	@AOPSUB(R5)	; ‹– „ƒ …€’€
+	TRAP	112		; “‘’’ …‹›
+	CMPB	#':,(R3)+	; …™… …€’› …‘’ ?
+	BEQ	1$		; „€.
+	DEC	R3		; 
+	RETURN
+
+TSTLAB::MOV	FCB,R4		; –…„“€ …„…‹…’ €‹—…
+1$:	CMP	R4,R0		; ‚ ’€‹–… ‘‘›‹ €‹—… …’
+	BLOS	3$		; ‚‡‚€’
+	CMP	-(R4),R5	; .   …’ …’“
+	BEQ	2$		; .+2 …’€ …‘’
+	CMP	-(R4),-(R4)
+	BR	1$
+
+2$:	TST	(R1)+
+3$:	RTS	R1
+
+
+PRUN::	
+	CALL	CLOALL
+	CLR	LYGIS
+	CALL	VRES
+	Call	ScrRes
+	Call	CurOff
+	Clr	ApdId
+	MOV	#TEXT,R4
+	JMP	@(R4)+
+
+VRES::
+	MOV	#2,@#76
+	MOV	#76,@#100
+	MOV	#IVS,@#AVPK
+	MOV	#100,@#ARSK
+	RETURN
+	
+
+
+PPRINT::
+	Call	Vres	
+	MOV	#BUF+60.,R3
+	MOV	#TEXT,R1
+	Trap	112
+	Cmp	r3,#Buf+97.
+	Bhi	2$
+
+1$:	Trap	112
+	Call	Let
+	Trap	112
+	Cmpb	#':,(r3)+
+	Beq	1$
+	Cmp	r3,#Buf+97.
+	Bhi	3$
+7$:	Trap	2
+3$:	Mov	#2$,(r1)+
+	Mov	#Text,r4
+	Jmp	@(r4)+
+
+2$:	
+	Mov	#Buf,r3
+	Mov	#Text,r1
+	CALL	LPRINT
+	Trap	112
+	Cmp	r3,#Buf+37.
+	Blos	7$
+	MOV	#CpEnd,(R1)+
+	Clr	LplCfl
+	Clr	LptPos
+	MOV	#TEXT,R4
+	JMP	@(R4)+
+	
+
+
+
+
+
+
+
+
+
+PTEST:				; ‘’€‘—…‘‰ €€‹‡€’ … ”€‰‹€
+	MOV	#DEFALT,R4	; …’› … ”€‰‹€  “‹—€ 
+	MOV	#BUF,R5		;  ”€‰‹€
+	CALL	FTEST		; ‚›‡‚ €€‹‡€’€
+	MOVB	MASKID,PERR+1	; ‡€ €‹—€ €‘
+	BCC	2$		; € ‚ … ”€‰‹€ ?
+	INC	PERR		; „€, †€‹“…‘ .
+2$:	JMP	CPEND
+	
+	
+
+
+
+FTEST:
+	PUSH	R5		; ‘•€’ “€‡€’…‹ €  ”€‰‹€
+	MOV	R4,R5		; ‚›‡‚€’ –…„““ ‘ ……  “‹—€
+	CALL	FT1		; 
+	MOV	(SP),R5		; ‚‘’€‚’ “€‡€’… € .”.
+1$:	CMPB	#40,(R5)+
+	DEC	R5
+	BEQ	1$
+	
+	
+	
+	
+	CLR	MASKID		; —‘’’ ‡€ €‘
+	CALL	FT1		; ‚›‡‚€’ –…„““ ‘ …… ”€‰‹€ ‡ .
+	POP	R5		; 
+	BCS	20$		; € ›‹€ ?
+	JSR	R1,COP		; ‘‚€’  “‘’‰‘’‚€
+	.WORD	DEVNAM,':
+	JSR	R1,COP		; ‘‚€’  ”€‰‹€
+	.WORD	FLENAM,'.
+	JSR	R1,COP		; ‘‚€’ €‘……
+	.WORD	EXTNAM,0
+
+20$:	RETURN			; ‚›‰’
+	
+
+COP:				; ‚€… …,  €‘‡€‚€… €‘
+	MOV	(R1)+,R0
+1$:	CMPB	#'*,(R0)
+	BEQ	2$
+	CMPB	#'%,(R0)
+	BNE	3$
+2$:	MOVB	#1,MASKID
+
+3$:	MOVB	(R0)+,(R5)+
+	BNE	1$	
+	MOVB	(R1)+,-1(R5)
+	INC	R1
+	RTS	R1
+	
+	
+	
+	
+FT1:	MOV	#DSEEK,CURTAB	; “‘’€‚’ “€‡€’…‹ € ’€‹–“ ‘€ “‘‰‘’‚€
+	MOV	R5,R3		; “€‡€’…‹ 1 €  ”€‰‹€
+	MOV	R5,R2		; “€‡€’…‹ 2 €  ”€‰‹€
+	
+	
+10$:	MOV	CURTAB,R1	; R1 - €„…‘ ’…“™…‰ ’€‹–›
+	BEQ	EXIT		; …‘‹ ‹, ’ ‚‘… ’€‹–› ’€’€‹
+	
+1$:	CMPB	(R1),@R3	; ‘‹…„“™‰ ‘‚‹ ‘‚€„€…’ ‘ ’€‹—› €‡„…‹’…‹…
+	BEQ	3$		; „€ - ……•„
+	TSTB	@R1		; …– ’€‹–› „‘’ƒ“’
+	BEQ	2$		; „€ - ……•„
+	ADD	#6,R1		; €—… - ‘‹…„“™‰ ‹……’ ’€‹–›
+	BR	1$
+
+2$:	INC	R3		; ……•„ € ‘‹…„“™‰ ‘‚‹ … 
+	BR	10$
+	
+
+				; ’€‹—›‰ €‡„…‹’…‹ €‰„…
+3$:	MOV	4(R1),CURTAB	; ‡€ƒ“‡€ ‡ ’€‹–› €„…‘€ ‘‹…„“™…‰ ’€‹–›
+	CALL	@2(R1)		; ……•„ € –…„““ ‚€ …’›
+	BCC	10$		; …’  - „‹†€’
+	
+
+EXIT:	RETURN
+
+
+DEVCPY:	JSR	%1,CPY		; ‚€… … “‘’‰‘’‚€ ‚ …†“’—›‰ “”…
+	.WORD	DEVNAM		; €„…‘ “”…€
+	.WORD	3		; €‘€‹… —‘‹ ‘‚‹‚ ‚ … = 3
+	RETURN
+	
+FNCPY:	
+	JSR	%1,CPY		; ‚€… … ”€‰‹€
+	.WORD	FLENAM
+	.WORD	6
+	RETURN
+	
+EXTCPY:
+	JSR	%1,CPY		; ‚€… €‘… 
+	.WORD	EXTNAM
+	.WORD	3
+	RETURN
+
+
+CPY:				; ‚“’ –…„“€ ‚€ ‚ “”…
+	MOV	(R1)+,R0
+	MOV	R3,R5
+	MOV	R2,R4
+	SUB	R4,R5
+	CMP	(R1)+,R5
+	BLO	ERROR
+	TST	R5
+	BEQ	2$
+1$:	CMPB	#'*,(R4)
+	BEQ	5$
+3$:	CMPB	#'%,(R4)
+	BEQ	5$
+	CMPB	(R4),#'0
+	BLO	ERROR
+	CMPB	(R4),#'9
+	BLOS	5$
+	BICB	#40,(R4)
+	CMPB	(R4),#'A
+	BLO	ERROR
+	CMPB	#'Z,(R4)
+	BLO	ERROR
+5$:	MOVB	(R4)+,(R0)+
+	SOB	R5,1$
+	CLRB	(R0)+
+2$:	INC	R3
+	MOV	R3,R2
+ERROR:	RTS	R1
+
+
+
+
+
+
+
+
+
+PGETFT:
+	
+	MOV	#BUF,R5
+	MOV	#FLMASK,R4
+11$:	MOVB	(R5)+,(R4)+
+	CMPB	#':,-1(R4)
+	BNE	11$
+	CLRB	(R4)+
+	
+	MOV	SP,R4
+	.CSISPC	#BUF+120,#DEVEXT,#FLMASK
+	MOV	R4,SP
+	MOV	#FLMASK,R4
+12$:	MOVB	(R5)+,(R4)+
+	BNE	12$
+	
+	
+	
+	MOV	#TEXT,R1
+	MOV	#1,R5
+1$:	CALL	20$
+	MOV	#DBUF+12,R0
+2$:	BIT	#2000,(R0)
+	BNE	4$
+	BIT	#4000,(R0)
+	BNE	3$
+	ADD	#16,R0
+	BR	2$
+3$:	MOV	@#DBUF+2,R5
+	BEQ	9$
+	BR	1$
+4$:	TST	(R0)+
+	MOV	R1,R2
+	MOV	#10,R5
+41$:	CLR	(R2)+
+	SOB	R5,41$
+	PUSH	R1
+	ADD	#3,R1
+	MOV	#3,R2
+5$:	MOV	(R0)+,R5
+	MOV	#3,R3
+6$:	CLR	R4
+	DIV	#50,R4
+	MOVB	RTAB(R5),-(R1)
+	MOV	R4,R5
+	SOB	R3,6$
+	ADD	#6,R1
+	CMP	R2,#2
+	BNE	8$
+	SUB	#3,R1
+7$:	CMPB	-(R1),#40
+	BEQ	7$
+	INC	R1
+	MOVB	#'.,(R1)+
+	ADD	#3,R1
+8$:	SOB	R2,5$
+	MOV	(SP),R2
+	ADD	#16,R2
+	SUB	#3,R1
+14$:	CLRB	(R1)+
+	CMP	R1,R2
+	BLOS	14$
+	
+	MOV	(R0)+,(R2)
+	
+	MOV	(SP),R1
+	PUSH	R0
+	MOV	#FLMASK,R0
+	CALL	FNCMP
+	POP	R0
+	POP	R1
+	BCS	10$
+	ADD	#20,R1
+	
+10$:	ADD	#4,R0
+	BR	2$
+
+9$:	CLR	(R1)+
+	JMP	CPEND
+
+
+20$:	ASL	R5
+	CMP	(R5)+,(R5)+
+	.LOOKUP	#AREA,#CHAN,#BUF+156
+	.READW	#AREA,#CHAN,#DBUF,#1000,R5
+	BCC	21$
+	JMP	RT1E
+21$:	.CLOSE	#CHAN
+	RETURN
+
+
+FNCMP::	
+	PUSH	R0
+	PUSH	R1
+1$:	TSTB	(R0)
+	BNE	2$
+	TSTB	(R1)
+	BEQ	7$
+	BR	6$
+2$:	CMPB	#'%,(R0)+
+	BNE	3$
+	TSTB	(R1)+
+	BEQ	6$
+	BR	1$
+3$:	CMPB	#'*,-(R0)
+	BNE	5$
+	INC	R0
+	TSTB	(R0)
+	BEQ	7$
+4$:	CALL	FNCMP
+	BCC	7$
+	TSTB	(R1)+
+	BEQ	6$
+	BR	4$
+5$:	CMPB	(R0)+,(R1)+
+	BEQ	1$
+6$:	SEC
+7$:	POP	R1
+	POP	R0
+	RETURN
+	
+
+PEXIT:
+	JMP	ADDRMN
+	
+
+
+
+APUSH::	MOV	R4,-(SP)
+	MOV	R3,-(SP)
+	MOV	R2,-(SP)
+	MOV	R1,-(SP)
+	MOV	R0,-(SP)
+	MOV	R5,PC
+
+APOP::	MOV	R5,1$
+	TST	(SP)+
+	MOV	(SP)+,R5
+	MOV	(SP)+,R4
+	MOV	(SP)+,R3
+	MOV	(SP)+,R2
+	MOV	(SP)+,R1
+	MOV	(SP)+,R0
+	JMP	@(PC)+
+1$:	.BLKW	1
+
+
+SEEKOP::
+	JSR	R1,CMPRET
+	.BYTE	'?, 13.
+	JSR	R1,CMPRET
+	.BYTE	'', 1.
+
+SEEK::	MOV	R3,OLDR3
+	MOV	(R0)+,R2
+	ASL	R2
+	BCC	NEXT.C
+	MOVB	(R3)+,R5
+	BICB	#40,R5
+	CMPB	R5,#'A
+	BLO	E.BAD
+	CMPB	R5,#'_
+	BHI	E.BAD
+	BIC	#^C37,R5
+	ASL	R5
+	ADD	R5,R2
+	MOV	(R2),R2
+	BEQ	E.BAD
+	BR	ENTRY
+NEXT.C: 
+	MOVB	(R3)+,R4
+	BICB	#40,R4
+	CMPB	R4,#'A
+	BLO	E.BAD
+	CMPB	R4,#'Z
+	BHI	E.BAD
+	BIC	#^C37,R4
+LOOP:	MOV	(R2)+,R5
+	BIC	#^C37,R5
+	CMPB	R5,R4
+	BLO	LOOP
+	BGT	E.BAD
+	MOV	-(R2),R5
+	ASH	#-5,R5
+	ADD	R5,R2
+ENTRY:	CMP	R2,#TAILS$
+	BLO	NEXT.C
+	CLR	R5
+	BISB	(R2)+,R5
+NEXT.T:	MOVB	(R3)+,R4
+	Cmpb	r4,#100
+	Blo	1$
+	BIC	#40,R4
+1$:	CMPB	R4,(R2)+
+	BEQ	NEXT.T
+	DEC	R3
+	CMPB	-(R2),#200
+	BEQ	E.OK
+	MOV	R3,R2
+	SUB	OLDR3,R2
+	CMP	R2,(R0)
+	BLO	E.BAD
+
+
+E.OK:	ASL	R5
+	CMP	(R0)+,(R0)+
+	TRAP	112
+	RTS	R0
+
+E.BAD:	MOV	(PC)+,R3
+OLDR3:	.BLKW	1
+	TST	(R0)+
+	RTS	R0
+
+CMPRET:
+	CMPB	(R3),(R1)+
+	BNE	1$
+	MOVB	(R1)+,R5
+	POP	R1
+	TST	(R0)+
+	INC	R3
+	BR	E.OK
+1$:	INC     R1
+	RTS     R1
+
+
+
+
+DEVEXT:	.RAD50	/BASBASBASBAS/
+NTMP:	.RAD50	/DK TBASICSWP/
+
+AREA:	.BLKW	6
+RTAB:	.ASCII	/ ABCDEFGHIJKLMNOPQRSTUVWXYZ$%*0123456789/
+DEVIC:	.RAD50	/DK          /
+
+
+DSEEK:	.WORD	':	,DEVCPY	,FSEEK
+FSEEK:	.WORD	'.	,FNCPY	,ESEEK
+	.WORD	0	,FNCPY	,0
+
+
+ESEEK:	.WORD	0	,EXTCPY	,0
+
+
+DM:	.ASCIZ	/DK:*.BAS/
+
+
+.EVEN
+
+.END
+                                                                                                                                                                                                                                                                                                    

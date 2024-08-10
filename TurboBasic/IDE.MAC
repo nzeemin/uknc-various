@@ -1,0 +1,1372 @@
+;******************************************************************************
+;*                               Главный модуль                               *
+;*                               Файл : Ide.Mac                               *
+;*                    Свободное распространение (Free Ware)                   *
+;*                          Герасимов Олег   (09.05.95)                       *
+;******************************************************************************
+	.Mcall	.GtLin	.RofDF .Print .Cstat .Exit
+	.RofDf
+
+	.Title	IDE			; Заголовок листинга
+	.Ident	/V1.0/			; Номер версии
+
+;	Определение порядка расположения програмных секций
+	.Psect	Install			; Инсталятор в ЦП
+	.Psect	Locked			; Защишеная часть системы в ПП
+	.Psect	Variable		; Переменые
+	.Psect	System			; Простая часть системы в ПП
+mSwap::
+	.Psect	Data			; Данные 
+	.Psect	Text			; Тексты окошек и сообщения
+	.Psect	Reltab			; Таблица релокации
+PpStp::
+Rtab:
+;	Определение констант	
+	Lbuf	== 1000			; Буфер строки текстового редактора
+	Farea	== 1300			; Область для имени файла при обмене
+	TtBuf	== 2000			; Буфер очередь терминала
+	TtPtr	== 22544		; Указатель на начало очереди терминала
+	T1Ptr	== 22542		; Указатель на конец очереди терминала
+	TProc	== 7064			; Признак процесса терминала
+	TExtR	== 100000		; Начало текста 
+	HiText	== 170000		; Верхний предел текста
+	EdXPl	== 13000		; Регистр палитры окна редактора
+	NmXPl	== 13010		; Регистр палитры нижней строки
+
+	.Includ	/IDE.MLB/		; Подключение макробиблиотеки
+	Define				; Определение популярных констант
+	.RelDef	A			; Определение макроса Rel
+
+;______________________________________________________________________________
+
+;	Исполняемая часть ЦП. (Инсталятор)
+.Psect	Install				; Програмная секция
+
+IdeIni::
+;	Call	TgInst			; Запуск Турбо-Графики 
+;	Bcs	All.Er			; В случае ошибки выход.
+
+;	Проверка дополнительных параметров
+	Clrb	FdBuf
+	Mov	@#SysPtr,r0
+	Bit	StatWd(r0),#10000
+	Beq	10$
+	.GtLin	#FdBuf,#Prom
+
+
+10$:
+;	Определение имени устройства запуска
+	.Cstat	#Area,#17,#Addr
+	Mov	#HName+3,r1
+	
+	Mov	Addr+10.,r5		; Получить имя устройства
+	Mov	#3,r2			; В имени три буквы
+11$:	Clr	r4
+	Div	#40.,r4			; Преобразвание к ASCII
+	Add	#100,r5			; Запись симола в строку
+	Movb	r5,-(r1)
+	Mov	r4,r5
+	Sob	r2,11$
+
+	Movb	Addr+8.,HName+2		; Получить номер устройства
+	Bisb	#60,HName+2		; Преобразовать к ASCII
+
+
+;	Процедура загрузки резидента в ПП
+	Mov	#176674,R1		; Адрес регистра
+	Mov	#Mp.All,R0		; Выделить памяти
+	Call	Put
+	Tstb	(r0)			; Проверить ответ от ПП
+	Bne	All.Er			; Ошибка - выход.
+	Mov	Pp.Adr,r2		; Адрес начала выделенной памяти
+	Sub	#Begin,R2
+	Mov	#Rtab,r0		; Адрес таблицы релокации
+1$:	Add	R2,@(R0)+		; Релокация обращения метки
+	Tst	(R0)			; Конец таблицы ?
+	Bne	1$			; Нет - продолжать..
+	Mov	#Mp.Put,R0		; Переписать инсталятор в ПП
+	Call	Put
+	Clc				; Очистить признак ошибки
+	Mov	Pp.Adr,Es		; Запомнить адрес
+	Call	TGINST
+	Return				; Выход из модуля
+
+;	Процедура отправки МП в ПП
+Put:	Mov	#4,R2			; Число байтов в посылке
+	Inc	R0
+	Clrb	(R1)			; Подготовка канала к приему байта
+1$:	Tstb	(R1)			; Канал готов ?
+	Bpl	1$			; - Нет. ждать
+	Movb	R0,2(R1)		; Записать байт в канал
+	Swab	R0			; Следующий байт
+	Sob	R2,1$			; Цикл для всех байтов
+2$:	Tstb	(r1)			; Ожидание окончания выполнения команды
+	Bpl	2$
+	Dec	R0
+	Return				; Возврат
+;	Обработка ошибки
+All.Err:
+	.Print	#NoMem
+	.Exit
+
+;______________________________________________________________________________
+;	Массив данных "Выделить память"
+Mp.All:	.Word	400,32
+Pp.Adr:	.Word	0
+Pp.Len:	.Word	<PPStp-Begin>/2
+
+
+;	Массив данных "Записать данные в ПП"
+Mp.Put:	.Word	10000,32
+Rel	.Word	Begin
+	.Word	Begin
+	.Word	<PPStp-Begin>/2
+
+;	Массив данных "Запуск"
+Mp.Exe:	.Word 	14000,32
+Rel	.Word	Begin
+	
+Answ:	.Word	-1
+;______________________________________________________________________________
+
+NoMem:	.Asciz	/Нет памяти в сопроцессоре. Выгрузите резидентые программы./ 
+Prom:	.Ascii	/Имя файла #/<200>
+.Even
+Area:	.Blkw	3			; Масив параметров .Cstat
+Addr:	.Blkw	6			; Блок данных .Cstat
+
+;______________________________________________________________________________
+;	Резидентная часть в ПП
+	.Psect	Locked			; Програмная секция в ПП
+Begin::	Clr	@#16			; Очистка флага On Break
+
+	Mov	@#100,OldTM		; Сохранение вектора таймера 
+	Mov	@#34,OldTR		; Сохранение вектора TRAP
+	Mov	@#300,OldKb		; Сохранение вектора клавиатуры
+Rel	Mov	#Int100,@#100		; Новое значение вектора таймера
+Rel	Mov	#Int300,@#300		; Новое значение вектора клавиатуры
+Rel	Mov	#Int34,@#34		; Новое значение вектора TRAP
+
+Rel	Mov	#VarSeg,R0		; Адрес секции переменных
+	Mov	#<FdBuf-VarSeg>/2,R1	; Длина секции переменных
+1$:	Clr	(R0)+			; Очистка переменных
+	Sob	R1,1$
+
+	Mov	@#2470,SysPl		; Сохранение старой палитры
+	Mov	@#2472,SysPL+2
+	Mov	#135400,BasPl		; Палитра рабочего экрана
+	Mov	#177735,BasPl+2
+	Call	$Spcl			; Установка палитры редактора
+
+	Mov	#Ds/2,@#177010		; Получение адреса буфера в ЦП
+	Mov	@#177014,r0
+	Asr	r0
+	Mov	r0,Bbuf			; Начало буфера
+	Add	#5120.,r0
+	Mov	r0,kbuf			; Конец буфера
+
+
+
+	Call	SwpFnt			; Догрузка необходимого шрифта
+	Call	ReKey			; Переназначение клавиатуры
+	Call	ReScr			; Инициализация экрана
+
+
+Rel	Mov	#WBuf,WBPnt		; Вершина стека видеокон
+	Mov	#12200,LhPtr
+	Call	$BgPrt			; Печать начального экрана
+
+	Call	$LDSK			; Загрузка DeskTop файла
+	Call	$Ewp			; Отрытие окна редактора
+	Call	$Edit			; Переход в редактор
+;	Выход из среды
+	Call	@#100242		; 
+	Return				; Выход в Ос ПП
+
+
+CmAppl::
+	Tst	Cm.Flg
+	Beq	2$
+	Call	Comp.H
+2$:	
+	Tst	@#16
+	Beq	5$
+	Clr	@#16
+	
+	
+	Tst	Cm.Flg
+	Bne	4$
+	Tst	RN.FLG
+	Beq	3$
+	
+4$:	
+	Mov	#4/2,@#177010
+	Push	@#177014
+	Mov	#24/2,@#177010
+	Pop	@#177014
+	Bic	#100000,@#177716
+	Bis	#100000,@#177716
+5$:	Return
+	
+	
+
+
+3$:	
+	Mov	@#7210,r0
+	Mov	#FK10,(r0)+
+	Bic	#40,r0
+	Mov	r0,@#7210
+	Return
+
+
+Comp.H:	Mov	#177010,R0
+	Mov	#177014,R1
+	Mov	#CPCD/2,(R0)
+	Cmp	#10001,(R1)
+	Beq	1$
+	Return
+1$:	Mov	#Lbuf,R2
+	Mov	Cm.Ptr,(R0)
+
+	Cmp	Cm.Num,Mx.Lin
+	Bhi	8$
+
+	Mov	#177012,R1
+2$:	Movb	(R1),(R2)+
+	Beq	4$
+	Inc	(R0)
+	Br	2$
+
+4$:	Inc	(R0)
+	Mov	(R0),Cm.Ptr
+	Movb	#12,-1(R2)
+	Sub	#Lbuf-2,R2
+	Asr	R2
+	Tst	(R1)+
+	Mov	#Lbuf,R3
+	Mov	#Buf/2,(R0)
+
+5$:	Mov	(R3)+,(R1)
+	Inc	(R0)
+	Sob	R2,5$
+	Clc
+9$:	Mov	#CPCD/2,(R0)
+	Bic	(R1),(R1)
+
+	Mov	Cm.Num,R1
+	Bcs	17$
+	Bit	#17,R1
+	Bne	10$
+17$:	Call	$D.CNV
+	Push	<#22.,#7.>
+	Call	$Wloc
+	Clr	Cm.Flg
+	Print	R0
+	Push	<#29.,#7.>
+	Call	$Wloc
+	Print	R0
+	Mov	#MemAvl/2,@#177010
+	Mov	@#177014,r1
+	Call	$D.CNV
+	Push	<#22.,#10.>
+	Call	$Wloc
+	Print	r0
+	Mov	#177777,CM.FLG
+	
+10$:	Inc	CM.NUM
+	Return
+
+8$:	
+	Mov	#Buf/2,(R0)
+	Mov	#32,(R1)
+	Sec
+	Br	9$
+	
+	.Psect	System
+
+	
+ReKey::	Mov	#5,R5
+	Mov	#12400,R0
+Rel	Mov	#AkTab,R4
+RK:	Mov	(R4)+,R1
+	Mov	#200,R2
+Rel	Mov	#Nkey,R3
+2$:	Movb	(R3),4$+2
+	Bitb	#1,(R3)
+	Bne	3$
+	Movb	(R3)+,1$+2
+4$:	Mov	0(R1),(R0)+
+1$:	Mov	R2,0(R1)
+	Inc	R2
+	Br	2$
+3$:	Sob	R5,RK
+	Clr	@#7042
+	Clr	@#7230
+	Clr	@#22552
+	Call	@#105306
+	Call	@#104054
+	Return
+	
+
+
+NmKey::	Mov	#5,R5
+	Mov	#12400,R0
+Rel	Mov	#AkTab,R4
+
+RK0:	Mov	(R4)+,R1
+
+Rel	Mov	#Nkey,R3
+2$:	Bitb	#1,(R3)
+	Bne	3$
+	Movb	(R3)+,1$+2
+
+1$:	Mov	(R0)+,0(R1)
+	Br	2$	
+3$:	Sob	R5,RK0
+	Call	@#104054
+	Call	@#100242
+	Return
+
+
+ReScr::	Call	$TsFr
+	Mov	#7,@#2462
+	Mov	#2476,@#2466
+	Mov	#2462,@#2456
+	Mov	#22656,@#23150
+	Mov	#2461,@#23160
+	Call	$SetPL
+	Color	Yellow,Blue
+	Call	Twait
+	Mov	#1,@#177026
+	Call	ClrScr
+	Call	CurClr
+	Mov	#2500,R0
+	Mov	#100000,R1
+	Mov	#22.,R2
+	Call	$$CP
+	Mov	#11.*21.,R2
+	Add	#81.*2.,R1
+	Call	$$CP
+	Mov	#11.*2.,R2
+	Add	#81.*6.,R1
+	Call	$$CP
+	Mov	#6742,-(R0)
+	
+	Mov	#2500+<11.*23.*4.>,@#2552+<11.*4.*21.>
+	Mov	#2630,@#2552+<11.*4.*22.>
+	Mov	#EdXPl+6,@#2472+<13*4>
+	Mov	#EdXPl+4,R0
+	Mov	@#2474+<13*4>,(R0)+
+	Mov	#2500+<13*4>,(R0)+
+	Mov	#NmXPl+6,@#2502+<11.*4*24.>
+	Cmp	(R0)+,(R0)+
+	Mov	@#2504+<11.*4*24.>,(R0)+
+	Mov	#2510+<11.*4*24.>,(R0)+
+
+	Mov	#81.,@#22666
+	Mov	R1,WBuf+4
+	Clr	@#2400
+	Clr	@#2402
+	Clr	@#6750
+	Clr	@#6752
+	Return
+
+
+CurClr::Mov	#2476,R0
+	Mov	#286.,R1
+	Mov	#1,R2
+1$:	Bic	R2,(R0)+
+	Tst	(R0)+
+	Sob	R1,1$
+	Return
+
+
+$$CP:	Mov	R1,(R0)+
+	Add	#81.,R1
+	Tst	(R0)+
+	Mov	R0,-2(R0)
+	Sob	R2,$$CP
+	Return
+
+$SetPl::Call	$Push
+	Mov	#2470,R3
+Rel	Mov	#Plg1,R0
+	Mov	#4,R4
+1$:	Mov	(R0)+,R1
+	Bis	#10,R1
+	Mov	R1,R2
+	Ash	#4,R2
+	Bis	R2,R1
+	Movb	R1,EdXPl-2470(R3)
+	Movb	R1,NmXPl-2470(R3)
+	Movb	R1,(R3)+
+	Sob	R4,1$
+	Mov	@#2470,IDEPL
+	Mov	@#2472,IDEPL+2
+	Call	$Pop
+	Return	
+
+$Sppl::	Push	<R0,R1>
+Rel	Mov	#Plg1,R0
+	Mov	#4,R1
+1$:	Movb	(R5)+,(R0)+
+	Tstb	(R0)+
+	Sob	R1,1$
+	Pop	<R1,R0>
+	Call	$SetPL
+	Rts	R5
+	
+
+NmScr::	Call	$TsFr
+	Color	7,1
+	Mov	PLG2,R0
+	Asl	R0
+REL	Mov	Colrs(R0),R0
+	.Irp	F,<2470,EdXPl,NmXPl>
+	Mov	R0,@#F
+	Mov	R0,@#F+2
+	.Endr
+	Call	Twait
+	Mov	#2500,R0
+	Mov	#100000,R1
+	Mov	#286.,R2
+1$:	Mov	R0,-2(R0)
+	Mov	R1,(R0)+
+	Tst	(R0)+
+	Add	#80.,R1
+	Sob	R2,1$
+	Call	ClrScr
+	Call	$CurOn	
+	Return
+
+
+
+
+$BgPrt::
+	Call	$CurOf
+Rel	Mov	#Main,R3
+	Color	2(R3)
+	Loc	0,0
+	Print	(R3)
+	Loc	0,23.
+	Mov	#13,R0
+	Emt	42
+	
+$Cls::	Call	EdHide
+	Mov	#1,R3
+	Call	$GetY
+	Mov	#177010,R4
+	Mov	#177020,R5
+	Mov	R3,(R4)
+	Mov	#Cyan,@#177016
+	Mov	#Blue,R0
+	Asl	R0
+REL	Mov	Colrs(R0),R0
+	Mov	R0,(R5)+
+	Mov	R0,(R5)+
+	Mov	#<<23.*11.*81.>+<8.*81.>>/2,R0
+1$:	Clr	(R5)
+	Inc	(R4)
+	Clr	(R5)
+	Inc	(R4)
+	Sob	R0,1$
+	Call	EdShow
+	Return
+
+
+	
+$LdSk::
+Rel	Mov	#FdBuf,r0
+	Mov	#Lbuf+100,r1
+	Mov	#20,r2
+1$:	Movb	(r0)+,(r1)+
+	Sob	r2,1$
+	Clrb	(r1)+
+Rel	Mov	#Dll,r1
+	Call	DnPrt
+Rel	Print	#DLD
+Rel	Mov	#DsFile,R1
+	Call	$NCopy
+	
+	Movb	#9.,FFFF
+	Call	$$DsCl
+	Beq	$201
+	Call	Csi
+	Bcc	$300
+	
+
+$New::	Movb	#377,NoNMid
+	Clrb	ChngId
+Rel	Mov	#NFile,R0
+	Movb	#1,Ferr
+	Jmp	Crfl
+
+$201:
+	Clr	FBlk
+	Mov	#<EndPP-DscTop>/2,R3
+	Mov	R3,Flen
+	Movb	#2,FFFF
+	Call	C1Call
+	Bcs	$New
+Rel	Mov	#DscTop,R4
+	Mov	Bbuf,@#177010
+1$:	Mov	@#177014,(R4)+
+	Inc	@#177010
+	Sob	R3,1$
+	Movb	#1,FFFF
+	Call	C1Call
+	Call	$SetPl
+
+	Call	Csi
+	Bcc	$300
+
+REL	Mov	#EFNam,R1
+	Call	$NCopy
+	
+$300:	Clr	Rol.GD
+	Clr	ED.Y
+
+
+
+$LOADF::
+	
+REL	Mov	#DLL,R1
+	Call	DnPrt
+	PRINT	#FAREA
+
+	MOVB	#9.,FFFF
+	CALL	$$DSCL
+
+
+
+	MOV	#FAREA,R0
+	CLRB	NONMID
+	Clrb	ChngId
+CRFL::
+REL	MOV	#EFNAM,R1
+100$:	MOVB	(R0)+,(R1)+
+	BNE	100$
+	
+	
+	CLR	FBLK
+	MOV	#177010,R5
+	MOV	#177014,R4
+	MOV	#PLEN/2,(R5)
+	MOV	(R4),F.LEN
+	Mov	#TextR,R1
+	MOV	R1,UP.PTR
+	MOV	R1,SL.PTR
+	CLR	MX.LIN
+	
+	
+	TST	FERR
+	BEQ	101$
+	
+	CALL	PZUOFF
+	MOV	#20.,R0
+1000$:	CLRB	(R1)+
+	SOB	R0,1000$
+	MOV	R1,DN.PTR
+	CALL	PZUON
+	RETURN
+	
+
+
+
+101$:	MOV	#HiText,DN.PTR
+	CLR	R2
+	CLR	R3
+7777$:	CALL	PZUON
+	SUB	#20.,F.LEN
+	BMI	1$
+	MOV	#5120.,FLEN
+	BR	2$
+1$:	MOV	F.LEN,FLEN
+	ADD	#20.,FLEN
+	SWAB	FLEN
+2$:	MOVB	#2,FFFF
+	CALL	C1CALL
+	BCS	31$
+	ADD	#20.,FBLK
+	CALL	PZUOFF
+	MOV	BBUF,(R5)
+77$:	Cmp	(R5),kBUF
+	Bhis	7777$
+	.MOVB	(R4)+,R0
+	BEQ	666$
+	Cmp	r4,#177016
+	Bne	8$
+	TST	-(R4)
+	INC	(R5)
+8$:	Cmp	r0,#100
+	Blo	24$
+	BISB	R3,R0
+7$:	MOVB	R0,(R1)+
+	INC	R2
+	CMPB	#375,R2
+	BEQ	79$
+	BR	77$
+24$:	Cmp	r0,#40
+	Bhis	7$
+	Cmp	r0,#Tab
+	Bne	22$
+	CLR	R0
+	SUB	R2,R0
+	BIC	#7,R2
+	ADD	#10,R2
+	ADD	R2,R0
+	MOVB	#40,(R1)+
+	SOB	R0,.-4
+	BR	77$
+22$:	Cmp	r0,#Enter
+	Bne	23$
+79$:	CLR	R2
+	INC	MX.LIN
+	CALL	663$
+	CLRB	(R1)+
+	Cmp	R1,DN.PTR
+	Bhis	666$
+	BR	77$
+23$:	IF	R0 {} #16 THEN 3$
+	MOV	#200,R3
+	BR	77$
+3$:	IF	R0 {} #17 THEN 77$
+	CLR	R3
+	BR	77$
+666$:	CALL	663$
+	MOV	#20.,R2
+662$:	CLRB	(R1)+
+	SOB	R2,662$
+	MOV	R1,DN.PTR
+	CALL	PZUON
+	MOVB	#1,FFFF
+	CALL	C1CALL
+	RETURN
+663$:	PUSH	(R5)
+	MOV	R1,(R5)
+25$:	DEC	(R5)
+	CMPB	#40,2(R5)
+	BEQ	25$
+	MOV	(R5),R1
+	INC	R1
+	POP	(R5)
+31$:	RETURN
+
+Csi:
+	Mov	#Lbuf+100,r1
+	Tstb	(r1)
+	Beq	1$
+	Call	$Ncopy
+	Tst	Ferr
+	Bne	1$
+	Clc
+	Return
+1$:	Sec
+	Return
+	
+
+	
+
+
+$SaveF::
+	.If	Ne Version-Demo
+Rel	Mov	#EfNam,R1
+	Call	$NCopy
+	Color	Black,Cyan
+	Loc	0,23.
+Rel	Print	#DLS	
+Rel	Print	#EfNam	
+	Movb	#10.,R0
+	Bit	#1,ESW
+	Beq	13$
+	Inc	r0
+13$:	Movb	R0,ffff
+	Call	C1call
+	Bcs	19$
+	Clr	Fblk
+	Mov	#177010,R5
+	Mov	#177014,R4
+	Mov	BBuf,(R5)
+	Mov	Up.Ptr,R3
+	Dec	R3
+	Mov	Mx.Lin,-(SP)
+10$:	Push	(R5)
+	Mov	R3,(R5)
+	Clr	R2
+	Mov	#LBuf,R1
+1$:	Inc	(R5)
+	Movb	2(R5),(R1)+
+	Bne	1$
+	Movb	#15,-1(R1)
+	Movb	#12,(R1)+
+	Mov	(R5),R3
+	Pop	(R5)
+	Mov	#Lbuf,R0
+	Sub	R0,R1
+7$:	Cmp	(R5),kBuf
+	Blo	8$
+	Call	11$
+	Bcs	19$
+	Mov	bBuf,(R5)
+8$:	Movb	(R0)+,(R4)+
+	Bit	#1,R4
+	Bne	12$
+	Tst	-(R4)
+	Inc	(R5)
+12$:	Sob	R1,7$
+	Dec	(SP)
+	Bpl	10$
+	Tst	(SP)+
+	Dec	(R5)
+	Call	11$
+	Movb	#1,ffff
+	Call	C1Call
+	Clrb	ChngId
+	Jmp	DLCrea
+
+
+11$:	Mov	(R5),R2
+	Sub	bBuf,R2
+	Mov	R2,Flen
+	Movb	#4,ffff
+	Call	C1Call
+	Bcs	19$
+	Ash	#-8.,R2
+	Add	R2,FBLK
+	Clc
+.Iff	
+Rel	Window	#About
+.EndC
+
+19$:	Return
+
+
+C1CALL::
+	CALL	$$DSCL
+	BNE	1$
+	CLC
+	RETURN
+1$:	
+Rel	Mov	#IOERTX,r1
+	Call	DnPrt
+3$:	EMT	22
+	CMP	R0,#ENTER
+	BNE	2$
+	CALL	RSTCOL
+	CALL	DLCREA
+	BR	C1CALL
+
+2$:	CMP	R0,#ESCAPE
+	BNE	3$
+	CALL	RSTCOL
+	CALL	DLCREA
+	SEC	
+	RETURN
+DLCREA::
+
+Rel	Mov	#DL2,r1
+	Call	DnPrt
+	JMP	RSTCOL
+	
+DnPrt::
+	Loc	0.,23.
+	Color	Black,Cyan
+	Jmp	Pr
+
+.Save
+.Psect	Locked
+
+$$DSCL::CALL	$PUSH
+	MOV	#177010,R5
+	MOV	#177014,R4
+	MOV	#PCOD/2,(R5)
+	MOV	#7,R2
+REL	MOV	#FFFF,R3
+1$:	MOV	(R3)+,(R4)
+	INC	(R5)
+	SOB	R2,1$
+	MOV	#104/2,(R5)			; КОМАНДА ДЛЯ ЦП.
+	MOV	(R4),R3
+	MOV	#24/2,(R5)
+	MOV	(R4),-(SP)
+	MOV	R3,(R4)
+	BIC	#100000,@#177716
+	BIS	#100000,@#177716
+	MOV	(SP)+,(R4)
+2$:	TRAP	0
+	MOV	#PCOD/2,@#177010
+	IF	@#177014 { #0 THEN 2$
+	MOV	#PERR/2,@#177010
+	MOV	@#177014,FERR
+	CALL	$POP
+	TST	FERR
+	RETURN
+
+FFFF::	.BYTE	0,377
+	.BLKW	4		; /* MicroSoft Reserved */ 
+FBLK::	.WORD	0
+FLEN::	.WORD	0
+FERR::	.WORD	0
+
+.Restore
+
+$NCOPY::
+	PUSH	R1
+3$:	TSTB	(R1)+
+	BNE	3$
+	DEC	R1
+4$:	CMPB	#40,-(R1)
+	BEQ	4$
+	CLRB	1(R1)
+	POP	R1
+	
+	
+	MOV	#177010,R5
+	MOV	#BUF/2-1,(R5)
+1$:	INC	(R5)
+	MOVB	(R1)+,4(R5)
+	BEQ	2$
+	MOVB	(R1)+,5(R5)
+	BNE	1$
+2$:	MOVB	#15,FFFF
+	CALL	$$DSCL
+	MOV	#BUF/2,@#177010
+	CALL	$$FPR
+	RETURN
+
+
+
+	.Save
+	.Psect	Locked
+INT100::CLR	@#7046
+	BIC	#17400,@#177716
+	MOV	#177777,TMRED
+	DEC	(PC)+
+6$:	.WORD	10.
+	BNE	5$
+	MOV	#10.,6$
+7$	= .+2
+	COM	#0
+5$:	TST	@#7134
+	BNE	9$
+	MOV	#177777,7$
+9$:	PUSH	<R5,R1,R0>
+	MOV	#42,-(SP)
+	BIT	#2,ESW
+	BNE	11$
+	BIT	#40,ESW
+	BEQ	11$
+	MOV	#6,(SP)
+11$:	MOV	@#23150,R5
+	MOVB	70(R5),@#2460
+	TSTB	C.IDEN
+	BNE	10$
+	TSTB	C.MOVE
+	BNE	4$
+10$:	MOV	(R5),R0
+	SUB	@32(R5),R0
+	MOV	66(R5),R1
+	BR	.+4
+	ASL	R0
+	ROR	R1
+	BCC	.-4
+	MOV	R0,@#23156
+	MOV	60(R5),R1
+	BIC	#1,52(R1)
+	BIC	#1,6(R1)
+	BIC	#1,42(R1)
+	MOV	32(R5),60(R5)
+	MOV	60(R5),R1
+	TSTB	7$
+	BEQ	3$
+8$:	TSTB	C.IDEN
+	BNE	3$
+	BIS	#1,52(R1)
+	ADD	(SP),R1
+	BIS	#1,(R1)
+3$:	CLR	@#23166
+	MOV	@#23160,R1
+	MOVB	R0,(R1)
+4$:	TST	(SP)+
+	POP	<R0,R1,R5>
+	MOV	#2,@#7134
+	JMP	@(PC)+
+OLDTM::	.BLKW
+	.Restore
+	
+;	Процедура ожидания прерывания от таймера.
+TWAIT:: 
+	Mtps	#0
+	Push	@#100			; Сохранить старое значение IntVec
+Rel	Mov	#Tint,@#100		; Подставить новое значение IntVec
+	Br	.			; Ожидание прерывания
+
+Tint:
+	Cmp	(Sp)+,(Sp)+		; Востановить значение стека
+	Pop	@#100			; Востановление IntVec
+	Return				; Возврат из процедуры
+
+	
+
+;	Процедура обновления таблицы терминала
+$TSFR::	Mov	#22656,R0		; Базовый адрес таблицы
+	Mov	#76/2,R1		; Длина таблицы в словах
+1$:	Mov	112144-22656(R0),(R0)+	; Копирование таблицы из ПЗУ
+	Sob	R1,1$
+	Return				; Возврат
+
+$D.CNV::
+REL	MOV	#DEC.BF,R5
+	MOV	#7,R0
+1$:	MOVB	#40,(R5)+
+	SOB	R0,1$
+	CLRB	(R5)
+	DEC	R5
+2$:	CLR	R0
+	DIV	#10.,R0
+	MOVB	#'0,-(R5)
+	BISB	R1,(R5)
+	MOV	R0,R1
+	BNE	2$
+REL	MOV	#DEC.BF,R0
+	RETURN
+
+	
+SWPFNT::
+REL	MOV	#OLDFNT,R0
+REL	MOV	#MASSIM,R1
+	MOV	#14542,R2
+	MOV	#9.,R3
+1$:	MOV	(R2),(R0)+
+	MOV	R1,(R2)+
+	ADD	#11.,R1
+	SOB	R3,1$
+	RETURN
+
+RSTFNT::
+REL	MOV	#OLDFNT,R0
+	MOV	#14542,R2
+	MOV	#9.,R3
+1$:	MOV	(R0)+,(R2)+
+	SOB	R3,1$
+	RETURN
+
+TSTFL::				; R1 - АДРЕС ИСХОДНОЙ СТРОКИ
+				; R2 - АДРЕС ВЫХОДНОЙ СТРОКИ
+
+	
+
+
+
+$DRPRT::
+	PUSH	R4
+	COLOR	CYAN,BLUE
+	MOV	#^B0000001000000010,@#22716
+	MOV	#FAREA,R0
+	MOV	#26.,R1
+3$:	MOVB	#40,(R0)+
+	SOB	R1,3$
+	CLRB	(R0)+
+	MOVB	#'│,@#FAREA+14
+	MOV	#8.,R5
+	MOV	#5,R4
+4$:	PUSH	#4
+	PUSH	R4
+	CALL	$WLOC
+	PRINT	#FAREA
+	INC	R4
+	SOB	R5,4$
+	MOV	#2,R5
+	MOV	#14.,R3
+	ADD	W2,R3
+	MOV	#1,R1
+	ADD	W1,R1
+	MOV	#44.,R2
+5$:	CALL	$INV
+	INC	R3
+	SOB	R5,5$
+	MOV	#DEFALT/2,@#177010
+	CALL	$$FPR
+	
+	
+	
+	
+	
+DRPR1::	MOV	#FAREA,R1
+	CALL	$NCOPY
+	MOV	#FAREA,R0
+	CALL	$FFILT
+	CLRB	16(R0)
+	COLOR	CYAN,BLUE
+	PUSH	<#4,#14.>
+	CALL	$WLOC
+	PRINT	#FAREA
+	
+		
+	
+	
+	
+	
+	
+	
+	MOVB	#14,FFFF
+	CALL	C1CALL
+	MOV	BBUF,@#177010
+	BCC	1$
+	CLR	@#177014
+	
+	
+1$:	CALL	$ONED
+	CLR	DR.PTR
+	CLR	DR.X
+	CLR	EX
+	CALL	$GET.MF
+REL	MOV	#ESLDIR,R5
+	MOV	#4.,R0
+	ADD	W1,R0
+	MOVB	R0,1(R5)
+	MOV	#13.,R0
+	ADD	W2,R0
+	MOVB	R0,2(R5)
+	MOV	DR.MAX,6(R5)
+	DEC	6(R5)
+	CLR	10(R5)
+	CALL	SCRBLP
+	CALL	$FAPR
+	POP	R4
+	RETURN
+	
+	
+$ONED:	COLOR	YELLOW,BLUE
+	MOV	#^B0000001000000010,@#22716
+	MOV	#5.,R3
+	CLR	-(SP)
+	CALL	2$
+	MOV	#18.,R3
+	CALL	2$
+	TST	(SP)+
+	RETURN
+
+
+
+2$:	MOV	#8.,R5
+	MOV	#5,R4
+1$:	TST	2(SP)
+	BNE	8$
+	CALL	$$FPR
+	TSTB	@#FAREA
+	BNE	8$
+	MOV	#1,2(SP)
+8$:	MOV	#FAREA,R0
+	CALL	$FFILT
+	CLRB	12(R0)
+3$:	PUSH	<R3,R4>
+	CALL	$WLOC
+	PUSH	@#177010
+	PRINT	#FAREA
+	POP	@#177010
+	INC	R4
+	SOB	R5,1$
+	
+7$:	
+	
+	
+	
+	
+	RETURN
+	
+	
+	
+$FFILT::PUSH	R0
+	DEC	R0
+5$:	INC	R0
+	CMPB	(R0),#40
+	BHIS	5$
+	TSTB	(R0)
+	BEQ	8$
+	MOVB	#40,(R0)
+	BR	5$
+8$:	MOV	(SP),R1
+	ADD	#14.,R1
+	SUB	R0,R1
+	BLOS	7$
+	
+	
+6$:	MOVB	#40,(R0)+
+	SOB	R1,6$
+
+7$:	POP	R0
+10$:	RETURN
+
+
+	
+
+$$FPR::	PUSH	<R5,R4,R3>
+	MOV	#177010,R5
+	MOV	#FAREA,R4
+	MOV	#10,R3
+1$:	MOV	4(R5),(R4)+
+	INC	(R5)
+	SOB	R3,1$
+	POP	<R3,R4,R5>
+	RETURN
+
+$GET.MF:
+	CLR	DR.MAX
+	MOV	BBUF,@#177010
+2$:	TSTB	@#177014
+	BEQ	1$
+	INC	DR.MAX
+	ADD	#10,@#177010
+	BR	2$
+1$:	RETURN
+
+	
+$DREXE::	
+	PUSH	R4
+	TST	DR.MAX
+	BNE	$112
+	JMP	$DT
+
+
+$112::	CALL	$FINV
+$111:	CALL	$FAPR
+	
+	MOV	DR.X,EX
+	ADD	DR.PTR,EX
+
+REL	MOV	#ESLDIR,R5
+	CALL	SCRBLM
+	
+	EMT	22
+	
+	CALL	$FINV
+REL	KEYJMP	#DIRJMP
+
+
+
+
+$DU::	TST	DR.X
+	BEQ	$113
+	DEC	DR.X
+	BR	$112
+
+
+
+
+
+$113:	TST	DR.PTR
+	BEQ	$112
+	SUB	#20,DR.PTR
+	MOV	#17,DR.X
+
+$115:
+	MOV	DR.PTR,R1
+	MUL	#10,R1
+	ADD	BBUF,R1
+	MOV	R1,@#177010
+	
+	
+	
+	CALL	$ONED
+	
+	BR	$112
+
+
+$DD::
+	
+	
+
+	MOV	EX,R0
+	INC	R0
+	CMP	R0,DR.MAX
+	BHIS	$112
+	CMP	DR.X,#17
+	BEQ	$114
+	INC	DR.X
+	BR	$112
+
+$114:	CLR	DR.X
+	ADD	#20,DR.PTR
+	BR	$115
+
+$DR::	MOV	EX,R0
+	MOV	#10,R5
+1$:	INC	R0
+	CMP	R0,DR.MAX
+	BHIS	2$
+	SOB	R5,1$
+2$:	
+	SUB	#10,R5
+	NEG	R5
+	
+	ADD	R5,DR.X
+	CMP	DR.X,#20
+	BLO	$112
+	
+	SUB	#10,DR.X
+	
+	
+	ADD	#10,DR.PTR
+	CMP	DR.PTR,DR.MAX
+	BLO	3$
+	SUB	#10,DR.PTR
+
+
+3$:
+	
+	BR	$115
+	
+	
+$DL::
+	MOV	EX,R0
+	MOV	#10,R5
+1$:	TST	R0
+	BEQ	2$
+	DEC	R0
+	SOB	R5,1$
+2$:	SUB	#10,R5
+	NEG	R5
+	SUB	R5,DR.X
+	BPL	$112
+	
+	ADD	#10,DR.X
+	TST	DR.PTR
+	BEQ	$112
+	SUB	#10,DR.PTR
+	BR	$115
+
+
+	
+
+
+$DT::	POP	R4
+	RETURN
+
+$DEN::
+	MOV	#DEVNAM/2,@#177010
+	CALL	$$FPR
+	MOV	#FAREA,R0
+	MOV	#LBUF,R1
+1$:	MOVB	(R0)+,(R1)+
+	BNE	1$
+	MOVB	#':,-1(R1)
+	PUSH	R1
+	CALL	$FAPR
+	POP	R1
+	MOV	#FAREA,R0
+2$:	MOVB	(R0)+,(R1)+
+	BNE	2$
+	
+	
+	JMP	@DS.PTR
+
+$RET2::
+	
+	CMP	(SP)+,(SP)+
+	WCLOSE
+	RETURN
+
+	
+$FINV:
+	MOV	#5.,R1
+	MOV	DR.X,R3
+	CMP	R3,#8.	
+	BLO	1$
+	SUB	#8.,R3
+	MOV	#18.,R1
+1$:	ADD	W1,R1
+	ADD	W2,R3
+	ADD	#5,R3
+	MOV	#10.,R2
+	CALL	$INV
+	RETURN
+	
+
+
+
+	
+$FAPR:
+	COLOR	CYAN,BLUE
+	PUSH	<#1,#15.>
+	CALL	$WLOC
+	MOV	DR.PTR,R1
+	ADD	DR.X,R1
+	MUL	#10,R1
+	ADD	BBUF,R1
+	MOV	R1,@#177010
+	
+	
+	CALL	$$FPR
+	MOV	#FAREA,R0
+	CALL	$FFILT
+	CLRB	12(R0)
+	MOV	#TTBUF+44.,R1
+	CLRB	(R1)
+	MOV	#44.,R0
+1$:	MOVB	#40,-(R1)
+	SOB	R0,1$
+	MOV	#FAREA,R0
+	ADD	#3,R1
+	MOV	#12,R2
+2$:	MOVB	(R0)+,(R1)+
+	SOB	R2,2$
+	MOV	@#FAREA+16,R1
+	CALL	$D.CNV
+	INC	R0
+	MOV	#TTBUF+15.,R1
+3$:	MOVB	(R0)+,(R1)+
+	BNE	3$
+	MOVB	#40,-(R1)
+	CALL	$PRTZ
+	RETURN
+	
+
+CLRSCR:	
+	MOV	@#23150,R5
+	PUSH	@50(R5)
+	PUSH	@52(R5)
+	MOV	#8.,R0
+	MOV	#113512,R1
+1$:	CMP	44(R5),(R1)+
+	BEQ	2$
+	SOB	R0,1$
+	MOV	#113514,R1
+2$: 	SUB	#113514,R1
+	CLR	R0
+	ASR	R1
+	ASR	R1
+	BCC	3$
+	MOV	#-4,R0
+3$:	ADD	50(R5),R1
+	MOVB	(R1),R2
+	ASH	R0,R2
+	BIC	#177770,R2
+	ASL	R2
+	MOV	113512(R2),R2
+	MOV	R2,@50(R5)
+	MOV	R2,@52(R5)
+	JMP	@#113262
+
+.PSECT	DATA
+
+DIRJMP:	.BYTE	7,UP,DOWN,TAB,ESCAPE,ENTER,LEFT,RIGHT
+
+REL	.WORD	$DU
+REL	.WORD	$DD
+REL	.WORD	$DT
+REL	.WORD	$RET2
+REL	.WORD	$DEN
+REL	.WORD	$DL
+REL	.WORD	$DR
+REL	.WORD	$112
+
+ESLDIR:
+	.BYTE	0,0,0,24.
+REL	.WORD	EX
+	.WORD	0,0
+	
+
+
+.END	IdeIni
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    

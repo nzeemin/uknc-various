@@ -1,0 +1,464 @@
+	.INCLUDE/IDE.MLB/
+	Define
+	.RelDef	D
+
+;__________________ Масивы параметров для диалоговых окошек ___________________
+
+.PSECT	DATA
+	.RADIX	10.
+ABOUT::	
+REL	.WORD	ABOUTW
+	.WIND	DIALOG,22,5,31,9,BLACK,CYAN
+REL	.WORD	ABOUTT
+	.BUTON	OKB,$NOPR,13,8,6
+	.WORD	0
+
+;______________________________________________________________________________
+PALETE::
+REL	.WORD	PALETN
+	.WIND	DIALOG,20,4,40,12,BLACK,CYAN
+REL	.WORD	PALETT
+	
+	.WORD	1
+REL	.WORD	PLG1
+	.BYTE	128!9,7,12,2,12,3,12,4,12,5,12,6,12,7,12,8,12,9
+	.WORD	0,1
+REL	.WORD	PLG2
+	.BYTE	128!17,7,20,2,20,3,20,4,20,5,20,6,20,7,20,8,20,9
+	.WORD	0,1
+REL	.WORD	PLG3
+	.BYTE	128!25,7,28,2,28,3,28,4,28,5,28,6,28,7,28,8,28,9
+	.WORD	0,1
+REL	.WORD	PLG4
+	.BYTE	33,7,36,2,36,3,36,4,36,5,36,6,36,7,36,8,36,9
+	.WORD	0
+	.BUTON	PLK1,$SPCL,3,11,7
+	.BUTON	PLK2,$SPMN,13,11,6
+	.BUTON	OKB,$SETPL,21,11,6
+	.BUTON	CANCB,$NOPR,29,11,8
+	.ENDS	$SETPL
+
+;______________________________________________________________________________
+OPEND::	
+REL	.WORD	OPENN
+	.WIND	DIALOG,16,3,44,15,BLACK,CYAN
+REL	.WORD	OPENT
+
+
+OP.PTR==.+4
+	.EDIT	LBUF,EFNAM,4,3,26,3,,REL
+	.USER	$DRPRT,$DREXE
+	.BUTON	FLK1,$OPF!1,33,3,9
+	.BUTON	FLK2,$NOPR,33,6,9
+	.BUTON	CANCB,$NOPR,33,9,9
+	.BUTON	HLPB,GetHlp,33,12,9
+	.ENDS	$OPF!1
+;______________________________________________________________________________	
+TsChD::
+Rel	.Word	Warnn
+	.Wind	Dialog,25,7.,32.,7,Black,Cyan
+Rel	.Word	TsCht
+
+	.Buton	Flk3,SfQ,2,6,8
+	.Buton	Flk4,Qui,12,6,8
+	.Buton	CancB,$NopR,22,6,8
+	.Ends	SfQ
+
+
+
+
+;______________________________________________________________________________	
+HELPW::
+REL	.WORD	HlpN
+	.Wind	Print,16,3,44,15,Black,Cyan
+Rel	.WORD	HlpT
+	.Word	0
+
+
+
+;______________________________________________________________________________
+SAVED::	
+REL	.WORD	SaveN
+	.WIND	DIALOG,16,3,44,15,BLACK,CYAN
+REL	.WORD	OpenT
+
+
+SV.PTR==.+4
+	.EDIT	LBUF,EFNAM,4,3,26,3,,REL
+	.USER	$DRPRT,$DREXE
+	.BUTON	FLK3,$SVF!1,33,3,9
+	.BUTON	CANCB,$NOPR,33,9,9
+	.BUTON	HLPB,GetHlp,33,12,9
+	.ENDS	$SVF!1
+
+
+
+
+COMPD::	
+REL	.WORD	COMPN
+	.WIND	PRINT,20,5,39,12,BLACK,CYAN
+REL	.WORD	COMPT
+	.WORD	0
+
+
+;______________________________________________________________________________
+DBGD::
+REL	.WORD	DBGN
+	.WIND	DIALOG,23,7,32,7,BLACK,CYAN
+REL	.WORD	DBGT
+	.BUTON	OKB,ErHl,6,6,8
+	.BUTON	HLPB,GetHlp,18,6,8
+	.WORD	0
+;______________________________________________________________________________	
+
+
+EDITD::
+REL	.WORD	EDITN
+	.WIND	DIALOG,22,5,37,12,BLACK,CYAN
+REL	.WORD	EDITTT
+	.WORD	2
+REL	.WORD	ESW
+	.BYTE	24,24,30,1,30,2,30,3,30,4,30,5,30,6,30,7,30,8,30,9
+	.WORD	0
+	.BUTON	OKB,$RET,7,11,8
+	.BUTON	CANCB,$NOPR,22,11,8
+	.ENDS	$RET
+;______________________________________________________________________________	
+.If	Eq	Version-Beta 
+COMPO::
+REL	.WORD	CMPN
+	.WIND	DIALOG,16,4,49,13,BLACK,CYAN
+REL	.WORD	CMPT
+	
+	
+	.WORD	2
+REL	.WORD	CSW1
+	.BYTE	18,18,21,2,21,3,45,2,45,3
+	.WORD	0,2
+REL	.WORD	CSW2	
+	.BYTE	18,18,21,6,21,7,45,6,45,7
+	.WORD	0,2
+REL	.WORD	CSW3
+	.BYTE	18,18,21,9,21,10,45,9,45,10
+	.WORD	0
+	.BUTON	OKB,$RET,6,12,8
+	.BUTON	CANCB,$NOPR,20,12,8
+	.BUTON	HLPB,GetHlp,34,12,8
+	.ENDS	$RET
+.EndC
+;______________________________________________________________________________	
+
+FINDD::
+
+REL	.WORD	FINDN
+	.WIND	DIALOG,18,4,44,14,BLACK,CYAN
+REL	.WORD	FINDT
+FB.PTR==.+4
+	.EDIT	LBUF,FDBUF,3,2,40,3,,REL
+	.WORD	1
+REL	.WORD	FSW1
+	.BYTE	12,9,16,5,16,6
+	.WORD	0,1
+REL	.WORD	FSW2
+	.BYTE	16,16,39,5,39,6
+	.WORD	0,1
+REL	.WORD	FSW3
+	.BYTE	12,10,16,9,16,10,16,11
+	.WORD	0,2
+REL	.WORD	FSW4
+	.BYTE	16,14,39,9,39,10,39,11
+	.WORD	0
+	.BUTON	FNDB,$FNDEX,4,13,8
+	.BUTON	CANCB,$NOPR,18,13,8
+	.BUTON	HLPB,GetHlp,32,13,8
+	.ENDS	$FNDEX
+;______________________________________________________________________________	
+NOTI::
+REL	.WORD	NOTN	
+	.WIND	DIALOG,24,8,30,6,BLACK,CYAN
+REL	.WORD	NOTT
+	
+	.BUTON	OKB,$NOPR,12,5,6
+	
+	.ENDS	$NOPR
+;______________________________________________________________________________	
+GOLNM::
+REL	.WORD	GOLNN
+	.WIND	DIALOG,24,8,30,6,BLACK,CYAN
+REL	.WORD	GOLNT
+	
+	.EDIT	LBUF,0,6,3,20,0
+	
+	.BUTON	OKB,$GOLIN,6,5,8
+	.BUTON	CANCB,$NOPR,17,5,8
+	.ENDS	$GOLIN
+;______________________________________________________________________________	
+PREFM::
+REL	.WORD	PREFN
+	.WIND	DIALOG,18,4,41,11,BLACK,CYAN
+REL	.WORD	PREFT
+
+	.WORD	1
+REL	.WORD	PSW1
+	.BYTE	15,9,17,3,17,4
+	.WORD	0,2
+REL	.WORD	PSW2
+	.BYTE	14,12,17,7,17,8
+	.WORD	0,1
+REL	.WORD	PSW3
+	.BYTE	13,9,37,3,37,4
+	.WORD	0,1
+REL	.WORD	PSW4
+	.BYTE	13,9,37,7,37,8
+	.WORD	0	
+	.BUTON	OKB,$RET,5,10,8
+	.BUTON	CANCB,$NOPR,17,10,8
+	.BUTON	HLPB,GetHlp,29,10,8
+	
+	.ENDS	$RET
+;______________________________________________________________________________	
+
+EVLMDD::
+REL	.WORD	EVLMDN
+	.WIND	DIALOG,13,5,52,9,BLACK,CYAN
+REL	.WORD	EVLMDT
+
+	.EDIT	LBUF,0,2,2,38,0
+	.EDIT	LBUF+50,0,2,5,38,0
+	.EDIT	LBUF+100,0,2,8,38,0
+	
+	.BUTON	EVLB,$EVLT!1,41,2,10
+	.BUTON	MODB,$EVLT!1,41,5,10
+	.BUTON	CANCB,$RET,41,8,10
+	.ENDS	$EVLT!1
+	
+		
+		
+	
+
+
+BRJMP::
+	.BYTE	7,ESCAPE,ENTER,TAB,UP,DOWN,LEFT,RIGHT
+REL	.WORD	<$NOPR,$BRE,$BRT,$BRT,$BRT,$BRT,$BRT,$BRBG>
+
+
+TRJMP::
+	.BYTE	8,ENTER,ESCAPE,TAB,UP,LEFT,DOWN,RIGHT,32,0
+REL	.WORD	<$ENTER,$NOPR,$TRN,$TRU,$TRU,$TRD,$TRD,$TRSP,$TRBG>
+	
+MEJMP::	
+	.BYTE	10,ENTER,ESCAPE,TAB,UP,DOWN,LEFT,RIGHT,DEL,RUS,LAT,0
+REL	.WORD	<$ENTER,$NOPR,$WET,$WET,$WET,$WEL,$WER,$WED,$WERS,$WELT,$WES>
+	
+.PSECT	TEXT
+
+.RADIX	8.
+
+;_______________________________________________________________________________
+AboutW:	.Asciz	<4>/О программе/
+.If	Ne	Version-Demo
+AboutT:	
+	.Byte	0
+	.Asciz	<11.>/Turbo Basic/
+	.Asciz	<11.>/Версия  1.1/
+	.Asciz	<4>/Copyright (c) 1994, 95 by/
+	.Asciz	<6>"Геpасимов Олег, ЛИнТех"
+ 	.Asciz	<2>/Телефон/Факс (095) 361-95-92/
+ 	.Byte	102
+.Iff
+
+AboutT:
+	.Byte	0
+	.Asciz	<5>/Turbo Basic, demo version/
+	.Asciz	<5>/Операция записи запрещена/
+	.Asciz	<4>/Для получения информации о/
+	.Asciz	<4>/полной  версии  звоните  :/
+	.Asciz	<10.>/(095) 939-34-94/
+	.Asciz	<5>/Электронные Работы, ltd./
+	.Byte	120
+.EndC
+
+;______________________________________________________________________________
+
+
+PaletN:	.Asciz	<14.>/Палитра/
+
+PaletT:	.Asciz	<3>/Цвет /<5>/0/<7>/1/<7>/2/<7>/3/
+	.Asciz	<3>/Черный/
+	.Asciz	<3>/Синий/
+	.Asciz	<3>/Красный/
+	.Asciz	<3>/Розовый/
+	.Asciz	<3>/Зеленый/
+	.Asciz	<3>/Голубой/
+	.Asciz	<3>/Желтый/
+	.Asciz	<3>/Белый/
+	.Byte	103
+
+
+
+
+;______________________________________________________________________________
+OpenN:	.Asciz	<14.>/Открыть файл/
+
+OpenT:	.Byte	0
+	.Asciz	<3>/Имя/
+	.Byte	0
+	.Asciz	<3>/Файлы/
+	.Byte	114
+
+;______________________________________________________________________________
+SaveN:	.Asciz	<13.>/Сохранить файл/
+;______________________________________________________________________________
+	
+	
+
+CompN:	.Asciz	<13.>/Компилятор/
+
+CompT:	.Byte	0
+	.Asciz	<2>/Компиляция/
+	.Asciz	<2>/Линковка/
+	.Byte	0
+	.Asciz	<23.>/Всего/<3>/Файл/
+	.Byte	0
+	.Asciz	<2>/Обработано строк:/<8.>/0/<6.>/0/
+	.Asciz	<2>/Возникло/<2>/ошибок:/<8.>/0/<6.>/0/
+	.Byte	0   
+	.Asciz	<2>/Доступная память:/<9.>/,байтов/
+	.Byte	0
+	.Asciz	<9.>/Ctrl-Break для останова/
+;______________________________________________________________________________
+
+DbgN:	.Asciz	<10.>/Отладка/
+
+DbgT:	.Byte	0
+	.Asciz	<3.>/Ошибка/<2>/выполнения программы/
+	.Byte	0
+DbMsg::	.Asciz	<1>/Place for error mesages size 3  /
+	.Byte	103
+
+;______________________________________________________________________________
+EditN:	.Asciz	<13.>/Редактор/
+EditTT:
+	.Asciz	<6.>/Резервная копия/
+	.Asciz	<6.>/Режим вставки/
+	.Asciz	<6.>/Автоотступ/
+	.Asciz	<6.>/Удаление автоотступа/
+	.Asciz	<6.>/Перманентные блоки/
+	.Asciz	<6.>/Большой курсор/
+	.Asciz	<6.>/Поиск под курсором/
+	.Asciz	<6.>/Длинные строки/
+	.Asciz	<6.>/Замена пробелов/
+	.Byte	103
+;______________________________________________________________________________
+.If	Eq	Version-Beta
+CMPN:	.Asciz	<19.>/Compiler/
+
+CMPT:	.Asciz	<19.>/Code generation/
+	.Asciz	<3.>/Debug information/<7.>/Assembler allowed/
+	.Asciz	<3.>/Overlay allowed/<9.>/Make .OBJ file/
+	.Byte	0
+	.Asciz	<19.>/Runtime/<2>/errors/
+	.Asciz	<3.>"Overflow checking"<7>"I/O checking"
+	.Asciz	<3.>/Range checking/<10.>/Stack checking/
+	.Asciz	<16.>/Bus adress protection/
+	.Asciz	<3.>/System variables/<8.>/Compiler area/
+	.Asciz	<3.>/Output registers/<8.>/Input registers/
+	.Byte	103
+.Endc
+
+
+;______________________________________________________________________________
+FINDN:	.ASCIZ	<18.>/Поиск/
+FINDT:	.ASCIZ	<2>/Текст/
+	.BYTE	102
+	.ASCIZ	<4>/Направление/<10>/Пространство/
+	.ASCIZ	<4>/Вперед/<15>/Выделенный текст/
+	.ASCIZ	<4>/Назад/<16>/Везде/
+	.BYTE	0
+	.ASCIZ	<4>/Начать/<14>/Регистр/
+	.ASCIZ	<4>"Сверху"<15>"РУС/ЛАТ"
+	.ASCIZ	<4>"Снизу"<16>"ВР/НР"
+	.ASCIZ	<4>/От курсора/<11>/Слово/
+	.BYTE	103
+;______________________________________________________________________________
+NOTN:	.ASCIZ	<10.>/Поиск/
+NOTT:	.BYTE	102
+	.ASCIZ	<3>/Невозможно найти этот текст/
+	.BYTE	120
+	
+;______________________________________________________________________________
+GOLNN:	.ASCIZ	<5.>/Переход к строке/
+GOLNT:	.BYTE	0
+	.ASCIZ	<10.>/Номер строки/
+	.BYTE	120
+;______________________________________________________________________________
+PREFN:	.ASCIZ	<14.>/Система/
+PREFT:	.BYTE	0
+	.ASCIZ	<3>/Рабочий экран/<8.>/Oтладкa/
+	.ASCIZ	<3>/4 Цвета/<14.>/Включена/
+	.ASCIZ	<3>/8 Цветов/<13.>/Выключена/
+	.BYTE	0
+	.ASCIZ	<3>/АвтоЗапись/<11.>/Объектный код/
+	.ASCIZ	<3>/Программы/<12.>/Память/
+	.ASCIZ	<3>/Настройки/<12.>/Файл/
+	.BYTE	120
+
+EVLMDN:	.ASCIZ	<18.>"Калькулятор"
+
+EVLMDT:
+	.ASCIZ	<3>/Выражение/
+	.BYTE	102
+	.ASCIZ	<3>/Результат/
+	.BYTE	102
+	.ASCIZ	<3>/Переменные/
+	.BYTE	120
+	
+	
+
+
+;______________________________________________________________________________
+HlpN:	.Asciz	<17.>/Помощь/
+
+HlpT:	.Byte	120
+	.Byte	0
+
+
+;______________________________________________________________________________
+
+Warnn:	.Asciz	<8.>/Предупреждение/
+
+TsCht:	
+	.Byte	101
+	.Asciz	<9.>/Файл был изменен/
+	.Byte	0
+	.Asciz	<11.>/Сохранить ?/
+	.Byte	120
+	
+
+
+Plk1:	.Asciz	/Цвет/
+Plk2:	.Asciz	/Моно/
+OKB:	.Asciz	/Ok/
+FlK1:	.Asciz	/Открыть/
+FlK2:	.Asciz	/Заменить/
+FLK3:	.ASCIZ	/Да/
+FLK4:	.Asciz	/Нет/
+CANCB:	.Asciz	/Отмена/
+HLPB:	.Asciz	/Помощь/
+FNDB:	.ASCIZ	/Поиск/
+EVLB:	.ASCIZ	/Считать/
+MODB:	.ASCIZ	/Изменить/
+NoHl::	.Asciz	/Нет помощи для этого контекста/
+
+;______________________________________________________________________________
+
+	
+.Even
+
+.PSECT	RELTAB
+.Word	0
+
+
+
+.End
+                                                                                                            

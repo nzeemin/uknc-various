@@ -1,0 +1,1319 @@
+; САША АКУЛИН : ДОМ Т. 264-73-40
+;               РАБ Т. 939-34-940
+	.INCLUDE/IDE.MLB/
+	Define
+	.RelDef	G
+
+
+	.PSECT	SYSTEM
+$COLOR::POP	TMP
+	BIC	#177610,(SP)
+	MOV	@#22656+34,@#22656+36
+	MOVB	(SP),@#22656+34
+	MOVB	(SP),@#177016
+	MOVB	(SP)+,R0
+	PUSH	TMP
+	ASH	#-3,R0
+REL	MOV	COLRS(R0),R0
+	MOV	@#22656+40,@#22656+42
+$SCL:	MOV	R0,@#22656+44
+	MOV	R0,@#22656+40
+	MOV	R0,@#177020
+	MOV	R0,@#177022
+	RETURN
+
+RSTCOL::
+	MOV	@#22656+36,@#22656+34
+	MOV	@#22656+34,@#177010
+	MOV	@#22656+42,R0
+	BR	$SCL
+	
+
+
+$LOCAT::POP	TMP
+	MOVB	(SP)+,1$
+	MOVB	(SP)+,1$+1
+	PUSH	TMP
+	JSR	R4,$$LC
+1$:	.BLKW	1
+	RETURN
+
+
+$$LC::	PUSH	<R5,R0,R2,R3>
+	MOV	@#23150,R5
+	MOVB	(R4)+,R3
+	MOVB	(R4)+,R2
+	MOV	12(R5),20(R5)
+	SUB	R3,20(R5)
+	CALL	$GETY
+	MOV	4(R5),16(R5)
+	SUB	R2,16(R5)
+	ADD	R2,R3
+	MOV	R3,(R5)
+	MOV	R0,32(R5)
+	POP	<R3,R2,R0,R5>
+	INC	@#7066
+	RTS	R4
+
+
+
+	
+$WLOC::	ADD	W2,2(SP)
+	ADD	W1,4(SP)
+	JMP	$LOCAT
+	
+	
+
+	RETURN
+
+$UPMEN::
+	CLR	ENTFLG
+UpMn1::	CALL	$CUROF
+	MOVB	3(R4),R3
+	TST	(R3)+
+	BIC	#1,R3
+	CMP	(R3)+,(R3)+
+	ADD	R4,R3
+	MOV	R3,UPWRK
+	JSR	R4,$$LC
+	.WORD	0
+	COLOR	2(R4)
+	PRINT	(R4)
+
+$UUNK::
+UBG::	MOV	R4,R1
+	ADD	WPNT,R1
+	MOVB	4(R1),R1
+	CLR	R3
+	MOV	#1,R2
+	PUSH	R1
+	ADD	(R4),R1
+1$:	INC	R2
+	Cmpb	(R1)+,#40
+	Bne	1$
+	POP	R1
+	DEC	R1
+	CALL	$INV
+	Tst	EntFlg
+	Beq	2$ 
+	PUSH	R4
+	MOV	WPNT,R4
+	ASL	R4
+	ADD	UPWRK,R4
+	WINDOW	(R4)
+	POP	R4
+	MOV	KEYCOD,R0
+	BR	3$
+2$:	FLUSH
+	EMT	22
+3$:	CALL	$INV
+REL	KEYJMP	#UKJMP
+
+
+
+$UR::	INCB	WPNT
+	Cmpb	Wpnt,3(r4)
+	Blos	Ubg
+	CLR	WPNT
+	BR	UBG
+
+$UL::	DECB	WPNT
+	BPL	UBG
+	MOVB	3(R4),WPNT
+	BR	UBG
+
+$UE::	Tst	EntFlg
+	Bne	1$
+	COM	ENTFLG
+	BR	UBG
+1$:	JMP	@JMPADR	
+
+$UES::	Tst	EntFlg
+	Beq	1$
+	CLR	ENTFLG
+	BR	UBG
+1$:	CALL	$CURON
+	RETURN
+		
+$INV::	CALL	$PUSH
+	MOV	#177010,R5
+	CALL	$GETY
+	MOV	@#23150,R0
+	MOV	10(R0),R0
+	ADD	R1,R3
+	MOV	R3,(R5)
+	MOV	#177014,R3
+	MOV	#11.,R4
+$$$2:	PUSH	R2
+$$$1::	COM	(R3)
+	NOP
+	INC	(R5)
+	SOB	R2,$$$1
+	POP	R2
+	SUB	R2,(R5)
+	ADD	R0,(R5)
+	SOB	R4,$$$2
+	CALL	$POP
+	RETURN
+
+$CUROF::PUSH	R5
+	CALL	$CHIDE
+	MOV	@#23150,R5
+	CLR	70(R5)
+	CLRB	@#2460
+	POP	R5
+	RETURN
+	
+	
+$CURON::PUSH	R5
+	MOV	@#23150,R5
+	MOV	#7,70(R5)
+	MOVB	#7,@#2460
+	POP	R5
+	RETURN
+
+$CHIDE::PUSH	R2
+	MOV	@#23150,R5
+	MOV	60(R5),R5
+	MOV	#11.,R2
+3$:	TST	(R5)+
+	BIC	#1,(R5)+
+	SOB	R2,3$
+	POP	R2
+	RETURN
+
+
+$WIND::	CALL	$PUSH
+	MOV	R4,WA
+	CALL	$COP
+	LOCATE	W1,W2
+	COLOR	7(R4)
+	BIT	#BARS,W0
+	BEQ	1$
+	JMP	$INBAR
+1$:	MOV	(R4),R4
+	PUSH	R4
+	INC	W4
+	MOV	W4,R1
+	CLR	R3
+REL	MOV	#WAREA+1,R5
+1$:	Cmpb	(r4),#2
+	Bne	2$
+	INC	R3
+	MOVB	W4,R2
+	SUB	R1,R2
+	MOVB	R2,(R5)+
+2$:	Tstb	(r4)+
+	Bne	1$
+	DEC	R1
+	BNE	1$
+	MOVB	R3,WAREA
+	CLRB	(R5)+
+	ADD	W4,R3
+	TST	(R3)+
+	MOV	WBPNT,R4
+	MOVB	W1,(R4)+
+	MOVB	W2,(R4)+
+	MOVB	W3,R1
+	ADD	#8.,R1	
+	MOVB	R1,(R4)+
+	MOVB	R3,(R4)+
+	TST	(R4)+
+	CALL	$TSTOP
+	POP	R4
+	MOV	#TTBUF,R1
+	CONCAT 	1,< ┌─>
+	CALL	WP1
+	CONCAT	1,<─┐>
+WP4:	MOVB	#40,(R1)+
+	CLRB	(R1)+
+	CALL	$PRTZ
+WP2:	INC	W2
+	LOCATE	W1,W2
+	MOV	#TTBUF,R1
+	MOVB	#40,(R1)+
+	Cmpb	(r4),#2
+	Bne	Wp3
+	CONCAT	1,<├─>
+	CALL	WP1
+	CONCAT	1,<─┤>
+	TSTB	(R4)+
+	BR	WP4
+WP3:	CONCAT	1,<│ >
+1$:	Cmpb	(r4),#1
+	Beq	Wp5
+	Tstb	(r4)
+	Beq	Wp6
+	Cmpb	(r4),#3
+	Bne	2$
+	MOVB	(R4)+,R0
+3$:	MOVB	#'.,(R1)+
+	SOB	R0,3$
+	BR	1$
+	
+2$:	MOVB	(R4)+,(R1)+
+	BR	1$
+WP6:	CALL	WP7
+WF1:	TSTB	(R4)+
+	CONCAT	1,<│>
+	DEC	W4
+	BNE	WP4
+	MOV	#TTBUF,R1
+	CONCAT	1,< └─>
+	CALL	WP1
+	CONCAT	1,<─┘ >
+	CLRB	(R1)+
+	CALL	$PRTZ
+	CLR	JMPADR
+	BIT	#EXE,W0
+	BEQ	1$
+	CALL	$EXE
+1$:	CALL	$POP
+	RETURN
+	
+WP5:	CALL	WP7
+1$:	Tstb	(r4)+
+	Bne	1$
+	DEC	R4
+	PUSH	<R1,R4>
+	DEC	R1
+2$:	MOVB	-(R4),-(R1)
+	Cmpb	(r4),#7
+	Bhi	2$
+	Cmpb	(r4),#1
+	Bhi	$3
+$2:	MOVB	#40,(R1)
+	POP	<R4,R1>
+	BR	WF1
+
+$3:	MOVB	(R4),R3
+	ASL	R3
+REL	MOV	ETB-10(R3),R3
+	INC	R1
+	MOVB	#'-,-(R1)
+1$:	MOVB	-(R3),-(R1)
+	BNE	1$
+	BR	$2
+
+
+WP1:	MOVB	W3,R5
+1$:	CONCAT 	1,<─>
+	SOB	R5,1$
+	RETURN
+	
+
+WP7:	MOV	W3,R5
+	ADD	#TTBUF+4,R5
+	SUB	R1,R5
+1$:	MOVB	#40,(R1)+
+	SOB	R5,1$
+	RETURN
+
+$TSTOP:	BIT	#MEMORY,W0
+	BEQ	8$
+	CALL	$SAVE
+8$:	BIT	#SHADOW,W0
+	BEQ	9$
+	CALL	$SHDW
+9$:	RETURN
+
+$INBAR:	MOV	WBPNT,R4
+	MOVB	W1,(R4)+
+	MOVB	W2,(R4)+
+	MOVB	W3,R1
+	CMP	(R1)+,(R1)+
+	MOVB	R1,(R4)+
+	MOVB	W4,R1
+	ADD	#3,R1
+	MOVB	R1,(R4)+
+	TST	(R4)+
+	CALL	$TSTOP
+	
+	MOV	#TTBUF,R1
+	MOV	#5,R0
+$$L:
+REL	MOVB	UL-TTBUF(R1),(R1)+
+	SOB	R0,$$L
+	MOV	W3,R0
+	CMP	-(R0),-(R0)
+1$:	CONCAT	1,<═>
+	SOB	R0,1$
+	CONCAT	1,<╗>
+	CLRB	(R1)+
+	MOV	@WA,R4
+	MOVB	(R4)+,R1
+	ADD	#TTBUF+2,R1
+	MOVB	#40,(R1)+
+2$:	MOVB	(R4)+,(R1)+
+	BNE	2$
+	MOVB	#40,-(R1)
+	
+	CALL	$PRTZ
+	MOV	WA,R4
+	MOV	10(R4),R4
+	CLR	R3
+6$:	INC	W2
+12$:	LOCATE	W1,W2
+	MOV	#TTBUF,R1
+	CONCAT	1,<║>
+	MOV	W3,R0
+3$:	CONCAT	1,< >
+	SOB	R0,3$
+	
+	DEC	R3
+	BPL	4$
+	
+	MOVB	(R4)+,R2
+	BEQ	4$
+	SUB	#100,R2
+	BMI	11$
+	MOV	R2,R3
+	BR	12$
+	
+11$:	ADD	#TTBUF+77,R2
+
+5$:	INC	R2
+	MOVB	(R4)+,(R2)
+	CMPB	(R2),#40
+	BHIS	5$
+	TSTB	(R2)
+	BEQ	8$
+	MOVB	(R2),R0
+9$:	MOVB	#40,(R2)+
+	SOB	R0,9$
+	BR	5$+2
+	
+8$:	MOVB	#40,(R2)
+	
+4$:	CONCAT	1,<║>
+	CALL	$PRTZ
+	DEC	W4
+	BNE	6$
+	INC	W2
+	LOCATE	W1,W2
+	MOV	#TTBUF,R1
+	CONCAT	1,<╚>
+	MOV	W3,R0
+7$:	CONCAT	1,<═>
+	SOB	R0,7$
+	CONCAT	1,<╝>
+	CALL	$PRTZ
+	MOV	WA,R4
+	CALL	$COP
+	ADD	#12,R4
+REL	MOV	#BAREA,B.PTR
+
+$$BRPR:	MOV	(R4)+,R1
+	BEQ	$$INBE
+	Cmp	r1,#400
+	Blo	$$TsPr
+	COLOR	BLACK,CYAN
+
+
+11$:
+	TST	(R4)+
+	MOVB	(R4)+,-(SP)
+	MOVB	(R4),-(SP)
+	BIC	#^C17,(SP)
+	PUSH	<2(SP),2(SP)>
+	CALL	$WLOC
+	MOVB	(R4)+,R3
+	BIC	#^C360,R3
+	ASH	#-4,R3
+	PUSH	@#22716
+	BIS	#^B0110000001100000,@#22716
+	MOV	R3,R5
+	MOV	#TTBUF,R2
+1$:	MOVB	#40,(R2)+
+	SOB	R5,1$		
+	CLRB	(R2)
+	SUB	R3,R2
+	MOV	R1,R5
+2$:	TSTB	(R5)+
+	BNE	2$
+	SUB	R1,R5
+	DEC	R5
+	SUB	R3,R5
+	NEG	R5
+	ASR	R5
+	ADD	R5,R2
+3$:	MOVB	(R1)+,(R2)+
+	BNE	3$
+	MOVB	#40,-(R2)
+	CALL	$PRTZ
+	POP	@#22716	
+	MOV	#207,R0
+	EMT	42
+	INC	(SP)	
+	INC	2(SP)
+	CALL	$WLOC
+	MOV	#210,R0
+10$:	EMT	42
+	SOB	R3,10$
+	BR	$$BRPR
+	
+12$:	
+
+
+	
+	
+$$INBE:	
+	MOV	(R4)+,JMPADR
+	CALL	$POP
+	BIT	#EXE,W0
+	BEQ	1$
+	JMP	$EXEB
+1$:	RETURN
+
+$$TSPR:
+	Cmp	r1,#3
+	Bne	4$
+	COLOR	YELLOW,BLUE
+	MOV	(R4)+,R0
+	MOV	(R4)+,R2
+	MOVB	(R4)+,-(SP)
+	MOVB	(R4)+,-(SP)
+	CALL	$WLOC
+	MOVB	(R4)+,R3
+	MOV	R3,R5
+	DEC	R5
+	PUSH	R0
+6$:	MOVB	#40,(R0)+
+	SOB	R3,6$
+	CLRB	(R0)+
+	CLRB	(R0)
+	MOV	R0,R3
+	BITB	#1,(R4)
+	BEQ	11$
+	MOV	(SP),R1
+12$:	MOV	R2,@#177010
+	MOV	@#177012,R0
+	BITB	#2,(R4)
+	BEQ	14$
+	TSTB	R0
+	BNE	15$
+	BR	13$
+14$:	BISB	#200,(R4)
+	CALL	$BTTST
+	BCS	13$
+15$:	INC	R2
+	MOVB	R0,(R1)+
+	SOB	R5,12$
+13$:	CMPB	-(R1),#40
+	BEQ	13$
+	INC	R1
+	
+	
+	SUB	(SP),R1
+	MOVB	R1,(R3)
+	BEQ	11$
+	BISB	#100,(R4)
+	MOV	#^B0000001000000010,@#22716
+	
+	
+	
+11$:	INC	R4
+	PRINT	(SP)+
+16$:	JMP	$$BRPR
+
+
+
+4$:	Cmp	r1,#4
+	Bne	17$
+	CALL	@(R4)+
+	TST	(R4)+
+	BR	16$
+	
+
+
+
+17$:	PUSH	R1
+	MOV	B.PTR,R1
+	MOV	(R4)+,R2
+	MOV	(R2),(R1)+
+	MOV	R2,(R1)+
+	MOV	R1,B.PTR
+	POP	R1
+	MOV	(R2),R2
+	MOVB	(R4)+,R5
+	INC	R4
+
+2$:	MOVB	(R4)+,-(SP)
+	BNE	1$
+	TST	(SP)+
+	TSTB	(R4)+
+	JMP	$$BRPR
+1$:	MOVB	(R4)+,-(SP)
+	CALL	$WLOC
+	TST	R5
+	BMI	10$
+	PUSH	<R1,R2>
+	MOVB	-(R4),R3
+	MOVB	-(R4),R1
+	TST	(R4)+
+	ADD	W1,R1
+	ADD	W2,R3
+	SUB	R5,R1
+	DEC	R1
+	MOV	R5,R2
+	BIC	#177600,R2
+	ADD	#5,R2
+	MOV	#313,$$$1
+	CALL	$INV
+	MOV	#5113,$$$1
+	COLOR	BLACK,BLUE
+	POP	<R2,R1>
+	
+10$:	Cmp	r1,#2
+	Beq	7$
+	MOV	#'(,R0
+	EMT	42
+	MOV	#' ,R0
+	SUB	#1,R2
+	BCC	3$
+	MOV	#205,R0
+3$:	EMT	42
+	MOV	#'),R0
+9$:	EMT	42
+	BR	2$
+7$:	MOV	#'[,R0
+	EMT	42
+	MOV	#' ,R0
+	ASR	R2
+	BCC	8$
+	MOV	#'X,R0
+8$:	EMT	42
+	MOV	#'],R0
+	BR	9$
+	
+	
+
+
+					; Исполняемая часть процедур окна
+$EXEB::	
+	
+	MOV	WA,R4			; Установка указателя на первый элемент
+	ADD	#12,R4			; списка окна
+	
+	
+$BGRS::	MOV	(R4),R5			; Прочитать код объекта
+	BEQ	$EXEB			; Если ноль - кольцо
+	Cmp	r5,#10
+	Bhi	2$			; Код > 10, значит "кнопка"
+	JMP	$TREX			; Иначе что-то другое
+	
+	
+	
+2$:	MOVB	4(R4),R1		; Взять координату X в окне
+	MOVB	5(R4),R3		; Распаковать координату Y и ширину
+	MOV	R3,R2			; Выделение : 
+	BIC	#^C17,R3		; координаты Y в окне
+	BIC	#^C360,R2		; ширины "кнопки" 
+	ASH	#-4,R2
+	ADD	W1,R1			; Переход из системы с относительными  
+	ADD	W2,R3			; координатами в абсолютные
+
+$BRBG::	CALL	$INV			; Инверсия изображения "кнопки"
+	
+	EMT	22			; Прочитать код нажатой клавиши
+	CALL	$INV			; Инверсия
+REL	KEYJMP	#BRJMP			; Распознавание кода клавиши
+
+					; Клавиша Enter 
+$BRE::	
+	MOV	2(R4),R0
+	BIT	#1,R0
+	BNE	1$
+	WCLOSE				; Закрыть окно
+	JMP	(R0)			; Переход на процедуру "кнопки"
+1$:	BIC	#1,R0
+	CALL	(R0)
+	BR	$EXEB
+	
+					; Клавиша Tab
+$BRT::	ADD	#6,R4			; Перевод указателя на следуюший элемент списка
+	BR	$BGRS			; Повтор процедуры для следующего элемента
+
+					; Раскрутка других процедур :
+					; Коды процедур
+					; 1 - тригерный список 
+					; 2 - селективный список
+					; 3 - микроредактор
+					; 4 - процедура пользователя
+$TREX::
+	TST	(R4)+			; Пропуск слова - кода элемента
+	MOV	(R4)+,R2		; Взять первый элемент списка
+					; Проверка кода
+	Cmp	r5,#3
+	Bne	1$
+	JMP	$EDEX			; Да - вызов процедуры
+
+
+1$:	Cmp	r5,#4
+	Bne	2$			; Процедура пользователя ?
+	CALL	@(R4)+			; Вызов процедуры пользователь.
+					; После выхода из процедуры пользователоя
+					; R4 должен указывать на следующий
+					; элемент списка окна.
+	BR	$BGRS			; Кольцо
+
+
+					; Отработка списков 
+					; R2 указывает на слово в котором 
+					; закодирован список
+					
+2$:	COLOR	BLACK,BLUE		; Установить цвет пиктограмм
+	TST	(R4)+			; Пропуск ненужного слова
+	MOV	R4,R3			; Запомнить начало списка
+	
+	Cmp	R5,#2			; Для селективного списка
+	Beq	$TrBg
+	MOV	(R2),R0			; определить номер альтернативы, уже  
+	ASL	R0			; содержащейся в списке для установкм
+	ADD	R0,R4			; на нее курсора
+
+$TRBG::
+	CALL	$CURON			; Включить апаратный курсор
+	MOVB	(R4),-(SP)		; Установить апаратный курсор
+	INC	(SP)			; На элемент списка
+	MOVB	1(R4),-(SP)
+	CALL	$WLOC
+	
+	PUSH	<R4,R2,R3>		; Подсветка элемента
+	MOVB	(R4),R1			; списка , на котором стоит
+	MOV	#3,R2			; апаратный курсор
+	MOVB	1(R4),R3
+	ADD	W1,R1
+	ADD	W2,R3
+	MOV	#313,$$$1+2
+	CALL	$INV
+	MOV	(SP),R4
+	MOVB	-(R4),R2
+	MOVB	-(R4),R0
+	BIC	#177600,R0
+	PUSH	R1
+	SUB	R0,R1
+	CALL	$INV
+	EMT	22
+	CALL	$INV
+	POP	R1
+	MOV	#3,R2
+	CALL	$INV
+	
+	
+	POP	<R3,R2,R4>
+	MOV	#240,$$$1+2
+
+
+REL	KEYJMP	#TRJMP
+
+
+
+$TRN::	TST	(R4)+
+	BNE	$TRN
+	CALL	$CUROF
+	BR	$BGRS
+	
+$TRU::	IF	R4 = R3 THEN $TRBG
+	TST	-(R4)
+	BR	$TRBG
+
+$TRD::	TST	2(R4)
+	BEQ	$TRBG
+	TST	(R4)+
+	BR	$TRBG
+
+
+$TRSP::	IF	-6(R3) = #2 THEN 1$
+	MOV	#205,R0
+	EMT	42
+	MOV	(R2),R0
+	ASL	R0
+	ADD	R3,R0
+	IF	R4 = R0 THEN $TRBG
+	MOVB	(R0)+,-(SP)
+	INC	(SP)
+	MOVB	(R0)+,-(SP)
+	CALL	$WLOC
+	MOV	#40,R0
+	EMT	42
+	MOV	R4,R0
+	SUB	R3,R0
+	ASR	R0
+	MOV	R0,(R2)
+	BR	$TRBG
+1$:	MOV	R4,R0
+	SUB	R3,R0
+	ASR	R0
+	MOV	#1,R1
+	ASH	R0,R1
+	XOR	R1,(R2)
+	MOV	#' ,R0
+	BIT	R1,(R2)
+	BEQ	2$
+	MOV	#'X,R0
+2$:	EMT	42
+	BR	$TRBG
+	
+
+
+
+$NOPR::	CALL	$CUROF
+	WCLOSE
+
+REL	MOV	#BAREA,R1
+	MOV	B.PTR,R2
+	SUB	R1,R2
+	BEQ	2$
+	ASR	R2
+	ASR	R2
+1$:	MOV	(R1)+,@(R1)+
+	SOB	R2,1$
+	
+
+
+2$:	RETURN
+
+$EDEX:
+	COLOR	YELLOW,BLUE
+	CALL	$CURON
+	MOV	R2,R1
+	TST	(R4)+
+	MOVB	(R4)+,EX
+	MOVB	(R4)+,EY
+	MOVB	(R4)+,R3
+	ADD	R2,R3	
+	CLRB	(R3)+
+	MOVB	(R3),R5
+	ADD	R5,R1
+	ADD	R5,EX
+	TST	-(R3)
+
+	BR	WEB1
+
+WEBG:	BITB	#100,(R4)
+	BEQ	WEB1
+
+WEB2:	BICB	#100,(R4)
+	PUSH	R1
+	MOV	R2,R1
+	MOVB	-3(R4),-(SP)
+	MOV	EY,-(SP)
+	CALL	$WLOC
+	CALL	PR
+	POP	R1
+	
+WEB1:	MOV	R1,R0
+	SUB	R2,R0
+	MOVB	R0,2(R3)
+
+	PUSH	<EX,EY>
+	CALL	$WLOC
+	CLRB	C.MOVE
+	EMT	22
+	MOVB	#377,C.MOVE
+REL	KEYJMP	#MEJMP
+
+
+$WES::	BITB	#100,(R4)
+	BEQ	2$
+	MOV	R2,R5
+3$:	MOVB	#40,(R5)+
+	CMP	R5,R3
+	BLO	3$
+	MOV	R2,R1
+	MOVB	-3(R4),EX
+2$:	CMPB	R0,#40
+	BLO	WEBG
+	CMPB	R0,#240
+	BLE	WEBG
+	CMPB	R0,#100
+	BLO	5$
+	BIS	RSLT,R0
+	
+5$:	CMP	R1,R3
+	BHIS	WEBG
+	CMPB	#40,(R3)
+	BNE	WEBG
+	MOV	R3,R5
+1$:	MOVB	-(R5),1(R5)
+	CMP	R5,R1
+	BHI	1$
+	MOVB	R0,(R1)+
+	INC	EX
+$4:	BICB	#200,(R4)
+	BR	WEB2
+
+$WER::	CMP	R1,R3
+ 	BHIS	WEBG
+	BITB	#200,(R4)
+	BEQ	1$
+	MOV	#177010,R5
+	MOV	-5(R4),(R5)
+	ADD	R1,(R5)
+	SUB	R2,(R5)
+	TSTB	2(R5)
+	BEQ	2$
+	MOVB	2(R5),(R1)+
+	INC	EX
+	BR	WEB2
+2$:	BICB	#200,(R4)
+1$:	INC	EX
+	INC	R1
+	BR	WEBG
+
+
+$WEL::	CMP	R1,R2
+	BLOS	WEBG
+	DEC	EX
+	DEC	R1
+	BR	WEBG
+
+$WET::	
+	INC	R4
+	CLRB	C.MOVE
+	CALL	$CUROF
+	JMP	$BGRS
+
+	
+
+$WED::	CMP	R1,R2
+	BLOS	WEBG
+	DEC	R1
+	MOV	R1,R5
+1$:	MOVB	1(R5),(R5)+	
+	CMPB	R5,R3
+	BNE	1$
+	MOVB	#40,(R3)
+	DEC	EX
+	BR	$4
+	
+$WERS::	MOV	#200,R0
+	BR	$201
+
+$WELT::	CLR	R0
+$201:	CMP	R0,RSLT
+	BEQ	1$
+	MOV	R0,RSLT
+	SWAB	@#7220
+	SWAB	@#7222
+1$:	JMP	WEBG
+
+
+$ENTER::
+	CALL	$CUROFF
+	CLRB	C.MOVE
+	MOV	JMPADR,R0
+	BIT	#1,R0
+	BNE	1$
+	WCLOSE
+	JMP	(R0)
+1$:	BIC	#1,R0
+	CALL	(R0)
+	JMP	$EXEB	
+	
+	
+
+
+
+$SHDW:	CALL	$PUSH
+	SUB	#6,R4
+	MOV	#2,3$+2
+	MOVB	 (R4),R2
+	MOVB	2(R4),R1
+	ADD	R1,R2
+	TST	-(R2)
+	MOVB	1(R4),R3
+	MOVB	3(R4),9$
+	DEC	9$
+	INC	R3
+	CALL	6$
+	MOV	#1,9$
+	MOVB	1(R4),R3
+	MOVB	3(R4),R1
+	ADD	R1,R3
+	DEC	R3
+	MOVB	2(R4),3$+2
+	SUB	#4,3$+2
+	MOVB	(R4),R2
+	TST	(R2)+
+	CALL	6$
+	CALL	$POP
+	RETURN
+
+6$:	CALL	$GETY
+	MOV	R0,8$+2
+	MOV	#177010,R5
+8$:	MOV	@#2500,(R5)
+	ADD	R2,(R5)
+	MOV	#13,7$
+2$:	PUSH	(R5)
+3$:	MOV	#2,R1
+1$:	MOV	4(R5),R0
+	SWAB	R0
+	MOVB	R0,4(R5)
+	SWAB	R0
+	BICB	R0,4(R5)
+	COMB	R0
+	BICB	R0,5(R5)
+	INC	(R5)
+	SOB	R1,1$
+	POP	(R5)
+	ADD	#121,(R5)
+	DEC	(PC)+
+7$:	.WORD	0
+	BNE	2$
+	MOV	8$+2,R1
+	MOV	52(R1),8$+2
+	DEC	(PC)+
+9$:	.WORD	0
+	BNE	8$
+	RETURN
+
+$EXE::	CLR	KEYCOD
+	MOV	WA,R4
+	CALL	$COP
+	MOVB	W3,R2
+	TST	(R2)+
+	MOVB	W1,R1
+	TST	(R1)+
+	INC	W2
+	DEC	W4
+	MOV	W2,R3
+	CLR	R4
+$EUNK::
+EBG::	CALL	$INV
+	TST	KEYCOD
+	BEQ	1$
+	MOV	KEYCOD,R0
+	BR	2$
+1$:	FLUSH	
+	EMT	22
+	MOV	#20000,R5
+	SOB	R5,.
+
+2$:	CALL	$INV
+REL	KEYJMP	#EXJMP
+
+
+$ED::	INC	R4
+	JSR	R5,$EMPT
+	INC	R3
+	INC	R3
+	IF	R4 {= W4 THEN 1$ (B)
+	CLR	R4
+	MOV	W2,R3
+1$:	BR	$EEE
+
+$EU::	JSR	R5,$EMPT
+	DEC	R3
+	DEC	R3
+	DEC	R4
+	BPL	1$
+	MOVB	WAREA,R3
+	ADD	W2,R3
+	MOV	W4,R4
+	ADD	R4,R3
+1$:	BR	$EEE
+
+
+
+$EL::
+$ER::
+	TST	ENTFLG
+	BEQ	EBG
+$EES::	MOV	R0,KEYCOD
+	WCLOSE
+	RETURN
+
+$EE::	MOV	R4,R5
+	ASL	R5
+	ADD	#10,R5
+	ADD	WA,R5
+	MOV	(R5),R5
+Rel	Cmp	#0,r5
+	Beq	Ebg
+;	BIT	#1,R5
+;	BEQ	1$
+;	BIC	#1,R5
+;	PUSH	<R4,WAREA,WAREA+2,W4,W2,WA>
+;	WINDOW	R5
+;	POP	<WA,W2,W4,WAREA+2,WAREA,R4>
+;	IF	KEYCOD = #ENTER THEN 2$
+;	IF	KEYCOD {} #ESCAPE THEN $EEE
+;	CLR	KEYCOD
+;	BR	$EEE
+
+1$:	MOV	R5,JMPADR
+2$:	WCLOSE
+	MOV	R0,KEYCOD
+	RETURN
+
+$EEE:	BR	EBG
+
+$EMPT:	PUSH	R1
+REL	MOV	#WAREA,R1
+	MOVB	(R1)+,R0
+	BEQ	3$
+1$:	IF	(R1)+ = R4 THEN 2$ (B)
+	SOB	R0,1$
+3$:	TST	(R5)+
+2$:	POP	R1
+	RTS	R5
+
+$COP:	MOVB	2(R4),W0
+	MOVB	3(R4),W1
+	MOVB	4(R4),W2
+	MOVB	5(R4),W3
+	MOVB	6(R4),W4
+	RETURN
+
+$PUSH::	POP	TMP
+	PUSH	<R0,R1,R2,R3,R4,R5,@#177010>
+	JMP	@TMP
+
+$POP::	POP	<TMP,@#177010,R5,R4,R3,R2,R1,R0>
+	JMP	@TMP
+
+$KJMP::	
+;	Cmp	R0,#FK6
+;	Bne	10$
+;	Movb	#17.,FFFF
+;	Call	$$DsCl
+10$:	PUSH	<R5,R3,R4>
+	MOVB	(R5)+,R3
+	CLR	R4
+2$:	IF	R0 = (R5)+ THEN 1$ (B)
+	TST	(R4)+
+	SOB	R3,2$
+1$:	MOVB	@4(SP),R3
+	TST	(R3)+
+	ADD	R3,R4
+	BIC	#1,R4
+	ADD	R4,4(SP)
+	POP	<R4,R3>
+	MOV	@0(SP),(SP)
+REL	MOV	#AKTAB,R5
+1$:	CMP	@#7214,(R5)+
+	BNE	1$
+REL	SUB	#AKTAB+2,R5
+	RETURN
+	
+
+
+
+$SAVE::	MOV	R4,WBPNT
+	CALL	$PUSH
+	SUB	#6,R4
+REL	MOV	#CL.X,R0
+	MOV	#4,R1
+1$:	MOVB	(R4)+,(R0)+
+	INC	R0
+	SOB	R1,1$
+	MOV	CL.Y,R3
+	CALL	$GETY
+	MOV	R0,8$+2
+	MOV	(R4)+,R1
+	MOV	#177024,R3  
+	MOV	#177010,R0       
+8$:	MOV	@#2500,R2
+	ADD	CL.X,R2
+	MOV	#121,R5
+	SUB	CL.WX,R5
+	MOV	#13,7$
+3$:	MOV	CL.WX,R4
+2$:	MOV	R2,(R0)
+	TST	(R3)
+	MOV	R1,(R0)
+	CLR	(R3)
+	INC	R1
+	INC	R2
+	SOB	R4,2$
+	ADD	R5,R2
+	DEC	(PC)+
+7$:	.WORD	0
+	BNE	3$
+	MOV	8$+2,R4
+	MOV	52(R4),8$+2
+	DEC	CL.WY
+	BNE	8$
+	MOV	WBPNT,R4
+	MOV	R1,4(R4)
+	CALL	$POP
+	RETURN
+
+
+$CLOSE:: 
+REL	CMP	#WBUF,WBPNT
+	BNE	1$
+	SEC
+	RETURN
+1$:	CALL	$PUSH
+	SUB	#6,WBPNT
+	MOV	WBPNT,R4
+REL	MOV	#CL.X,R1
+	MOV	#4,R2
+1$:	MOVB	(R4)+,(R1)+
+	INC	R1
+	SOB	R2,1$
+	MOV	CL.Y,R3
+	CALL	$GETY
+	MOV	R0,8$+2
+	MOV	#177024,R3
+	MOV	#177010,R0
+	MOV	(R4)+,(R0)
+8$:	MOV	@#2500,R4
+	ADD	CL.X,R4
+	MOV	(R0),R2
+	SUB	R4,R2
+	MOV	R2,R1
+	INC	R1
+	MOV	#121,R5
+	SUB	CL.WX,R5
+	MOV	#13,7$
+4$:	MOV	CL.WX,R4
+5$:	TST	(R3)
+	SUB	R2,(R0)
+	CLR	(R3)
+	ADD	R1,(R0)
+	SOB	R4,5$
+	SUB	R5,R2
+	SUB	R5,R1
+	DEC	(PC)+
+7$:	.WORD	13.
+	BNE	4$
+
+	MOV	8$+2,R4
+	MOV	52(R4),8$+2
+	DEC	CL.WY
+	BNE	8$
+	CALL	$POP
+6$:	RETURN
+
+$GETY::	MOV	@#2476,R0
+	IF	R3 = #0 THEN 2$ 
+1$:	MOV	52(R0),R0
+	SOB	R3,1$
+2$:	MOV	(R0),R3
+	RETURN
+
+;$PRTN::	CALL	$PUSH
+;	MOV	@#22544,R0
+;1$:	MOVB	(R4)+,(R0)+
+;	BIC	#200,R0
+;	INC	@#7064
+;	SOB	R5,1$
+;	MOV	R0,@#22544
+;	TRAP	0
+;	CALL	$POP
+;	RETURN
+
+$PRTZ::	CALL	$PUSH
+	MOV	#TTBUF,R1
+	MOV	R1,@#T1PTR
+1$:	IF	(R1)+ {} #0 THEN 1$ (B)
+	CALL	$$PR
+	CALL	$POP
+	RETURN
+
+PR::
+	Call	$Push
+	Mov	R1,r0
+	Mov	#TtBuf,r1
+	Mov	r1,@#T1Ptr
+1$:	Movb	(r0)+,(r1)+
+	Bne	1$
+	Call	$$Pr
+	Call	$Pop
+	Return
+	
+
+
+$$PR::	MOV	R1,@#TTPTR
+	SUB	#TTBUF,R1
+	MOV	R1,@#TPROC
+	TRAP	0
+	RETURN
+
+SCRBLP::
+	CALL	$PUSH
+	COLOR	BLUE,CYAN
+REL	MOV	#SCRDIR,R4
+	TSTB	(R5)
+	BEQ	1$
+	ADD	#6,R4
+1$:	MOVB	1(R5),R2
+	MOVB	2(R5),R3
+	CALL	$100
+	MOVB	(R4),R0
+	EMT	42
+	ADD	2(R4),R2
+	ADD	4(R4),R3
+	CALL	$100
+	MOVB	3(R5),R1
+	MOV	#204,R0
+2$:	EMT	42
+	ADD	2(R4),R2
+	ADD	4(R4),R3
+	CALL	$100
+	SOB	R1,2$
+	MOVB	1(R4),R0
+	EMT	42
+	MOV	#-1,10(R5)
+	BR	$101
+
+$100:	LOCATE	R2,R3
+	RETURN
+
+SCRBLM::
+	CALL	$PUSH
+	COLOR	BLUE,CYAN
+	
+$101:	MOV	@4(R5),R1
+	MOVB	3(R5),R0
+	MUL	R0,R1
+	CLR	R0
+	DIV	6(R5),R0
+	CMP	R0,10(R5)
+	BEQ	1$
+	PUSH	R0
+	MOV	10(R5),R0
+	BMI	2$
+	CALL	$102
+	MOV	#204,R0
+	EMT	42
+2$:	POP	R0
+	MOV	R0,10(R5)
+	CALL	$102
+	MOV	#206,R0
+	EMT	42
+1$:	CALL	RSTCOL
+	CALL	$POP
+	RETURN
+	
+
+$102:	INC	R0
+	CMPB	R0,3(R5)
+	BLO	3$
+	MOVB	3(R5),R0
+3$:	MOVB	1(R5),R2
+	MOVB	2(R5),R3
+	TSTB	(R5)
+	BEQ	1$
+	ADD	R0,R3
+	BR	2$
+1$:	ADD	R0,R2
+2$:	BR	$100
+
+.PSECT	DATA
+
+SCRDIR:	.BYTE	202,203
+	.WORD	1,0
+	.BYTE	200,201
+	.WORD	0,1
+COLRS::
+	.Word	0,10421,21042,31463,42104,52525,63146,73567
+
+
+	.End
+                                                                                                                                                                             

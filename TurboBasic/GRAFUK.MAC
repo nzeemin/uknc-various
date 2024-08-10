@@ -1,0 +1,1368 @@
+
+
+;ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+;³                    ƒà ä¨ç¥áª¨© ¬®¤ã«ì ’ãà¡®-¥©á¨ª                         ³
+;³                   ‘ª®àà¥ªâ¨à®¢ ­  ƒ¥à á¨¬®¢ë¬ Ž«¥£®¬                       ³
+;³                     ¤«ï à ¡®âë á ¤à ©¢¥à®¬ x-graph                         ³
+;ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ            
+
+
+
+	
+	
+	.PSECT	BASIC	
+	E=33
+GRINIT::
+	MOV	#4,@#$SCRT
+	MOV	#8.,CHAR
+	MOV	#8.,GRPEN
+	MOV	#2,PAPER
+	MOV	#2,GRPAP
+	MOV	#2,CHRBOX
+	CLR	CRTGRP
+	RETURN
+
+MIG::
+	MOV	R1,WORK0
+	MOV	#23,CODP
+	CALL	PPEXE
+	RETURN
+	
+GLNTST:	CALL	TSTXY		;—…—…ˆ… ŸŒŽ‰ „Ž
+GLINE:	MOV	#12,CODP	;X=R1, Y=R2
+	BR	GXYW
+
+
+	
+GPNTST:	CALL	TSTXY		;‚›‚Ž„ ’Ž—Šˆ
+GPOINT:	MOV	#6,@#CODP	;X=R1, Y=R2
+	
+GXYWT:	CALL	TSTXY
+
+GXYW:	MOV 	R1,WORK1
+				; Yuk = 252 - Yibm/2
+	Push	r2
+	Call	TsSc12
+	Mov	r2,Work0
+	Pop	r2
+
+PPEXE::	MOVB	#20,PASSW
+1$:	TSTB	PASSW
+	BNE	1$
+	RETURN
+
+
+TsSc12::
+	Tst	Sc12Id
+	Beq	1$
+	Push	r3
+	Mov	r2,r3			; Yuk = 263 - Yibm*264/480 
+	Mul	#33.,r3
+	Clr	r2
+	Div	#60.,r2
+	Sub	#263.,r2
+	Neg	r2
+	Pop	r3
+1$:	Return
+
+
+
+
+GXYST:	CALL	TSTXY		;“‘’€Ž‚Š€ Ž‹Ž†…ˆŸ
+GXYS::	MOV	#11,CODP	;ƒ€”ˆ—…‘ŠŽƒŽ Š“‘Ž€
+	BR	GXYW		;X=R1, Y=R2
+
+	
+GERROR:	TRAP	5
+	
+GXYR:
+GXYRD:
+	MOV	#15,CODP
+	CALL	PPEXE		;—’…ˆ… Ž‹Ž†…ˆŸ
+1$:	TSTB	DRVREG		;ƒ€”ˆ—…‘ŠŽƒŽ Š“‘Ž€
+	BPL 	1$		;X=R1, Y=R2
+	MOV	WORK0,R2
+	
+	Tst	Sc12Id
+	Beq	2$		; Yibm = (264-Yuk)*480/264
+	Sub	#263.,r2	; 480/264 = 60/33
+	Neg	r2
+	Push	r3
+	Mov	r2,r3
+	Mul	#60.,r3
+	Clr	r2
+	Div	#33.,r2
+	Pop	r3
+
+	
+2$:	MOV	WORK1,R1
+	RETURN
+	
+	
+$KEY::	CMP	(SP)+,(SP)+
+	TST	(SP)+
+	JMP	@(4)+
+	
+
+ScrRes::
+	Jsr	R4,Stand
+	.Word	Iconst
+	.Word	0
+	.Word	Smode
+	.Word	Iconst
+	.Word	0
+	.Word	Iconst
+	.Word	0
+	.Word	At
+	.Word	R4Ret
+R4Ret::	Return
+
+
+SMODE::	Clr	Sc12Id
+	MOV	(SP)+,R1
+	CLR	WORK0
+	Cmp	r1,#12.
+	Beq	2$
+	CMP 	R1,#4
+	BMI	1$
+	INC	WORK0
+1$:	MOV	#21,CODP
+	CALL	PPEXE
+	JMP	@(4)+
+2$:	Mov	#-1,Sc12Id
+	Br	1$
+	
+
+
+	;
+COLCHR::MOV	CRTGRP,R0
+	MOV	CHAR(0),-(SP)
+	JMP	@(4)+
+COLBOX::MOV	CHRBOX,-(SP)
+	JMP	@(4)+
+
+COLPAP::MOV	PAPER,-(SP)
+	JMP	@(4)+
+	
+TSTXY:	CMP	R1,#640.	;ŠŽ’Ž‹œ €‚ˆ‹œŽ‘’ˆ
+	BLO	2$		;ŠŽŽ„ˆ€’ X,Y
+	BLT	1$
+	MOV	#639.,R1
+	BR	2$
+1$:	CLR	R1
+2$:	CMP	R2,#480.
+	BLO	TSTEND
+	BLT	3$
+	MOV	#479.,R2
+	RETURN
+3$:	CLR	R2
+TSTEND:	RETURN
+	
+TSTC3:	
+	Dec	r3
+	Bic	#^c7,r3
+	Inc	r3
+	Dec	r2
+	Bic	#^c7,r2
+	Inc	r2
+TSTCOL:
+	Dec	r1
+	Bic	#^c7,r1
+	Inc	r1
+	Return
+	
+	
+GRPERR:
+COLERR:	TRAP	5
+	
+COL3::	MOV	(SP)+,R3	;“‘’€Ž‚Š€ –‚…’Ž‚:
+	MOV	(SP)+,R2	;”Ž€
+	BNE	1$
+	MOV	#1,R2		;0 - —…›‰
+1$:	TST	R3		;‡€ŠŽŒ…‘’€
+	BNE	2$
+	MOV	R2,R3		;0 - ”ŽŽ‚›‰
+2$:	MOV	(SP)+,R1	;‘ˆŒ‚Ž‹Ž‚
+	BNE	3$
+	MOV	R2,R1		;0 - ”ŽŽ‚›‰
+3$:	CALL	TSTC3
+	MOV	R1,R5
+	CALL	COLORS
+	JMP	@(4)+
+	
+COLORS::
+	MOV	R1,-(SP)
+	MOV	R2,-(SP)
+	MOV	#10,CODP
+	MOV	R5,CHAR
+	DEC	R5
+	MOV	R5,WORK0
+	MOV	R3,CHRBOX
+	DEC	R3
+	MOV	R3,WORK1
+	MOV	R2,PAPER
+	DEC	R2
+	MOV	R2,WORK2
+	CALL	PPEXE
+	MOV	(SP)+,R2
+	MOV	(SP)+,R1
+	BR	GCOLOR
+	;
+COLG::	MOV	(SP)+,R1	;“‘’€Ž‚Š€ –‚…’€ —…—…ˆŸ
+	BNE	C1
+CPAP::	MOV	GRPAP,R1	;—…’ˆ’œ ”ŽŽ‚›Œ
+	BR	C1
+	
+CCHR::	MOV	GRPEN,R1	;—…’ˆ’œ ’…Š›™ˆŒ –‚…’ŽŒ
+C1:	CALL	COLSET
+	JMP	@(4)+
+	
+GCOLOR:	MOV	R2,GRPAP
+	MOV	R1,GRPEN
+	BR	GC
+
+COLSET:	CALL	TSTCOL
+GC:	DEC	R1
+	MOV	#7,CODP
+	MOV	R1,WORK0
+	JMP	PPEXE
+	
+CURCOR::CALL	GXYR
+	MOV	R1,-(SP)
+	MOV	R2,-(SP)
+	JMP	@(R4)+
+	
+STP::	CALL	GXYR
+	ADD	R1,2(SP)
+	BVC	1$
+	MOV	#639.,2(SP)
+1$:	ADD	R2,@SP
+	BR	LSTPE
+	
+LSTP::	ADD	6(SP),2(SP)
+	BVC	1$
+	MOV	#639.,2(SP)
+1$:	ADD	4(SP),@SP
+LSTPE:	BVC	2$
+	MOV	#263.,@SP
+2$:	JMP	@(R4)+
+
+
+
+SPFORM::
+	TST	@SP
+	BNE	1$
+	MOV	@#GRPAP,@SP
+1$:	JMP	@(R4)+
+SPSET::
+	MOV	(SP)+,R1
+	CALL	COLSET
+	JMP	@(R4)+
+
+RSP::	MOV	@#GRPEN,-(SP)
+	JMP	@(R4)+
+	
+VIDSP::	MOV	@SP,-(SP)
+	JMP	@(R4)+
+	
+
+.SBTTL	POINT	GETTING OF POINT COLOR
+
+;-----------------------------------------------------------------------------
+; Ž–…„“€ Ž‹“—…ˆŸ –‚…’€ ’Ž—Šˆ, ‡€„€Ž‰ ŠŽŽ„ˆ€’›.
+; ‘’…Š € ‚•Ž„…:
+; 2(SP)		X-ŠŽŽ„ˆ€’€;
+;  (SP)		Y;
+; ‘’…Š € ‚›•Ž„…:
+;  (SP)		ŠŽ„ –‚…’€ ’Ž—Šˆ.
+;-----------------------------------------------------------------------------
+
+POINT::
+2$:	MOV	(SP)+,R2	; Y
+	MOV	(SP)+,R1	; X
+	MOV	#-1,R0
+	CMP	R1,#640.
+	BHIS	1$
+	CMP	R2,#480.
+	BHIS	1$
+	CALL	$COLOR
+1$:	MOV	R0,-(SP)	; ‚Ž‡‚€™€…Œ›‰ –‚…’ ’Ž—Šˆ
+	JMP	@(R4)+
+	
+
+.SBTTL	SET/RESET	SPECIFIED COLOR POINT SETTING/ERASING
+
+;-----------------------------------------------------------------------------
+; Ž–…„“€ “‘’€Ž‚Šˆ –‚…’€ ˆ ƒ€˜…ˆŸ ’Ž—Šˆ.
+; ‘’…Š € ‚•Ž„…:
+; 2(SP)		X-ŠŽŽ„ˆ€’€;
+;  (SP)		Y;
+;-----------------------------------------------------------------------------
+
+
+SET::	MOV	(SP)+,R2
+	MOV	(SP)+,R1
+	CALL	GPNTST
+	JMP	@(R4)+
+	;
+
+RESET::
+	BR	SET
+	
+
+
+.SBTTL	LSET	LINE'S SEGMENT DRAWING
+
+;-----------------------------------------------------------------------------
+; Ž–…„“€ ‚›—…—ˆ‚€ˆŸ Ž’…‡Š€ ŸŒŽ‰ Œ…†„“ „‚“ŒŸ ’Ž—Š€Œˆ (X1,Y1)-(X2,Y2).
+; ‘’…Š € ‚•Ž„…:
+;  6(SP)	X1;
+;  4(SP)	Y1;
+;  2(SP)	X2;
+;   (SP)	Y2;
+;-----------------------------------------------------------------------------
+
+LSET::	MOV	6(SP),R1
+	MOV	4(SP),R2
+	CALL	GPNTST
+	MOV	(SP)+,R2
+	MOV	(SP)+,R1
+	CALL	GLNTST
+	CMP	(SP)+,(SP)+
+	JMP	@(R4)+
+	
+
+.SBTTL	RECSET	RECTANGLE DRAWING
+
+;-----------------------------------------------------------------------------
+; Ž–…„“€ Ž’ˆ‘Ž‚Šˆ ŸŒŽ“ƒŽ‹œˆŠ€ ‘Ž ‘’ŽŽ€Œˆ €€‹‹…‹œ›Œˆ ‘’ŽŽ€Œ
+; Š€€ ˆ „ˆ€ƒŽ€‹œž € ’Ž—Š€• (X1,Y1), (X2,Y2)
+; ‘’…Š € ‚•Ž„…:
+;  6(SP)	X1;
+;  4(SP)	Y1;
+;  2(SP)	X2;
+;   (SP)	Y2;
+;-----------------------------------------------------------------------------
+
+RECSET::MOV	@SP,R2
+	MOV	2(SP),R1
+	CALL	GPNTST
+	MOV	6(SP),R1
+	CALL	GLNTST
+	MOV	4(SP),R2
+	CALL	GLNTST
+	MOV	2(SP),R1
+	CALL	GLNTST
+	MOV	(SP)+,R2
+	CALL	GLNTST
+	TST	(SP)+
+	CMP	(SP)+,(SP)+
+	JMP	@(R4)+
+
+
+.SBTTL	BOXSET FILLING RECTANGLE DRAWING
+;-----------------------------------------------------------------------------
+; Ž–…„“€ ˆ‘Ž‚€ˆŸ ‡€Š€˜…ŽƒŽ ŸŒŽ“ƒŽ‹œˆŠ€ ‘Ž ‘’ŽŽ€Œˆ €€‹‹…‹œ›Œˆ
+; ‘’ŽŽ€Œ Š€€ ˆ „ˆ€ƒŽ€‹œž € ’Ž—Š€• (X1,Y1), (X2,Y2).
+; ‘’…Š € ‚•Ž„…:
+;  6(SP)	X1;
+;  4(SP)	Y1;
+;  2(SP)	X2;
+;   (SP)	Y2;
+;-----------------------------------------------------------------------------
+BOXSET::
+	MOV	#13,CODP
+	MOV	(SP)+,r2
+	Call	tsSc12
+	Mov	r2,Work2
+	MOV	(SP)+,Work3
+	MOV	(SP)+,r2
+	Call	TsSc12
+	Mov	r2,Work0
+	MOV	(SP)+,WORK1
+	CALL	PPEXE
+	JMP	@(4)+
+	
+
+.SBTTL	$BSCGRP	BASIC GRAPHIC
+
+.MACRO	PUSH	ARGS
+.IRP	ARG,<ARGS>
+	MOV	ARG,-(SP)
+.ENDR
+.ENDM
+
+.MACRO	POP	ARGS
+.IRP	ARG,<ARGS>
+	MOV	(SP)+,ARG
+.ENDR
+.ENDM
+
+
+.SBTTL	$PAINT	REGION FILLING
+
+;-----------------------------------------------------------------------------
+; Ž–…„“€ ‡€Š€‘Šˆ “Š€‡€›Œ –‚…’ŽŒ Ž‹€‘’ˆ ‘ ƒ€ˆ–…‰ Ž…„…‹…ŽƒŽ –‚…’€.
+; ‘’…Š € ‚•Ž„…:
+;  6(SP)	X-ŠŽŽ„ˆ€’€ ’Ž—Šˆ;
+;  4(SP)	Y;
+;  2(SP)	ŠŽ„ –‚…’€ ŽŠ€‘Šˆ;
+;   (SP)	ŠŽ„ –‚…’€ ƒ€ˆ–›;
+; …ƒˆ‘’› R4,R5 ‘Ž•€Ÿž’‘Ÿ.
+;-----------------------------------------------------------------------------
+$PAINT::
+	MOV	(SP)+,R1
+	CALL	COLSET		;“‘’€Ž‚Š€ –‚…’€ ƒ€ˆ–›
+	MOV	(SP)+,R3
+	DEC	R3
+	NEG	R3
+	MOV	(SP)+,R2
+	MOV	(SP)+,R1
+	CALL	GXYST		;“‘’€Ž‚Š€ €—€‹œŽ‰ ’Ž—Šˆ
+	MOV	#16,CODP	
+	MOV	R3,WORK0
+	CALL	PPEXE		;‡€‹ˆ‚Š€
+	JMP	@(4)+
+	
+
+	.SBTTL	$COLOR
+
+;-----------------------------------------------------------------------------
+; ‚“’…ŸŸ Ž–…„“€ Ž…„…‹Ÿ…’ –‚…’ ‡€„€Ž‰ ’Ž—Šˆ.
+; …ƒˆ‘’› € ‚•Ž„…:
+; R1	X-ŠŽŽ„ˆ€’€ ’Ž—Šˆ;
+; R2	Y.
+; …ƒˆ‘’› € ‚›•Ž„…:
+; R0	–‚…’ ’Ž—Šˆ.
+; ‡€ ˆ‘Š‹ž—…ˆ…Œ R0 …ƒˆ‘’› ‘Ž•€Ÿž’‘Ÿ.
+;-----------------------------------------------------------------------------
+
+$COLOR:
+	MOV	#14,CODP
+	CALL	GXYW
+1$:	TSTB	DRVREG
+	BPL	1$
+	MOV	WORK0,R0
+	RETURN
+
+ANG1::	MOV	12(SP),-(SP)
+	MOV	12(SP),-(SP)
+	MOV	12(SP),-(SP)
+	BR	ANG
+ANG2::	MOV	16(SP),-(SP)
+	MOV	16(SP),-(SP)
+	MOV	16(SP),-(SP)
+ANG:	MOV	R4,-(SP)
+	MOV	R4,SAVJMP
+	MOV	12(SP),-(SP)
+	MOV	12(SP),-(SP)
+	JSR	R4,STAND
+	.WORD	KOS, 2$,IR,MLR,RI,3$,4$
+	.WORD	SING,5$,IR,MLR,RI,3$,6$
+2$:	MOV	6(SP),-(SP)
+	JMP	@(4)+
+3$:	ADD	10(SP),@SP
+	JMP	@(4)+
+4$:	MOV	14(SP),-(SP)
+	MOV	14(SP),-(SP)
+	BGE	8$
+	NEG	4(SP)
+8$:	BIS	#100000,@SP
+	JMP	@(4)+
+5$:	MOV	10(SP),-(SP)
+	JMP	@(4)+
+6$:	MOV	(SP)+,12(SP)
+	MOV	(SP)+,12(SP)
+	MOV	(SP)+,R4
+	CLR	SAVJMP
+	ADD	#6,SP
+	JMP	@(4)+
+ANG01::	MOV	2(SP),-(SP)
+	ADD	10(SP),@SP
+	MOV	6(SP),-(SP)
+	JMP	@(R4)+
+ANG02::	MOV	6(SP),-(SP)
+	ADD	14(SP),@SP
+	MOV	12(SP),-(SP)
+	JMP	@(R4)+
+ASPINT::MOV	#1,-(SP)
+	JMP	@(R4)+
+ASPSNG::MOV	#1,R2
+	MOV	(SP)+,R1
+	BLE	7$
+	CLR	R0
+	BISB	R1,R0
+	BIS	#200,R0
+	ASL	R1
+	CLRB	R1
+	SWAB	R1
+	SUB	#211,R1
+	BGE	55$
+	CMP	R1,#-20
+	BLT	6$
+1$:	INC	R1
+
+	BEQ	3$
+	ASR	R0
+	BCC	1$
+	ROL	R0
+2$:	ASLB	R2
+	BCS	4$
+	INC	R1
+	BNE	2$
+3$:	MOV	R0,@SP
+	MOV	R2,-(SP)
+	JMP	@(R4)+
+4$:	RORB	R2
+	ASL	R2
+5$:	INC	R1
+	BEQ	3$
+	ASR	R0
+	ADC	R0
+	BR	5$
+55$:	MOV	#400,R0
+	BR	3$
+6$:	MOV	R2,R0
+	MOV	#400,R2
+	BR	3$
+7$:	TRAP	5
+ASP0::	MOV	#1,-(SP)
+	MOV	#1,-(SP)
+	JMP	@(R4)+
+	
+$CONST:	MOV	R4,-(SP)
+	MOV	R5,-(SP)
+	TRAP	110
+	BR	DRKL
+	MOV	4(SP),R4
+	MOV	R5,4(SP)
+	MOV	(SP)+,R5
+	RTS	R4
+DRKL:	TRAP	5
+$VALUE: MOV	R4,-(SP)
+	MOV	R5,-(SP)
+	CLR	-(SP)
+	TRAP	105
+	BR	9$
+	BR	9$
+	BR	9$
+	TRAP	104
+	TST	R4
+	BEQ	9$
+	MOV	(R4)+,@SP
+	TST	TYPE
+	BNE	9$
+	MOV	R1,R5
+	MOV	@R4,@SP
+	MOV	-(R4),-(SP)
+	JSR	R4,STAND
+	.WORD	RI,1$
+
+1$:	MOV	R5,R1
+9$:	MOV	6(SP),R4
+	MOV	(SP)+,4(SP)
+	MOV	(SP)+,R5
+	RTS	R4
+
+$STRNG:	CLR	-(SP)
+	MOV	R4,-(SP)
+	MOV	R5,-(SP)
+10$:	TRAP	105
+	BR	DRKL
+	BR	DRKL
+	BR	1$
+	BR	DRKL
+1$:	TRAP	104
+	TST	R4
+	BEQ	5$
+	MOV	6(SP),R5
+	MOV	(R4)+,4(SP)
+	MOV	@R4,6(SP)
+	MOV	R5,R4
+4$:	MOV	(SP)+,R5
+	RTS	R4
+5$:	MOV	6(SP),R4
+	CLR	6(SP)
+	BR	4$
+
+
+.SBTTL	$ARC	ARC DRAWING
+
+;-----------------------------------------------------------------------------
+; Ž–…„“€ Ž‘’Ž…ˆŸ „“ƒˆ ŽŠ“†Ž‘’ˆ ( ‘…‚„Ž‹ˆ‘€ ).
+; ‘’…Š € ‚•Ž„…:
+; 22(SP)	X-ŠŽŽ„ˆ€’€ –…’€ ŽŠ“†Ž‘’ˆ;
+; 20(SP)	Y;
+; 16(SP)	€„ˆ“‘;
+; 14(SP)	–‚…’ Ž’ˆ‘Ž‚Šˆ;
+; 12(SP)	X-ŠŽŽ„ˆ€’€ €—€‹œŽ‰ ’Ž—Šˆ;
+; 10(SP)	Y;
+;  6(SP)	X-ŠŽŽ„ˆ€’€ ŠŽ…—Ž‰ ’Ž—Šˆ;
+;  4(SP)	Y;
+;  2(SP)	—ˆ‘‹ˆ’…‹œ ‘ŽŽ’Ž˜…ˆŸ ŠŽŽ„ˆ€’;
+;   (SP)	‡€Œ…€’…‹œ;
+; …‘‹ˆ X-ŠŽŽ„ˆ€’› ƒ€ˆ—›• ’Ž—…Š Ž’ˆ–€’…‹œ›…, ’Ž Ž‚Ž„Ÿ’‘Ÿ ŸŒ›…,
+; ‘Ž…„ˆŸž™ˆ… ’ˆ ’Ž—Šˆ ‘ –…’ŽŒ ŽŠ“†Ž‘’ˆ.
+;-----------------------------------------------------------------------------
+$ARC::
+	PUSH	<CHAR,R4,R5>
+	MOV	R4,SAVJMP
+	MOV	22(SP),R1		; ŠŽ„ –‚…’€
+	BEQ	10$
+	CALL	COLSET       		; “‘’€€‚‹ˆ‚€…Œ –‚…’ Ž’ˆ‘Ž‚Šˆ
+10$:
+	MOV	20(SP),R1		; XS < 0 ?
+	BGE	12$			; …’
+	NEG	R1
+	NEG	20(SP)			; XS = -XS
+	MOV	16(SP),R2		; YS
+	CMP	10(SP),6(SP)		; …‘’œ ‘†€’ˆ… Ž Ž„Ž‰ ˆ‡ Ž‘…‰ ?
+	BEQ	106$			; …’
+	BLT	103$			; „€, Ž Ž‘ˆ Y
+	SUB	30(SP),R1
+	CALL	$MD
+	ADD	30(SP),R1
+	BR	106$
+103$:
+	SUB	26(SP),R2		; ‘†€’ˆ… Ž Ž‘ˆ X
+	MUL	10(SP),R2
+	DIV	6(SP),R2
+	ADD	26(SP),R2
+106$:
+	CALL	GPOINT
+	MOV	30(SP),R1		; XC
+	MOV	26(SP),R2		; YC
+	CALL	GLINE			; —…’ˆŒ Ž’…‡ŽŠ (XS,YS)-(XC,YC)
+12$:
+	MOV	14(SP),R1		; XT < 0 ?
+	BGE	14$			; …’
+	NEG	R1
+	NEG	14(SP)			; XT = -XT
+	MOV	12(SP),R2		; YT
+	CMP	10(SP),6(SP)
+	BEQ	126$
+	BLT	123$
+	SUB	30(SP),R1
+	CALL	$MD
+	ADD	30(SP),R1
+	BR	126$
+123$:
+	SUB	26(SP),R2
+	MUL	10(SP),R2
+	DIV	6(SP),R2
+	ADD	26(SP),R2
+126$:
+	CALL	GPOINT
+	MOV	30(SP),R1		; XC
+	MOV	26(SP),R2		; YC
+	CALL	GLINE			; —…’ˆŒ Ž’…‡ŽŠ (XT,YT)-(XC,YC)
+14$:
+	CLR	R1			; 0 - €—€‹œŽ… ‡€—…ˆ… X-ŠŽŽ„ˆ€’›
+					; ‚ …‚ŽŒ Š‚€„€’…
+	MOV	24(SP),R2		; R - €—€‹œŽ… ‡€—…ˆ… Y-ŠŽŽ„ˆ€’›
+					; ‚ …‚ŽŒ Š‚€„€’…
+	MOV	R2,R3			; „€‹…… ‚›—ˆ‘‹Ÿ…Œ D[0]
+	DEC	R3
+	NEG	R3
+	ASL	R3			; D[0]
+	CMP	20(SP),14(SP)		; X-ŠŽŽ„ˆ€’› €—€‹œŽ‰ ˆ ŠŽ…—Ž‰
+					; ’Ž—…Š „“ƒˆ ‘Ž‚€„€ž’ ?
+	BNE	20$			; …’
+	CMP	16(SP),12(SP)		; €—€‹œ€Ÿ ˆ ŠŽ…—€Ÿ ’Ž—Šˆ
+					; ‘Ž‚€„€ž’ ?
+	BNE	20$			; …’
+	MOV	#125252,R5		; ‡€„€…Œ Ž’ˆ‘Ž‚Š“ ‚‘…‰ ŽŠ“†Ž‘’ˆ
+	JMP	$ASET
+20$:
+	SUB	30(SP),20(SP)		; ……•Ž„ˆŒ ‚ ‘ˆ‘’…Œ“ ŠŽŽ„ˆ€’
+	SUB	26(SP),16(SP)		; ‘ €—€‹ŽŒ ‚ –…’… ŽŠ“†Ž‘’ˆ
+	SUB	30(SP),14(SP)
+	SUB	26(SP),12(SP)
+	CLR	R0			; R0 - ŽŒ… Š‚€„€’€ ‘ ( XS, YS )
+	TST	20(SP)
+	BGE	30$
+	INC	R0
+	INC	R0
+	TST	16(SP)
+	BLT	40$
+	BR	35$
+30$:
+	TST	16(SP)
+	BGE	40$
+35$:
+	INC	R0
+40$:
+	CLR	R4			; R4 - ŽŒ… Š‚€„€’€ ‘ ( XT, YT )
+	TST	14(SP)
+	BGE	50$
+	INC	R4
+	INC	R4
+	TST	12(SP)
+	BLT	60$
+	BR	55$
+50$:
+	TST	12(SP)
+	BGE	60$
+55$:
+	INC	R4
+60$:					; "……Ž‘ˆŒ" €—€‹œ“ž ˆ ŠŽ…—“ž
+	ASL	R0			; ’Ž—Šˆ ‚ 1-›‰ Š‚€„€’
+	JMP	@$QS(R0)
+$MD:
+	MOV	R1,R0
+	MUL	6(SP),R0
+	DIV	10(SP),R0
+	MOV	R0,R1
+	RETURN
+$QS1:
+	PUSH	<20(SP)>
+	MOV	20(SP),22(SP)		; X=-Y
+	NEG	22(SP)
+	POP	<16(SP)>		; Y=X
+	BR	$QS0
+$QS2:
+	NEG	20(SP)			; X=-X
+	NEG	16(SP)			; Y=-Y
+	BR	$QS0
+$QS3:
+	PUSH	<20(SP)>
+	MOV	20(SP),22(SP)		; X=Y
+	POP	<16(SP)>		; Y=-X
+	NEG	16(SP)
+	BR	$QS0
+$QS0:
+	ASR	R0
+	ASL	R4
+	JMP	@$QT(R4)
+$QT1:
+	PUSH	<14(SP)>
+	MOV	14(SP),16(SP)
+	NEG	16(SP)
+	POP	<12(SP)>
+	BR	$QT0
+$QT2:
+	NEG	14(SP)
+	NEG	12(SP)
+	BR	$QT0
+$QT3:
+	PUSH	<14(SP)>
+	MOV	14(SP),16(SP)
+	POP	<12(SP)>
+	NEG	12(SP)
+$QT0:
+	ASR	R4
+	CLR	R5
+	CMP	R0,R4			; €—€‹œ€Ÿ ˆ ŠŽ…—€Ÿ ’Ž—Šˆ
+					; ‚ Ž„ŽŒ Š‚€„€’…
+	BEQ	40$			; „€	
+	PUSH	<#6>
+	CALL	$SETCD
+10$:
+	INC	R0
+	CMP	#4,R0
+	BNE	20$
+	CLR	R0
+20$:
+	CMP	R0,R4
+	BEQ	30$
+	PUSH	<#12>
+	CALL	$SETCD
+	BR	10$
+30$:
+	PUSH	<#2>
+	CALL	$SETCD
+	BR	$ASET
+40$:
+	CMP	20(SP),14(SP)		; XS-XT>0 ?
+	BGT	50$
+	PUSH	<#10>
+	CALL	$SETCD
+	BR	$ASET
+50$:
+	MOV	#125252,R5	;?
+	PUSH	<#4>
+	CALL	$SETCD
+$ASET:
+	CALL	$P4SET
+	TST	R5			; Ž‘’Ž…€ ‚‘Ÿ „“ƒ€ ?
+	BEQ	$AEND			; „€
+	MOV	R3,R0			; D[I]
+	BGT	20$
+;------ D[I] <= 0
+	ADD	R2,R0			; ‚›—ˆ‘‹Ÿ…Œ L[I]
+	ASL	R0
+	DEC	R0
+	BGT	10$
+;...... D[I] <= 0 AND L[I] <= 0   ===> M1
+	INC	R1			; X[I+1]=X[I]+1
+	MOV	R1,R0
+	ASL	R0
+	ADD	R0,R3
+	INC	R3			; D[I+1]=D[I]+2*X[I+1]+1
+	BR	$ASET
+;...... D[I] <= 0 AND L[I] > 0 OR D[I] >= 0 AND L'[I] <= 0 ====> M2
+10$:
+	INC	R1			; X[I+1]=X[I]+1
+	DEC	R2			; Y[I+1]=Y[I]-1
+	MOV	R1,R0
+	SUB	R2,R0
+	INC	R0
+	ASL	R0
+	ADD	R0,R3			; D[I+1]=D[I]+2*X[I+1]-2*Y[I+1]+2
+	BR	$ASET
+;------ D[I] > 0
+20$:
+	SUB	R1,R0			; ‚›—ˆ‘‹Ÿ…Œ L'[I]
+	ASL	R0
+	DEC	R0
+	BLE	10$
+;...... D[I] > 0 AND L'[I] > 0
+	DEC	R2			; Y[I+1]=Y[I]-1
+	MOV	R2,R0
+	ASL	R0
+	SUB	R0,R3
+	INC	R3
+	BR	$ASET
+$AEND:
+	POP	<R5,R4,R3>
+	ADD	#20,SP
+	POP	<R2,R1>
+	CALL	GXYST
+	CLR	SAVJMP
+	JMP	@(4)+
+$QS:
+	.WORD	$QS0
+	.WORD	$QS1
+	.WORD	$QS2
+	.WORD	$QS3
+$QT:
+	.WORD	$QT0
+	.WORD	$QT1
+	.WORD	$QT2
+	.WORD	$QT3
+.SBTTL	$SETCD	QUADRANT CODE SETTING
+;-----------------------------------------------------------------------------
+; ‚“’…ŸŸ Ž–…„“€ Ž…„…‹…ˆŸ ŠŽ„€ Š‚€„€’€.
+; ‘’…Š € ‚•Ž„…:
+; 2(SP)		“‘’€€‚‹ˆ‚€…Œ›‰ ŠŽ„;
+;  (SP)		€„…‘ ‚Ž‡‚€’€.
+;-----------------------------------------------------------------------------
+
+$SETCD:
+	PUSH	<R0,R1,R2>
+	MOV	10(SP),R1		; “‘’€€‚‹ˆ‚€…Œ›‰ ŠŽ„
+	MOV	#17,R2			; Œ€‘Š€
+	TST	R0
+	BEQ	20$
+10$:
+	ASL	R1
+	ASL	R1
+	ASL	R1
+	ASL	R1
+	ASL	R2
+	ASL	R2
+	ASL	R2
+	ASL	R2
+	SOB	R0,10$
+20$:
+	BIC	R2,R5
+	BIS	R1,R5
+	POP	<R2,R1,R0,(SP)>
+	RETURN
+
+
+.SBTTL	$P4SET	SYMMETRICAL POINTS CHECKING AND DRAWING
+;-----------------------------------------------------------------------------
+; ‚“’…ŸŸ Ž–…„“€ Ž‚…Šˆ „Ž“‘’ˆŒŽ‘’ˆ ˆ Ž’ˆ‘Ž‚Šˆ 4-• ‘ˆŒŒ…’ˆ—›•
+; ’Ž—…Š.
+; ‚•Ž„›… €€Œ…’›:
+; R1	Ž’Ž‘ˆ’…‹œ€Ÿ X-ŠŽŽ„ˆ€’€ ’Ž—Šˆ ( ‚ 1-ŽŒ Š‚€„€’… );
+; R2	Y;
+; R5	ŠŽ„ Š‚€„€’€.
+; ‚›•Ž„›… €€Œ…’›:
+; R5	ŠŽ„ Š‚€„€’€.
+; … ‘Ž•€Ÿ…’‘Ÿ R0.
+; ‚ˆŒ€ˆ…!!! ‘ˆŸ Ž–…„“€ €ƒ‹Ž ˆ‘Ž‹œ‡“…’ ‡€ˆ… ‘’…Š€, Ž’ŽŒ“ ‹ž›…
+; ˆ‘€‚‹…ˆŸ ‚ ‚›‡›‚€ž™…‰ Ž–…„“… $ARC, ‡€’€ƒˆ‚€ž™ˆ… ‘’…Š ˆ‚…„“’
+; Š …Ž•Ž„ˆŒŽ‘’ˆ …… ŠŽ…Š–ˆˆ.
+;-----------------------------------------------------------------------------
+$P4SET:
+	PUSH	<R5,R5>
+	CLR	R0			; ŽŒ… Š‚€„€’€ ( 0,1,2,3 )
+$P4CYC:
+	BIC	#177760,R5		; ‚›„…‹Ÿ…Œ ŠŽ„ Ž—……„ŽƒŽ Š‚€„€’€
+	JMP	@$CODE(R5)		; Ž€€’›‚€…Œ ’Ž—Š“ ‚ ‚›„…‹…ŽŒ
+					; Š‚€„€’… ‘Žƒ‹€‘Ž …… ŠŽ„“
+$C0000:					; „“ƒ€ ‚ Š‚€„€’… … ‚›—…—ˆ‚€…’‘Ÿ
+	INC	R0
+	CMP	#4,R0			; Ž€Ž’€› ‚‘… Š‚€„€’› ?
+	BNE	10$
+	JMP	$P4END			; „€
+10$:
+	POP	<R5>
+	ASR	R5
+	ASR	R5
+	ASR	R5
+	ASR	R5
+	PUSH	<R5>
+	BR	$P4CYC
+$C0010:					; „“ƒ€ ‚›—…—ˆ‚€…’‘Ÿ Ž’ €—€‹€
+					; Š‚€„€’€ „Ž ŠŽ…—Ž‰ ’Ž—Šˆ
+	CMP	R1,22(SP)		; „Ž‘’ˆƒ“’€ ŠŽ…—€Ÿ ’Ž—Š€ ?
+	BLT	$L2			; …’
+	CMP	R2,20(SP)
+	BGT	$L2
+	CLR	R5			; “‘’€€‚‹ˆ‚€…Œ, —’Ž ‚ Ž‘’€‚˜…‰‘Ÿ
+					; —€‘’ˆ Š‚€„€’€ „“ƒ€ … ‚›—…—ˆ-
+					; ‚€…’‘Ÿ
+$L0:					; „€‹…… ‘‹…„“…’ “‘’€Ž‚Š€ ŠŽ„€
+					; ‚›—…—ˆ‚€…ŒŽ‘’ˆ „“ƒˆ ‚ „€ŽŒ
+					; Š‚€„€’…
+	MOV	#17,R4			; Œ€‘Š€
+	PUSH	<R0>			; ‘Ž•€Ÿ…Œ ŽŒ… Š‚€„€’€
+	BEQ	$L1
+10$:
+	ASL	R5
+	ASL	R5
+	ASL	R5
+	ASL	R5
+	ASL	R4
+	ASL	R4
+	ASL	R4
+	ASL	R4
+	SOB	R0,10$
+$L1:
+	POP	<R0>			; ‚Ž‘‘’€€‚‹ˆ‚€…Œ ŽŒ… Š‚€„€’€
+	BIC	R4,2(SP)		; ƒ€‘ˆŒ …„›„“™ˆ‰ ŠŽ„
+	BIS	R5,2(SP)		; “‘’€€‚‹ˆ‚€…Œ Ž‚›‰
+$L2:					; Ž’ˆ‘Ž‚Š€ ’Ž—Šˆ
+	PUSH	<R0,R1,R2>
+	ASL	R0
+	JMP	@$QUA(R0)
+$Q0:
+	PUSH	<R3>
+	CMP	26(SP),24(SP)
+	BEQ	$L8
+	BLT	$L5
+	MOV	R1,R0
+	MUL	24(SP),R0
+	DIV	26(SP),R0
+	MOV	R0,R1
+	BR	$L8
+$L5:
+	MUL	26(SP),R2
+	DIV	24(SP),R2
+$L8:
+	POP	<R3>
+	ADD	44(SP),R1
+	ADD	42(SP),R2
+	CALL	GPOINT			; ‚›‚Ž„ˆŒ ’Ž—Š“
+	POP	<R2,R1,R0>
+	BR	$C0000
+$Q1:
+	MOV	R2,R1			; X=Y
+	MOV	2(SP),R2		; Y=-X
+	NEG	R2
+	BR	$Q0
+$Q2:
+	NEG	R1			; X=-X
+	NEG	R2			; Y=-Y
+	BR	$Q0
+$Q3:
+	MOV	R2,R1			; X=-Y
+	NEG	R1
+	MOV	2(SP),R2		; Y=X
+	BR	$Q0
+$C0100:					; „“ƒ€ ‚›—…—ˆ‚€…’‘Ÿ Ž’ €—€‹€
+					; Š‚€„€’€ „Ž ŠŽ…—Ž‰ ’Ž—Šˆ ˆ
+					; Ž’ €—€‹œŽ‰ ’Ž—Šˆ „Ž ŠŽ–€
+					; Š‚€„€’€
+	CMP	R1,22(SP)		; ŠŽ…—€Ÿ ’Ž—Š€ „Ž‘’ˆƒ“’€ ?
+	BLT	$L2			; …’
+	CMP	R2,20(SP)
+	BGT	$L2
+	MOV	#6,R5			; “‘’€€‚‹ˆ‚€…Œ ˆ‡€Š Ž’ˆ‘Ž‚Šˆ
+					; Ž’ €—€‹œŽ‰ ’Ž—Šˆ „Ž ŠŽ–€
+					; Š‚€„€’€
+	BR	$L0
+$C0110:					; „“ƒ€ ‚›—…—ˆ‚€…’‘Ÿ Ž’ €—€‹œŽ‰
+					; ’Ž—Šˆ „Ž ŠŽ–€ Š‚€„€’€
+	CMP	R1,26(SP)		; €—€‹œ€Ÿ ’Ž—Š€ „Ž‘’ˆƒ“’€ ?
+	BLT	$C0000			; …’
+	CMP	R2,24(SP)
+	BGT	$C0000
+	MOV	#12,R5			; “‘’€€‚‹ˆ‚€…Œ ˆ‡€Š Ž’ˆ‘Ž‚Šˆ
+					; ‚‘…ƒŽ ( Ž‘’€‚˜…ƒŽ‘Ÿ) Š‚€„€’€
+	BR	$L0
+$C1000:					; „“ƒ€ ‚›—…—ˆ‚€…’‘Ÿ ‚ …„…‹€•
+					; Ž„ŽƒŽ Š‚€„€’€ Ž’ €—€‹œŽ‰
+					; „Ž ŠŽ…—Ž‰ ’Ž—Šˆ
+	CMP	R1,26(SP)		; €—€‹œ€Ÿ ’Ž—Š€ „Ž‘’ˆƒ“’€ ?
+	BGE	5$
+	JMP	$C0000			; …’
+5$:
+	CMP	R2,24(SP)
+	BLE	10$
+	JMP	$C0000
+10$:
+	MOV	#2,R5			; “‘’€€‚‹ˆ‚€…Œ ˆ‡€Š Ž’ˆ‘Ž‚Šˆ
+					; Ž’ €—€‹€ Š‚€„€’€ „Ž ŠŽ…—Ž‰
+					; ’Ž—Šˆ
+	BR	$L0
+$C1010:					; „“ƒ€ —…’ˆ’‘Ÿ ‚Ž ‚‘…Œ Š‚€„€’…
+	CMP	R1,32(SP)		; „Ž‘’ˆƒ“’ ŠŽ…– Š‚€„€’€ ?
+	BLT	$L2			; …’
+	TST	R2
+	BGT	$L2
+	CLR	R5
+	BR	$L0
+$P4END:
+	POP	<R5,R5>
+	RETURN
+$CODE:
+	.WORD	$C0000
+	.WORD	$C0010
+	.WORD	$C0100
+	.WORD	$C0110
+	.WORD	$C1000
+	.WORD	$C1010
+$QUA:
+	.WORD	$Q0
+	.WORD	$Q1
+	.WORD	$Q2
+	.WORD	$Q3
+; “•!!!
+.MACRO	PUSH	ARGS		; PUSH:  €ƒ-->‘’…Š
+.IRP	ARG,<ARGS>
+	MOV	ARG,-(SP)
+.ENDR
+.ENDM
+.MACRO	POP	ARGS		; POP:   ‘’…Š-->€ƒ
+.IRP	ARG,<ARGS>
+	MOV	(SP)+,ARG
+.ENDR
+.ENDM
+;************************************************
+;		Žƒ€Œ€  Ž…€’Ž€ DRAW
+;	€ ‚•Ž„…:	‚ ‘’…Š… 2(SP) -€„…‘ ‘’ŽŠˆ
+;				 (SP) -„‹ˆ€ ‘’ŽŠˆ
+;	€ ‚›•Ž„…:	‘’…Š “‘’
+;	‚‘… …ƒˆ‘’› ‘Ž•€ž’‘Ÿ.
+;	ˆ ‚›‡Ž‚€• $CONST,$VALUE,$STRNG R4 ‘Ž•.
+;************************************************
+;
+$DRAW::
+	MOV	R4,SAVJMP
+	CALL	CLRTSP
+	POP	<R5,R3>		; ˆ‡‚‹…—œ „‹. ˆ €„.‘’
+	BEQ	OUT
+	CALL	GXYR		; €—€‹œŽ… Ž‹Ž†…ˆ…
+	MOV	R5,R0		; ‘Ž•€ˆ’œ
+	PUSH	<R0,CHAR>	; ‘Ž•. R5,–‚…’
+	CLR	-(SP)		; ‡€ˆ‘œ ‘‹Ž‚( 0,0 -ˆ‡€Š ŽŠŽ—€ˆŸ ),
+	CLR	-(SP)
+	MOV	#70000,-(SP)	; ˆ ‘‹Ž‚€ ……Œ…™…ˆ‰  ( WM )( 70000 )
+NEWSTR:
+	TST	R3		; “‹…‚Ž‰ €„…‘-ˆ‡€Š ŠŽ–€ ?
+	BEQ	OUT		; „€--‚›•Ž„ ˆ‡  $DRAW
+	ADD	R3,R5		; ŠŽ…Š–ˆŸ R5<--€„…‘ Ž‘‹…„. €‰’€ ‘’ŽŠˆ
+	DEC	R5
+AGAIN:
+;----------------------------------------------------------------------
+;  SKANER Ž…„…‹Ÿ…’ ˆ€„‹…†Ž‘’œ ‘ˆŒ‚Ž‹€ (R3) Š Š‹ž—€Œ.„‹Ÿ Š‹ž—…‚ŽƒŽ
+;	  B R0 ‘Œ…™…ˆ… …ƒŽ ‚  ‘’ŽŠ… KEY “ŒŽ†…Ž… € 2
+;	!!!!! R3 € ‚›•Ž„… “Š€‡›‚€…’ € ‘‹…„“ž™ˆ‰  ‘ˆŒ‚O‹  !!!!!!
+;----------------------------------------------------------------------
+;SKANER
+	TRAP	112
+	CMP	R3,R5		; ŠŽ…– Ž€Ž’Šˆ Ž„‘’ŽŠˆ?
+	BHI	NEXT		; „€
+	CLR	R0		; …‚Ž€—€‹œŽ  “‹…‚Ž… ‘Œ…™…ˆ…
+1$:	CMPB	KEY(R0),(R3)	; ‘ˆŒ‚Ž‹› ‘•Ž„Ÿ’‘Ÿ
+	BEQ	2$		; „€-€ ‚›•Ž„
+	INC	R0		; …’--‘‹…„“ž™ˆ‰
+	TSTB	KEY(R0)		; “‹…‚Ž‰ ? „€-€ ‚›•Ž„
+	BNE	1$		; …’--ŽŸ’œ ‘€‚…ˆ…
+	BR	ERROR		; … Š‹ž—
+2$:	ASL	R0		;  * 2
+	INC	R3		; Ž„‚ˆ†…ˆ… R3
+;----------------------------------------------------------
+;	SELEKTOR Ž‘“™…‘’‚‹Ÿ…’ ‚…’‚‹…ˆ… Ž Ž€Ž’Š… Š‹ž—…‰
+;----------------------------------------------------------
+;SELEKTOR
+	CMP	R0,#16		; ……Œ…™…ˆ…  RLDUEFGH
+	BLT	3$		; …’
+	JMP	RDEG$		; „€--€ RDEG$
+3$:	JMP	@CASE(R0)	; …’---‚…’‚‹…ˆE
+;
+KEY:
+	.ASCIZ	/MNBCSAXRULDRULEHGFEHG/		; Š‹ž—ˆ
+	.EVEN
+CASE:
+	.WORD	M$,N$,B$,C$,S$,A$,X$		;Œ…’Šˆ ……XŽ„€ SELEKTOR
+;
+NEXT:				; Ž€Ž’Š€ ‘‹…„. Ž„‘’ŽŠˆ
+	POP	<R0,R5,R3>	; —’…ˆ… WM,€„.ˆ „‹. ‘’ŽŠˆ
+	PUSH	R0		; ‡€ˆ‘œ WM
+	BR	NEWSTR
+;------------------------------
+;	X$---Ž€Ž’Š€ Ž„‘’ŽŠ
+;------------------------------
+X$:
+	POP	R0		; ‘Ž•€ˆ’œ WM
+	CMP	-(SP),-(SP)	; ‡€…‡…‚ˆŽ‚€’œ 2 ‘‹Ž‚€
+	CALL	BLNC		; Ž“‘Š Ž…‹Ž‚
+	CALL	$STRNG		; Ž‹“—…ˆ… ‚ ‘’…Š… €„…‘€ Ž‚Ž‰ Ž„‘’ŽŠˆ
+				;   ˆ …… „‹ˆ›. R3 €‚’ŽŒ€’ˆ—…‘Šˆ Ž„‚ˆ“’
+	CALL	BLNC		; Ž“‘Š Ž…‹Ž‚
+	BNE	ERROR		; Žƒ€ˆ—ˆ’…‹œ-";" ? …’-Ž˜ˆŠ€
+	INC	R3		; Ž“‘Š ";"
+	SUB	R3,R5		; ŠŽ…Š–ˆŸ R5<--„‹ˆ€ ‘’ŽŠˆ
+	INC	R5
+	MOV	R3,6(SP)	; ‡€ˆ‘œ ‚ Ž’Š‹€„›‚€…Œ›•
+	MOV	R5,4(SP)	;    €„…‘€ ˆ  „‹ˆ›
+	POP	<R5,R3> 	; Ž‹“—…ˆ… Ž‚›•
+	PUSH	R0		; ‚Ž‘‘’. WM
+	BR	NEWSTR
+;
+ERROR:				; Ž˜ˆŠ€
+	TRAP	5
+;
+BLNC:	TRAP	112		;Ž“‘Š Ž…‹Ž‚
+	CMP	R3,R5
+	BHI	ERROR
+	CMPB	#';,@R3
+	RETURN
+;
+OUT:	CMP	(SP)+,(SP)+	; Ž—ˆ‘’Š€ ‘’…Š€ WM
+	POP	<R5>		; ‚Ž‘‘’. R5
+RET:	CLR	SAVJMP
+	JMP	@(R4)+		; !!!!!!!!! ‚›•Ž„ ˆ‡ $DRAW
+;
+;-----------------------------------------
+;		Ž€Ž’Š€ Ž’„…‹œ›• ŠŽŒ€„
+;-----------------------------------------
+B$:				; ŠŽŒ. B--"Ž„Ÿ’Ž… …Ž"
+	BIS	#4000,(SP)	; “‘’€Ž‚Š€ ˆ’€ 11 ‚ ‘‹Ž‚… ……Œ…™.
+	BR	AGAIN
+;
+N$:				; ŠŽŒ. N--‚Ž‡‚€’ Š “‹ž
+	BIS	#100000,(SP)	; “‘’€Ž‚Š€ ˆ’€ 15-ˆ‡€Š ‚Ž‡‚€’€ Š ’—.(0,0)
+	BR	AGAIN
+;
+S$:				; ŠŽŒ. S--“‘’€Ž‚Š€ Œ€‘˜’€.ŠŽ…””.
+	CLR	R0
+	CALL	$$SENSE		; —’…ˆ… ‡€—…ˆŸ
+	BNE	1$
+	MOV	#4,R0		; “‹…‚Ž‰ Œ€‘˜’€--“ŒŽ‹—€ˆ…
+1$:	MOVB	R0,$SCRT	; ‡€‘›‹Š€ ‚ ‘‹Ž‚Ž ‚€™…ˆŸ-Œ€‘˜’.
+	BR	AGAIN
+;
+C$:				; ŠŽŒ. C--“‘’€Ž‚Š€ –‚…’€
+	CLR	R0		; “ŒŽ‹—€ˆ…
+	CALL	$$SENSE		; —’…ˆ…
+	TST	R0
+	BNE	1$
+	MOV	PAPER,R0
+1$:	CMP	#10,R0		; R0<=8
+	BLO	ERROR		; …’-Ž˜ˆŠ€
+	PUSH	<R1>
+	MOV	R0,R1		; R2   =  ŠŽ„› –‚…’Ž‚:   Š€‘›‰  5
+				;			 ‡…‹…›‰  3
+				;			 ‘ˆˆ‰    2
+				;			 —…›‰   1 ˆ ’.„.
+	CALL	COLSET		; ……„€—€ ŠŽ„€ ‚ „€‰‚…
+	POP	<R1>
+	BR	AGAIN
+;
+A$:				; ŠŽŒ. €--‚€™…ˆ… Ž‘…‰
+	CLR	R0		; “ŒŽ‹—€ˆ…
+	CALL	$$SENSE		; Ž‹“—…ˆ… ‡€—…ˆŸ
+	CMP	R0,#4		; Ž‚…Š€ ƒ€ˆ–
+	BHIS	ERROR
+	MOVB	R0,$SCRT+1	; “‘’€Ž‚Š€ Ž‚ŽƒŽ ‡€—…ˆŸ ‚€™…ˆŸ
+JAG:	BR	AGAIN
+;----------------------------------------
+;		‚•Ž„ „‹Ÿ Ž€Ž’Šˆ ŠŽŒ. M
+;----------------------------------------
+M$:
+	PUSH	<R1,R2>		; ‘Ž•€…ˆ… ŠŽŽ„ˆ€’
+	CALL	$$SIGN		; Ž‹“—…ˆ… ‡€Š€
+	CLR	R0		; “ŒŽ‹—€ˆ…
+	CALL	$$SENSE		; Ž‹“—…ˆ… ‡€—…ˆŸ
+	BIT	#1000,4(SP)	; Ž’Ž‘ˆ’…‹œŽ… ?
+	BEQ	1$		; …’
+	CALL	$$SCALE		; „€--Œ€‘˜’€ˆŽ‚€ˆ…
+1$:	MOV	R0,R1		; ŠŽŽ„ˆ€’€ •
+	CALL	BLNC		; Ž“‘Š Ž…‹Ž‚
+	CMPB	#',,(R3)	; "," ?
+	BNE	ERROR		; …’--Ž˜ˆŠ€
+	INC	R3		; Ž“‘Š ","
+	ASLB	4(SP)		; ‚ WM ˆ’ 1--X,ˆ’ 0--Y
+	ASRB	5(SP)		; ‘Ž•. ˆ‡€Š€ Ž’Ž‘ˆ’.
+	CALL	$$SIGN		; Ž‹“—…ˆ… ‡€Š€ Y
+	CLR	R0		; “ŒŽ‹—€ˆ…
+	CALL	$$SENSE		; Ž‹“—…ˆ… ‡€—…ˆŸ  Y
+	ASLB	5(SP)		; ‚Ž‘‘’€. ˆ‡. Ž’Ž‘ˆ’.
+	BIT	#1000,4(SP)	; Ž’Ž‘ˆ’…‹œŽ… ?
+	BEQ	2$		; …’
+	CALL	$$SCALE		; „€--Œ€‘˜’€ˆŽ‚€ˆ…
+2$:	MOV	R0,R2		; ‘Œ…™…ˆ… Ž Y
+	CMP	(SP)+,(SP)+	; “Š€‡€’…‹œ ‘’…Š€ € WM
+	BIT	#1000,(SP)	; Ž’Ž‘ˆ’…‹œŽ… ?
+	BEQ	MOVIN		; …’- €‘Ž‹ž’.
+;*******	Ž’Ž‘ˆ’…‹œŽ…
+	MOVB	$SCRT+1,R0	; €‰’ ‚€™…ˆŸ
+	CMP	#2,R0		; €0 ˆ‹ˆ €1
+	BGT	5$		; „€
+	NEG	R2		; …’--ˆ‡Œ……ˆ… ‡€Š€ „Y
+5$:	DEC	R0
+	CMP	#2,R0		; €1 ˆ‹ˆ €2
+	BLOS	6$
+	NEG	R1		; „€-ˆ‡Œ……ˆ… ‡€Š€ „•
+6$:	ASRB	(SP)		; ‡€Š "-" ˆ „Y ?
+	BCC	7$		; …’
+	NEG	R2		; „€-ˆ‡Œ……ˆ… ‡€Š€ „Y
+7$:	ASRB	(SP)		; ‡€Š "-" ˆ „• ?
+	BCC	8$		; …’
+	NEG	R1		; „€--ˆ‡Œ……ˆ… ‡€Š€ „•
+8$:	ASR	R0		; €0 ˆ‹ˆ €2
+	BCS	9$		; „€
+	MOV	R1,R0		; …’-……‘’€Ž‚Š€
+	MOV	R2,R1
+	MOV	R0,R2
+9$:	ADD	-2(SP),R1	; ˆ€‚‹…ˆ… ŠŽŽ„ˆ€’
+	ADD	-4(SP),R2	; ˆ€‚‹…ˆ… ŠŽŽ„ˆ€’
+	BR	MOVIN		; ……•Ž„ € ……Œ…™…ˆ…
+;-------------------------------------------------------------
+;			‚•Ž„  Ž€Ž’Šˆ ŠŽŒ.   R,L,D,U,E,F,G,H
+;-------------------------------------------------------------
+;		R U  L D  R U  L E  H  G  F  E  H  G
+COD:	.BYTE	2,10,3,11,2,10,3,12,17,13,16,12,17,13
+;-------------------------------------------------------------
+RDEG$:
+	SUB	#16,R0		; ŠŽ…Š–ˆŸ ‘Œ…™…ˆŸ
+	ASR	R0		; -----"----"---
+	PUSH	R0		; Ž‘‚ŽŽ„ˆ’œ R0 ,‘Ž•€ˆ‚ ‚ ‘’…Š…
+	MOVB	$SCRT+1,R0	; €‰’ ‚€™…ˆŸ ˆ‡ $SCRT--> ‚ R0
+	ADD	(SP)+,R0	; ‘‹Ž†…ˆ… ‘Œ…™…ˆŸ ˆ €‰’€ ‚€™…ˆŸ ‚ R0
+	MOVB	COD(R0),(SP)	; ‡€‘‹€’œ ŠŽ„ ‚ ‘‹Ž‚Ž ……Œ…™…ˆ‰
+	MOV	#1,R0		; “ŒŽ‹—€ˆ…
+	CALL	$$SENSE		; Ž‹“—ˆ’œ ‡€—…ˆ…
+	CALL	$$SCALE		; Œ€‘˜’€ˆŽ‚€ˆ…
+	ASRB	(SP)		; ˆ’ 0-- Ž’ˆ–€’…‹œ›‰ R0 ?
+	BCC	1$		; „€ --ˆ‡Œ……ˆ… ‡€Š€
+	NEG	R0		; -R0
+1$:	ASRB	(SP)		; ˆ’ 1--‘Œ…™…ˆ… Ž •
+	BCC	2$		; …’
+	ADD	R0,R1		; ‘Œ…™…ˆ… Ž  •
+2$:	ASRB	(SP)		; ˆ’ 2-- ˆ‡Œ……ˆ… ‡€Š€ R0 ?
+	BCC	3$		; …’
+	NEG	R0		; ˆ‡Œ……ˆ… ‡€Š€
+3$:	ASRB	(SP)		; ˆ’ 3-- ‘Œ…™…ˆ… Ž Y
+	BCC	MOVIN		; …’ -……•Ž„ € ……Œ…™…ˆ…
+	ADD	R0,R2		; ‘Œ…™…ˆ… Ž Y
+;----------------------------------
+;			……Œ…™…ˆŸ
+;----------------------------------
+MOVIN:
+	ASRB	@SP		; „‹Ÿ €‘Ž‹ž’ŽƒŽ M
+	BCC	5$		; Y ‘Ž ‡€ŠŽŒ "-" ?
+	NEG	R2		; „€
+;
+5$:	PUSH	<R1,R2>
+	CALL	GXYRD
+	MOV	R1,-(SP)
+	MOV	R2,-(SP)
+	MOV	4(SP),R2
+	MOV	6(SP),R1
+	MOV	(SP)+,2(SP)
+	MOV	(SP)+,2(SP)
+	BIT	#4000,4(SP)	; 11-ˆ’:ˆ‘Ž‚€ˆ… (0)--……Œ…™…ˆ… (1)
+	BNE	1$		; ……Œ…™…ˆ…
+	CALL	GLNTST		; ‚…Š’Ž
+	BR	2$
+1$:	CALL	GXYST		; ……Œ…™…ˆ…--’Ž—Š€
+2$:	TST	4(SP)		; ‚Ž‡‚€’ Š …†ˆŒ ŠŽŽ„ˆ€’€Œ?
+	BPL	3$		; …’
+	MOV	(SP)+,R2	; „€- ‚Ž‘‘’€Ž‚‹…ˆ… ŠŽŽ„ˆ€’
+	MOV	(SP)+,R1
+	CALL	GXYST
+	BR	4$
+3$:	CMP	(SP)+,(SP)+
+4$:	MOV	#70000,(SP)
+	JMP	AGAIN
+;-----------------------------------------
+;		Ž‹“—…ˆ… ‡€K€ „‹Ÿ ŠŽŒ. Œ
+;-----------------------------------------
+$$SIGN:
+	CALL	BLNC		; Ž“‘Š Ž…‹Ž‚
+	CMPB	#'+,(R3)	; ‹ž‘ ?
+	BNE	1$		; …’
+	BIS	#1000,6(SP)	; „€--“‘’€Ž‚Š€ ˆ’€ 9
+	BIC	#1,6(SP)	; CŽ‘ ˆ’€ 0
+	INC	R3		; Ž“‘Š "+"
+	BR	2$
+1$:	CMPB	#'-,(R3)	; Œˆ“‘ ?
+	BNE	2$		; …’
+	BIS	#1001,6(SP)	; „€--“‘’€Ž‚Š€ ˆ’Ž‚ 0 ˆ 9
+	INC	R3		; Ž“‘Š "-"
+2$:	RETURN
+;------------------------------------------------------------------
+;		Žƒ€ŒŒ€ $$SCALE  ŠŽ…Š’ˆ“…’ R0 ‚ ‘ŽŽ’‚…’‘’‚ˆˆ ‘
+;		Œ€‘˜’€ŽŒ, ’.…. „…‹ˆ’ € 4 ˆ “ŒŽ†€…’ € Œ€‘˜’€›‰
+;		ŠŽ””ˆ–ˆ…’,ŠŽ’Ž›‰ •€ˆ’‘Ÿ ‚ Œ‹€„˜…Œ €‰’… $SCRT
+;------------------------------------------------------------------
+$$SCALE:
+	PUSH	<R1,R2,R3>	; Ž‘‚ŽŽ„ˆ’œ R1,R2,R3 D‹Ÿ “ŒŽ†…ˆŸ
+	MOV	#8.,R2		; —ˆ‘‹Ž €‡Ÿ„Ž‚-—ˆ‘‹Ž ‘‹Ž†…ˆ‰
+	CLR	R1		; €ŠŽˆ’…‹œ Žˆ‡‚…„…ˆŸ
+	MOVB	$SCRT,R3	; ŒŽ†ˆ’…‹œ
+1$:	ROR	R3		; €‡Ÿ„ ŒŽ†ˆ’…‹Ÿ ‚ ˆ’ ‘
+	BCC	2$		; Ž‹œ
+	ADD	R0,R1		; …„ˆˆ–€--‘‹Ž†…ˆ…
+2$:	CMP	R2,#7		; „‹Ÿ €‡Ÿ„Ž‚ 0 ˆ 1
+	BLT	3$
+	ASR	R1		; ‘„‚ˆƒ Žˆ‡‚…„…ˆŸ („…‹…ˆ… € 4)
+
+	BR	4$
+3$:	ASL	R0		; „‹Ÿ Ž‘’€‹œ›•-‘„‚ˆƒ ŒŽ†ˆ’…‹Ÿ
+4$:
+	SOB	R2,1$		; ‚‘… €‡Ÿ„› ?
+	MOV	R1,R0		; …‡“‹œ’€’ -‚ R0
+	POP	<R3,R2,R1>	; ‚Ž‘‘’€Ž‚ˆ’œ R1 ˆ R2
+	RETURN	
+;-------------------------------------------------------------------
+;		Žƒ€ŒŒ€ $$SENSE ‚Ž‡‚€™€…’ ‚ R0 ‡€—…ˆ… ŠŽ‘’€’›
+;			ˆ‹ˆ ……Œ…Ž‰ (ŠŽ‘’“Š–ˆˆ =<ˆŒŸ> )	
+;-------------------------------------------------------------------
+$$SENSE:
+	TRAP	112		; Ž“‘Š Ž…‹Ž‚
+	CMPB	@R3,#';
+	BNE	1$
+	INC	R3		; Ž“‘Š ";"
+6$:	RETURN
+1$:	CMP	R3,R5
+	BHI	6$
+	CMPB	#'=,(R3)	; ŠŽ‘’“Š–ˆŸ =<ˆŒŸ>
+	BNE	2$		; …’-ŠŽ‘’€’€
+	INC	R3		; Ž“‘Š "="
+	CALL	BLNC		; Ž“‘Š Ž…‹Ž‚
+	CALL	$VALUE		; —’…ˆ… ‡€—…ˆŸ ‚ ‘’…Š
+	CALL	BLNC		; Ž“‘Š Ž…‹Ž‚
+	BEQ	3$		; Žƒ€ˆ—ˆ’…‹œ- ";" ? „€
+	JMP	ERROR		; Ž˜ˆŠ€
+2$:
+	CMPB	#'9,(R3)	; –ˆ”€ ?		BLO	5$
+	CMPB	#'0,(R3)
+	BHI	5$
+	CALL	$CONST		; —’…ˆ… ŠŽ‘’€’›
+	CALL	BLNC		; Ž“‘Š Ž…‹Ž‚
+	BNE	4$		; …’ ";"
+3$:	INC	R3		; Ž“‘Š ";"
+4$:
+	POP	<R0>
+5$:	RETURN
+	.END
+
+                                                                                                                                                   

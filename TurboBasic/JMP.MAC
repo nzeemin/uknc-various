@@ -1,0 +1,1152 @@
+	.INCLUDE /GENUKD.MAC/
+	.SBTTL	EXECUTIONS KERN EXPANTION
+
+	.MACRO	.BJSR	ADR
+		CALL	ADR
+	.ENDM
+
+	.PSECT	BASIC
+INKEY::	CLR	-(SP)
+	CLR	-(SP)
+	CMP	FIRST,LAST
+	BEQ	1$
+	INC	@SP
+	CALL	TSTFRE
+	CALL	NIM
+	MOVB	R0,@2(SP)
+1$:	BR	NEWTMP
+	
+OCT::	MOV	#6,R5
+	CALL	VIETOS
+	MOV	@SP,R0
+	MOV	R1,-(SP)
+1$:	DEC	R5
+	BMI	REGFUL
+	MOV	R0,R2
+	BIC	#177770,R2
+	ADD	#'0,R2
+	MOVB	R2,-(R1)
+	CLC
+	ROR	R0
+	ASR	R0
+	ASR	R0
+	BNE	1$
+	SUB	R1,@SP
+	MOV	R1,2(SP)
+	BR	NEWTMP
+
+BIN::
+	MOV	#20,R5
+	CALL	VIETOS
+	MOV	@SP,R0
+	MOV	R1,-(SP)
+1$:	DEC	R5
+	BMI	REGFUL
+	MOV	R0,R2
+	BIC	#177776,R2
+	ADD	#000060,R2
+	MOVB	R2,-(R1)
+	CLC
+	ROR	R0
+	BNE	1$
+	SUB	R1,@SP
+	MOV	R1,2(SP)
+	BR	NEWTMP
+	;
+HEX::
+	MOV	#4,R5
+	CALL	VIETOS
+	MOV	@SP,R0
+	MOV	R1,-(SP)
+1$:	DEC	R5
+	BMI	REGFUL
+	MOV	R0,R2
+	BIC	#177760,R2
+	CMP	R2,#9.
+	BLE	2$
+	ADD	#000067,R2
+	BR	3$
+2$:	ADD	#000060,R2
+3$:	MOVB	R2,-(R1)
+	CLC
+	ROR	R0
+	ASR	R0
+	ASR	R0
+	ASR	R0
+	BNE	1$
+	SUB	R1,@SP
+	MOV	R1,2(SP)
+	BR	NEWTMP
+	;
+
+TSTFRE::
+	SUB	2(SP),FRELEN
+	BGE	1$
+	CALL	STRSQU
+	SUB	2(SP),FRELEN
+	BMI	STRFUL
+1$:	MOV	FREBEG,4(SP)
+	ADD	2(SP),FREBEG
+	RETURN
+	;
+STRFUL:	CLR	FRELEN
+REGFUL:	TRAP	14.
+	;
+$CONST::TST	(R4)+
+	PUSH	R4
+	PUSH	-2(R4)
+	ADD	-2(R4),R4
+	INC	R4
+	BIC	#1,R4
+
+NEWTMP::MOVB	TMPSP+1,1(SP)
+	MOV	SP,TMPSP
+	ASR	TMPSP
+	SWAB	TMPSP
+	JMP	@(4)+
+	;
+$VAR::	MOV	(4)+,R1
+	MOV	2(1),-(SP)
+	MOV	@R1,-(SP)
+	BR	NEWTMP
+	;
+$XVAR::	MOV	@SP,R0
+	MOVB	(0)+,R1
+	MOVB	(0)+,@SP
+	MOVB	(0)+,1(SP)
+	CLR	-(SP)
+	BISB	R1,@SP
+	BR	NEWTMP
+	;
+$PAR::	MOV	PFACT,R0
+	SUB	(4)+,R0
+	MOV	-(0),-(SP)
+	MOV	-(0),-(SP)
+	BR	NEWTMP
+	;
+	
+	CHR::	MOV	(SP)+,R5
+		BIT	#177400,R5
+		BNE	A5
+		CLR	-(SP)
+		MOV	#1,-(SP)
+		CALL	TSTFRE
+		MOVB	R5,@2(SP)
+		BR	NEWTMP
+	;
+	STR2::	MOV	2(SP),R0
+		BR	STR1
+	;
+	STR::	MOV	(SP)+,R0
+		BLT	A5
+	STR1:	MOV	(SP)+,R1
+
+		BLE	A5
+		DEC	R1
+		ADD	R1,2(SP)
+		MOV	@SP,R2
+		SWAB	R2
+		BIC	#177400,@SP
+		SUB	R1,@SP
+		BLE	A5
+		CMP	R0,@SP
+		BGE	1$
+		MOV	R0,@SP
+	1$:	BISB	R2,1(SP)
+		BR	NEWTMP
+	;
+	CONCAT::CLR	R0
+		BISB	(SP)+,R0
+		MOV	(SP)+,R1
+		CLR	R2
+		MOV	@SP,R3
+		BISB	R3,R2
+		MOV	R2,@SP
+		ADD	R0,@SP
+		BIT	#177400,@SP
+		BNE	2$
+		ADD	2(SP),R2
+		TST	R0
+		BEQ	3$
+	1$:	MOVB	(R1)+,(R2)+
+		SOB	R0,1$
+	3$:	SUB	FREBEG,R2
+		ADD	R2,FREBEG
+		SUB	R2,FRELEN
+		SWAB	R3
+		BISB	R3,1(SP)
+		BR	NEWTMP+6
+	2$:	TRAP	15.
+	;
+	ALLSK::	MOV	(SP)+,R5
+		BIT	#177400,R5
+		BEQ	STRING
+	A5:	TRAP	5
+	;
+	ALLSM::	CALL	CLRTMP
+		TST	(SP)+
+		BEQ	A5
+		MOVB	@(SP)+,R5
+	STRING:
+		BIT	#177400,@SP
+		BNE	A5
+		MOV	@SP,-(SP)
+		BEQ	2$
+		CALL	TSTFRE
+		MOV	2(SP),R2
+		MOV	@SP,R1
+	1$:	MOVB	R5,(R2)+
+		SOB	R1,1$
+	2$:	BR	NEWTMP
+
+	;
+	NEWSTR::CALL	CLRTMP
+	NEW2:	MOV	2(SP),R5
+		CALL	TSTFRE
+		MOV	@SP,R1
+		BEQ	2$
+		MOV	2(SP),R2
+	1$:	MOVB	(R5)+,(R2)+
+		SOB	R1,1$
+	2$:	BR	NEWTMP
+	;
+	ASC::	CALL	CLRTMP
+		TST	(SP)+
+		BEQ	A5
+		CLR	R0
+		BISB	@(SP)+,R0
+		MOV	R0,-(SP)
+		JMP	@(R4)+
+	;
+	INSTR::	CALL	CLRTMP
+		MOV	(SP)+,R0
+		MOV	(SP)+,R1
+		CALL	CLRTMP
+		MOV	(SP)+,R2
+		BEQ	I3
+		MOV	(SP)+,R3
+		MOV	(SP)+,R5
+		BLE	A5
+		CMP	R5,#255.
+		BHI	A5
+		DEC	R5
+	I0:	MOV	R2,-(SP)
+		SUB	R5,R2
+		BLE	A5
+		ADD	R3,R5
+		MOV	R0,-(SP)
+		BEQ	I6
+	I1:	MOV	R1,-(SP)
+	1$:	CMPB	(R5)+,(R1)
+		BEQ	I5
+		SOB	R2,1$
+	I2:	TST	(SP)+
+	I3:	TST	(SP)+
+	I4:	CLR	@SP
+		JMP	@(R4)+
+	I5:	CMP	R2,R0
+		BLT	I2
+		MOV	R5,-(SP)
+		DEC	R5
+	8$:	CMPB	(R5)+,(R1)+
+		BNE	I7
+		SOB	R0,8$
+		CMP	(SP)+,(SP)+
+	I6:	TST	(SP)+
+		DEC	R2
+		SUB	R2,@SP
+		JMP	@(R4)+
+
+	I7:	MOV	(SP)+,R5
+		MOV	(SP)+,R1
+		MOV	(SP),R0
+		DEC	R2
+		BR	I1
+	;
+	INSTR2::CALL	CLRTMP
+		MOV	(SP)+,R0
+		MOV	(SP)+,R1
+		CALL	CLRTMP
+		MOV	(SP)+,R2
+		BEQ	I4
+		MOV	(SP)+,R3
+		CLR	R5
+		BR	I0
+	;
+	LEN::	MOV	(SP)+,@SP
+		CALL	CLRTMP
+		JMP	@(R4)+
+	;
+	VAL::	CALL	CLRTMP
+		MOV	R4,SAVJMP
+		CALL	PACK
+		MOV	SAVJMP,R4
+		CLR	SAVJMP
+		JMP	@(R4)+
+	;
+
+	SSTR::	CALL	EGO
+		BR	STRE
+
+	ISTR::	MOV	(SP)+,R5
+		.BJSR	ISGUNP
+		MOV	R1,-(SP)
+		MOV	R2,-(SP)
+STRE:	DEC	@SP
+	MOVB	TMPSP+1,1(SP)
+	BR	NEWSTR
+	;
+	;
+SFRE::	TST	(SP)+
+IFRE::	TST	(SP)+
+FRE::	MOV	CIKL,-(SP)
+	SUB	ENDCOD,@SP
+ENDFRE::JMP	@(R4)+
+	;
+$FRE::	TST	(SP)+
+	CALL	CLRTMP
+	CALL	STRSQU
+	MOV	FRELEN,@SP
+	JMP	@(R4)+
+	;
+VIETOS:	SUB	R5,FRELEN
+	BGE	1$
+	CALL	STRSQU
+	SUB	R5,FRELEN
+
+	BGE	1$
+	ADD	FRELEN,R5
+	CLR	FRELEN
+1$:	ADD	R5,FREBEG
+	MOV	FREBEG,R1
+	RETURN
+	;
+	;-----------------------
+	;ëÅéêäÄ åìëéêÄ ëàåÇ. éÅã.
+	;-----------------------
+	STRSQU::MOV	R4,SAVJMP	;R3 - çéÇõâ FREBEG
+		MOV	R5,-(SP)	;R0 - çÄóÄãé èÖêÖåÖôÄÖåéÉé åÄë.
+		MOV	STRREG,R3	;R2 - ìäÄá. Ç íÄÅã. àåÖç
+		MOV	R3,-(SP)	;@SP - äéçÖñ STRREG
+		ADD	STRSIZ,@SP
+	40$:	MOV	@SP,R0
+		TST	-(SP)
+		MOV	LENT,R2
+	8$:
+		JSR	R4,FIND
+		BR	58$
+		BR	1$
+		TST	(R2)+
+		BEQ	7$
+		CMP	@R2,R0
+		BHIS	7$
+		CMP	@R2,R3
+		BLO	7$
+		MOV	@R2,R0
+		MOV	R2,@SP
+	7$:	TST	(R2)+
+		BR	8$
+	;
+	1$:	CALL	SSQ1
+	38$:	CALL	SSQ2
+		CMP	R4,R0
+		BHIS	39$
+		CMP	R4,R3
+		BLO	39$
+		MOV	R4,R0
+		MOV	R5,@SP
+	39$:	CMP	R5,R1
+		BLO	38$
+		CMP	(R2)+,(R2)+
+		BR	8$
+	;
+	58$:	MOV	(SP)+,R2
+		CMP	R0,@SP
+		BEQ	22$
+		CMP	R2,LENT
+		BLOS	11$
+	;
+		MOV	R3,@R2
+	55$:	CLR	R1
+		DEC	R2
+		BISB	-(2),R1
+		BR	3$
+
+	;
+	11$:	CMP	R2,@SP
+		BLO	55$
+		SWAB	R3
+		MOVB	R3,-(R2)
+		SWAB	R3
+		MOVB	R3,-(R2)
+		CLR	R1
+		BISB	-(R2),R1
+	3$:	CALL	PERK
+		BR	40$
+	;
+	22$:	MOV	R3,FREBEG
+		SUB	R3,@SP
+		MOV	(SP)+,FRELEN
+		MOV	(SP)+,R5
+		MOV	SAVJMP,R4
+		CLR	SAVJMP
+		RETURN
+
+	PERK:	CMP	R0,R3		;R0 - ëíÄêõâ
+		BEQ	3$		;R3 - çéÇõâ
+					;R1 - ÑãàçÄ
+		MOV	#TMPSP,R2
+	1$:	MOVB	1(2),R2
+		BEQ	2$
+		BIC	#177400,R2
+		ASL	R2
+		MOV	2(2),R5
+		SUB	R0,R5
+		BLO	1$
+		CMP	R5,R1
+		BGE	1$
+		ADD	R3,R5
+		MOV	R5,2(2)
+		BR	1$
+
+	2$:	MOVB	(0)+,(3)+
+		SOB	R1,1$
+		RETURN
+
+	3$:	ADD	R1,R3
+		RETURN
+	;
+	SSQ1:
+		CLR	R5
+		BISB	2(R2),R5
+		ASL	R5
+		ADD	@R2,R5
+		MOV	(5)+,R1
+		ADD	R5,R1
+		RETURN
+	SSQ2:	CLR	R4
+		TSTB	(R5)+
+		BEQ	1$
+		BISB	(R5)+,R4
+		SWAB	R4
+
+		BISB	(R5)+,R4
+		SWAB	R4
+		RETURN
+	1$:	CMPB	(R5)+,(R5)+
+		RETURN
+	FIND:	CMP	R2,LENT
+		BLO	10$
+		CMP	R2,TABTOP
+		BHIS	8$
+					;ÇïéÑ:	R2-> àåü
+		BIT	#20000,@R2	;ÇõïéÑ:	+0	äéçÖñ èÖêÖåÖççõï
+		BEQ	1$		;	+2	ëàåÇ.åÄë. R2->àåü+2
+		TSTB	@R2		;	+4	ëàåÇ.èÖê. --//---
+		BPL	2$		;		ÇêÖå.èÖê. R2->ÑãàçÄ
+		TST	2(2)
+		BNE	3$
+	1$:	CALL	PRAL
+		BR	FIND
+	2$:	TST	(4)+
+	3$:	TST	(2)+
+	4$:	TST	(4)+
+	7$:	RTS	R4
+	8$:	MOV	#TMPSP,R2
+	9$:	TST	(2)+
+	10$:	MOVB	-1(2),R2
+		BEQ	7$
+		BIC	#177400,R2
+		ASL	R2
+		TSTB	@R2
+		BEQ	9$
+		TST	(4)+
+		BR	4$
+	;
+	PRAL:	TST	(R2)+
+		BMI	8$
+		TST	(R2)+
+	8$:	TST	(R2)+
+		RETURN
+	;
+	
+	CLRSTR::MOV	@SP,R0
+		BLT	C5
+		INC	R0
+		BIC	#1,R0
+		MOV	R0,@SP
+		SUB	STRSIZ,R0	;
+		MOV	R0,R1		;ÄçÄãàá I-Éé ÄêÉìåÖçíÄ
+		ADD	ENDCOD,R0	;
+		CMP	R0,LENT
+		BLOS	CLR1
+	CLRERR:	TRAP	7
+	CLR::	CLR	R1
+		MOV	STRSIZ,-(SP)
+	;.............ìëíÄçéÇäÄ éÅãÄëíà Ñãü ëíêéä..........
+	CLR1:	MOV	STRREG,R0
+
+
+		MOV	R0,FREBEG
+		MOV	@SP,FRELEN
+		MOV	(SP)+,STRSIZ
+		MOV	LENT,LIMIT
+		MOV	LENT,CIKL
+		ADD	R1,ENDCOD
+	;.........................ëÑÇàÉ åÄëëàÇéÇ...........
+		MOV	R3,-(SP)
+
+		ADD	STRSIZ,R0
+		MOV	ENDCOD,R3
+		MOV	R1,R5
+		BEQ	1$
+		NEG	R1
+		BMI	20$
+		ADD	R0,R1
+	10$:	MOV	(R1)+,(R0)+
+		CMP	R0,R3
+		BLO	10$
+		BR	1$
+	20$:	ADD	R3,R1
+	22$:	MOV	-(R1),-(R3)
+		CMP	R3,R0
+		BHI	22$
+	;...................éóàëíäÄ èÖêÖåÖççõï.............
+	1$:	MOV	LENT,R2
+	7$:	CMP	R2,TABTOP
+		BHIS	8$
+		TSTB	@R2
+		BPL	6$
+		TST	(R2)+
+		TST	(R2)+
+		BEQ	77$
+		ADD	R5,-(R2)
+		MOV	(R2)+,R0
+		CLR	R3
+		BISB	@R2,R3
+		ASL	R3
+		ADD	R3,R0
+		MOV	(0)+,R1
+		ASR	R1
+	2$:	CLR	(R0)+
+		SOB	R1,2$
+	77$:	TST	(R2)+
+		BR	7$
+	6$:	MOV	(R2)+,R0
+		BMI	4$
+	5$:	CLR	(R2)+
+	4$:	CLR	(R2)+
+	3$:	BR	7$
+	8$:
+
+		CMP	R4,STRREG
+		BLO	9$
+
+		BR	S1T
+	9$:	JMP	@(R4)+
+	C5:	TRAP	5
+	;
+	;---------------------------------------------
+	CLRMEM::
+		CMP	@SP,@#WHIMEM
+		BHI	C5
+		CMP	@SP,#TEXT
+		BLOS	C5
+
+		CALL	CLOALL
+		MOV	(SP)+,R2
+		ASR	R2
+		ASL	R2
+		SUB	HIMEM,R2
+		CALL	TABMOV
+		ADD	R2,HIMEM
+		.BJSR	CLRBUF
+		.BJSR	CLRCOD
+		MOV	(SP)+,R0
+		INC	R0
+		BIC	#1,R0
+		MOV	R0,STRSIZ
+	S1T:
+		JMP	ENDPRG
+	;
+	TABMOV::MOV	TABTOP,R0
+		ADD	R2,R0
+		CMP	R0,TXEND
+		BLO	CLRERR
+		MOV	FCB,R1
+		SUB	TABTOP,R1
+		BEQ	4$
+		ASR	R1
+		TST	R2
+		BMI	2$
+		MOV	FCB,R3
+		MOV	R3,R0
+		ADD	R2,R0
+	3$:	MOV	-(R3),-(R0)
+		SOB	R1,3$
+		BR	4$
+	2$:	MOV	TABTOP,R3
+	5$:	MOV	(R3)+,(R0)+
+		SOB	R1,5$
+	4$:	ADD	R2,TABTOP
+		RETURN
+	;
+	POKJMP::MOV	(SP)+,@(SP)+
+		JMP	@(R4)+
+
+	OUTJMP::TST	(SP)+
+		BEQ	1$
+		BIS	(SP)+,@(SP)+
+		JMP	@(R4)+
+	1$:	BIC	(SP)+,@(SP)+
+		JMP	@(R4)+
+	;
+	PEEK::	MOV	@(SP),(SP)
+		JMP	@(R4)+
+	;
+	INP::	MOV	@2(SP),2(SP)
+	INPEND:	COM	(SP)
+		BIC	(SP)+,(SP)
+		JMP	@(R4)+
+	;
+	IFCERR:	TRAP	5
+	;
+	$DEFUS::
+		MOV	(SP)+,@(R4)+
+		JMP	@(R4)+
+	$USR::	MOV	SP,R5
+		MOV	(R4)+,R0
+		MOV	(R4)+,R3
+		BPL	10$
+		MOVB	1(SP),TMPSP
+		CLRB	1(SP)
+	10$:	MOV	R4,SAVJMP
+		CALL	@USRTAB(R0)
+		MOV	SAVJMP,R4
+		CLR	SAVJMP
+		MOVB	TMPSP,1(SP)
+		JMP	@(R4)+
+
+
+
+	NOUSR::	TRAP	5
+
+	ONTRG$::MOV	(SP)+,R0
+		CMP	(R4)+,(R4)+
+		TST	(R4)+
+		BNE	1$
+		CALL	TSVCT
+
+		MOV	@R0,-2(R4)
+		MOV	@#VCTNMB,-4(R4)
+		MOV	R0,@#VCTNMB
+	1$:
+		MOV	#4537,@R4
+		MOV	R4,(R0)+
+		MOV	#340,@R0
+		MOV	-6(R4),R4
+		JMP	@(R4)+
+
+
+	TRPOF$::MOV	(SP)+,R0
+		CALL	TSVCT
+		CALL	RSTVCT
+		BCS	NOUSR
+		JMP	@(R4)+
+
+	RSTVCT::MOV	R1,-(SP)
+		MOV	R2,-(SP)
+
+		CALL	TSTVCT
+		BCS	3$
+		MOV	#VCTNMB,R2
+
+	1$:	CMP	@R2,#1		;TST	@R2
+		BLO	3$		;BEQ
+		CMP	@R2,R0
+		BEQ	2$
+		MOV	@(R2)+,R2
+		CMP	-(R2),-(R2)
+		BR	1$
+	2$:
+		MOV	@R0,R1
+		MOV	-(R1),@R0
+		CLR	@R1
+		MOV	-(R1),@R2
+		CLC
+	3$:
+		MOV	(SP)+,R2
+		MOV	(SP)+,R1
+		RETURN
+
+	TSVCT:	TST	R0
+		BEQ	NOUSR
+		CMP	R0,#500
+		BHIS	NOUSR
+		BIC	#3,R0
+		CMP	R0,#30
+		BEQ	NOUSR
+		CMP	R0,#34
+		BEQ	NOUSR
+		RETURN
+
+	TSTVCT::CMP	@R0,@#TXEND
+		BLO	1$
+		CMP	@#STRREG,@R0
+		BHI	1$
+		SEC
+
+	1$:	RETURN
+
+	SREG::	CMP	SP,#520
+		BHIS	1$
+		TRAP	7
+	1$:	MOV	R4,-(SP)
+		MOV	R3,-(SP)
+		MOV	R2,-(SP)
+		MOV	R1,-(SP)
+		MOV	R0,-(SP)
+		MOV	@#SAVJMP,-(SP)
+		MOV	R5,PC
+
+	RREG::	CMP	SP,#STACK-20
+		BHI	1$
+		TST	(SP)+
+		MOV	(SP)+,@#SAVJMP
+		MOV	(SP)+,R0
+		MOV	(SP)+,R1
+		MOV	(SP)+,R2
+		MOV	(SP)+,R3
+		MOV	(SP)+,R4
+		RTS	R5
+	1$:	;CLR	ONERFL
+		TRAP	51.
+
+	;--------------------------------------------
+	OpApd::
+		Mov	#WR.*400,r1
+		Mov	#-1,ApdId
+		Br	Opff
+	
+	
+	
+	OPINP::
+		CLR	R1
+		BR	OPFILE
+	;
+	OPOUT::
+		MOV	#WR.*400,R1
+	OPFILE:;MOV	MAXFIL,R3	;JEI NERA AS#
+	;	MOV	(SP)+,R3	;JEI YRA AS#
+	;	BLE	BADFN
+	;	CMP	R3,MAXFIL
+	;	BHI	BADFN
+		Clr	ApdId
+	Opff:	CALL	FNDBUF
+		TST	(0)+
+		BNE	2$
+		CLR	@#ASCFLG
+		JSR	R1,FILNAM
+		MOV	#".D,(0)+
+		MOV	#"AT,(0)+
+		MOV	#" 0,(R0)+
+		MOV	#"00,(R0)+
+		MOV	#40433,(R0)+
+		SUB	#22,R0
+		MOV	(SP)+,@R0
+		BNE	10$
+		MOV	@#WRITE,-(SP)
+		CALL	CASCII
+		MOV	(SP)+,@#WRITE
+		MOV	#RD.*400,@#MAG
+		CALL	CAS
+		MOV	@#MAG,@R0
+	10$:
+		Tst	ApdId
+		Beq	11$
+		Push	Write
+		Call	Cascii
+		Pop	Write
+		Call	Cas
+		
+
+
+	11$:	CMP	@#WRITE,DRIVER
+		BEQ	1$
+		BIS	#100000,@R0
+	1$:	JMP	@(R4)+
+	2$:	TRAP	54.
+	BADFN:	TRAP	52.
+	;
+	FNDBUF::MOV	FCB,R0
+	;	SUB	#22,R0
+	1$:	ADD	#400,R0		;VELIAU #422
+	;	SOB	R3,1$
+		RETURN
+	;
+	DEVICE::MOV	#1,IODEV	;MAXFIL,IODEV		;VERSIJA 1
+		JMP	@(R4)+
+	;	MOV	(SP)+,IODEV
+	;	BLE	NOTOP
+	;	CMP	IODEV,MAXFIL
+	;	BGT	INIPRP		;VELIAU - BLOS
+	NOTOP:	TRAP	59.
+	;
+	DEVLP::	MOV	#-1,IODEV
+	INIPRP::JMP	@(4)+
+	;
+	CLRDEV::CLR	IODEV
+		JMP	@(R4)+
+	;
+	;
+	SLPOS::	TST	(SP)+
+	ILPOS::	TST	(SP)+
+	LPOS::
+		MOV	LPTPOS,-(SP)
+		JMP	@(4)+
+	;
+	CLOFIL::
+	;	MOV	(R4)+,R2
+	;	BEQ	3$
+	;1$:	MOV	(SP)+,R3
+	;	BEQ	2$
+	;	CMP	R3,MAXFIL
+	;	BHI	BADFN
+	;	CALL	FNDBUF
+	;	CALL	CLOF
+	;2$:	SOB	R2,1$
+	;	JMP	@(R4)+
+	3$:	CALL	CLOALL
+		JMP	@(R4)+
+	;
+	CLOALL::;MOV	MAXFIL,R2
+	;	BEQ	5$
+		MOV	HIMEM,R0
+	4$:	SUB	#422,R0
+	;	CALL	CLOF
+	;	SOB	R2,4$
+	;5$:	RETURN
+	;
+	CLOF:	MOV	(R0),R3
+
+		BEQ	6$
+		BIT	#WR.*400,R3
+		BEQ	3$
+		BIC	#177400,R3
+		ADD	R0,R3
+		ADD	#22,R3
+		CALL	CLOUTF
+		BR	6$
+
+	3$:	CALL	CASCII		;CLINF
+		CALL	LASTBL
+		CLR	@R0
+		CALL	CAS
+	6$:
+	CLR	@#ASCFLG
+		RETURN
+	;
+	CLOUTF::MOVB	#32,(R3)+	;^Z
+		INCB	@R0
+		BNE	CLOUTF
+		CALL	CASCII
+		CLR	@R0
+		CALL	CAS
+		CALL	LASTBL
+		CLR	@MAG+ADRW
+		CALL	CAS
+		RETURN
+	;
+	FNDCHR:	MOV	IODEV,R3
+		BLE	NOTOP
+	FNDCR:	CALL	FNDBUF
+		TST	@R0
+		BEQ	NOTOP
+		BIT	#RD.*400,@R0
+		BEQ	BADFN
+		CLR	R3
+		BISB	@R0,R3
+		ADD	R0,R3
+		ADD	#22,R3
+		RETURN
+	;
+	EOF::	CLR	-(SP)
+		CALL	FNDCR
+		CMPB	@R3,#32	;^Z
+		BNE	1$
+		COM	@SP
+	1$:	JMP	@(4)+
+	;
+	FILINP::CALL	FNDCHR
+		MOV	R0,R5
+		ADD	#22,R5
+	COPYIN::MOV	#BUF,R1
+	1$:	CMPB	@R3,#32
+		BEQ	3$
+		CMP	R1,#BUF+417
+		BHIS	4$
+		MOVB	(3)+,(1)
+
+		INCB	(0)
+		BNE	2$
+		MOV	R1,-(SP)
+		MOV	R0,-(SP)
+		SUB	#400,R3
+		CALL	CASCII
+		MOV	#16*400,@#MAG
+		CALL	CAS
+		MOV	(SP)+,R0
+		MOV	(SP)+,R1
+	2$:	CMPB	@R1,#CR
+		BEQ	1$
+		CMPB	(1)+,#LF
+		BNE	1$
+	3$:	MOVB	#LF,@R1
+	5$:	RETURN
+	4$:	TRAP	25.
+	;
+
+
+
+$BL0::
+	MOV	#1,-(SP)
+	JMP	@(R4)+
+
+$BLOAD::
+CALL	CLOALL
+
+	MOV	#MAG,R0
+	MOV	#RD.*400,(0)+
+	MOV	#11,(0)+
+	MOV	(SP)+,20(0)
+	MOV	#-2,22(0)
+	CALL	$BIN
+
+	MOV	#160000,R1
+
+	SUB	(0)+,R1
+	BLOS	BS3
+	CLC
+	ROR	R1
+	MOV	R1,(0)+
+	MOV	R4,@#SAVJMP
+	MOV	(SP)+,R3
+	CALL	CAS
+	TST	R3
+	BEQ	BL1
+	BIT	#1,@#MAG+ADRW
+	BNE	10$
+	CALL	@MAG+ADRW
+	BR	BL1
+10$:	CALL	@MAG+ADRR
+BL1:
+	BR	BS4
+	;
+	$BSAVE::
+	CALL	CLOALL
+
+		MOV	#MAG,R0
+		MOV	#WR.*400,(0)+
+		MOV	#11,(0)+
+		MOV	(SP)+,22(0)
+		MOV	(SP)+,20(0)
+		CALL	$BIN
+		BIC	#1,@R0
+		SUB	(0)+,@R0
+		BLOS	BS3
+		CLC
+		ROR	@R0
+		ADC	(0)+
+		MOV	R4,@#SAVJMP
+		CALL	CAS
+	BS4:
+		MOV	@#SAVJMP,R4
+
+		CLR	@#SAVJMP
+	BS2::	JMP	@(4)+
+	BS3::	TRAP	5
+	;
+	DEVTAB:
+	.BYTE	0,40
+	.ASCII	/CAS /
+	.EVEN
+
+	DRIVER:
+	.WORD	RT11
+	DEND:
+
+FILTYP::.ASCII	/COD BIN FNT /
+	.Even
+
+	;
+	TTANAL::
+		MOV	R4,-(SP)
+		MOV	R2,-(SP)
+		MOV	R3,-(SP)
+		TRAP	112
+		MOV	R3,-(SP)
+
+		CMP	-(SP),-(SP)
+		MOV	SP,R5
+		MOVB	(3)+,(5)+
+		MOVB	(3)+,(5)+
+		MOVB	(3)+,(5)+
+		MOVB	(3)+,(5)+
+		MOV	SP,R3
+		TRAP	113
+		.WORD	DEVTAB
+		.BYTE	3,DEND-DRIVER-2
+		BR	12$
+		CMPB	@R3,#':
+		BNE	12$
+		INC	R3
+		SUB	SP,R3
+		CMP	(SP)+,(SP)+
+		ADD	(SP)+,R3
+		ADD	(SP),R2
+		SUB	R3,R2
+		BEQ	2$
+		BMI	11$
+		CMP	(SP)+,(SP)+
+		BR	13$
+	12$:	ADD	#6,SP
+	11$:	MOV	(SP)+,R3
+		MOV	(SP)+,R2
+		CLR	R5
+	13$:	MOV	(SP)+,R4
+		MOV	DRIVER(5),@#WRITE
+		RETURN
+	2$:	TRAP	56.
+	;
+	FILNAM::MOV	4(SP),R3
+		MOV	(SP)+,2(SP)
+		CALL	CLRTSP
+		MOV	(SP)+,R2
+		BEQ	5$
+		MOV	R5,-(SP)
+		MOV	R4,SAVJMP
+		CALL	TTANAL
+		MOV	SAVJMP,R4
+		CLR	SAVJMP
+		MOV	#6,R5
+	1$:	CMPB	(R3),#'.
+		BEQ	6$
+		MOVB	(R3)+,(R0)+
+		DEC	R5
+		BEQ	3$
+		SOB	R2,1$
+	2$:	MOVB	#40,(R0)+
+		SOB	R5,2$
+	3$:	DEC	R2
+		BLE	4$
+		CMPB	@R3,#'.
+		BEQ	7$
+	5$:	TRAP	56.
+	6$:	MOVB	#40,(0)+
+
+		SOB	R5,6$
+	7$:	MOV	#4,R5
+	8$:	MOVB	(3)+,(0)+
+		DEC	R5
+		BEQ	10$
+		SOB	R2,8$
+	9$:	MOVB	#40,(0)+
+		SOB	R5,9$
+	10$:	DEC	R2
+		BGT	5$
+		ADD	#10,R1
+	4$:	MOV	(SP)+,R5
+		MOV	R1,PC
+
+	
+$BIN:	MOV	(SP)+,R1
+	JSR	R1,FILNAM
+	MOV	#".B,(R0)+
+	MOV	#"IN,(R0)+
+BINEND:	MOV	#20040,(R0)+
+	MOV	#20040,(R0)+
+	MOV	#20040,(R0)+
+	RTS	PC
+	;
+	;
+LASTBL::
+	MOV	#MAG+NAMEW+13,R1
+	CLRB	(R1)+
+	CLR	(R1)+
+	CLR	(R1)+
+	MOV	#1,@#MAG+LENW
+	CMPB	@#MAG+1,#RD.
+	BNE	1$
+	MOV	#16*400,@#MAG
+
+1$:
+	RETURN
+	;
+ATSTAB:	CMP	R5,TABTOP
+	BLO	2$
+	MOV	R5,R4
+	SUB	FCB,R4
+
+	ADD	R5,R4
+1$:	MOV	-(R4),-(R5)
+	CMP	R5,TABTOP
+	BHI	1$
+2$:	RETURN
+	;
+CASCII::CMP	R0,FCB
+	BLO	2$
+	MOV	DRIVER,@#WRITE
+	MOV	#MAG,R1
+	MOV	(0)+,(1)+
+	BPL	10$
+	BIC	#100000,-2(1)
+	MOV	DRIVER+2,@#WRITE
+10$:
+	MOV	#12,(1)+
+	MOV	#10,R5
+1$:	MOV	(0)+,(1)+
+	SOB	R5,1$
+	MOV	R0,R5
+	MOV	R0,(1)+
+	MOV	#200,(R1)+
+	SUB	#22,R0
+2$:	RETURN
+
+CAS1:
+CAS::
+	MOV	#MAG,R1
+	CALL	@WRITE
+CASERR:
+	MOVB	@R1,R1
+	BEQ	2$
+	CMPB	R1,#NER.
+	BEQ	CAS1
+
+	CMPB	R1,#RER.
+	BGE	1$
+	MOV	#5$,R0
+3$:	TSTB	@R0
+	BEQ	1$
+	CMPB	R1,(R0)+
+	BNE	3$
+
+	SUB	#5$+1,R0
+	ASL	R0
+	JMP	@6$(R0)
+5$:
+	.BYTE	RER.
+	.BYTE	FER.,MER.,SER.
+.EVEN
+6$:
+	.WORD	1$
+	.WORD	7$,8$,BRKO
+
+2$:	RETURN
+1$:	TRAP	19.
+7$:	TRAP	53.
+
+8$:	TRAP	7
+
+	.END
+
+                                                                                                                  

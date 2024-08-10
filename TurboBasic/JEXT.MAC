@@ -1,0 +1,702 @@
+	; EXTENDED BASIC INSTRUCTION
+	; WRITTEN BY GERASIMOV OLEG
+	; IN 22.01.1995 
+
+
+	.Mcall	.ReadW .WritW .Close .Purge .Enter .CsiSpc .LookUp
+	.PSECT	BASIC
+
+
+D$Num::	Mov	(r4)+,Number
+	Jmp	@(r4)+
+
+
+$REPT::
+	MOV	CIKL,R0
+	MOV	#125252,-(R0)
+	MOV	R4,-(R0)
+	CMP	ENDCOD,R0
+	BMI	1$
+	TRAP	7
+1$:	MOV	R0,CIKL
+	JMP	@(R4)+
+
+$UNTIL::	
+	MOV	CIKL,R0
+	CMP	2(R0),#125252
+	BEQ	2$
+	TRAP	1
+2$:	TST	(SP)+
+	BNE	3$
+	MOV	(R0),R4
+	JMP	@(R4)+
+3$:	CMP	(R0)+,(R0)+
+	MOV	R0,CIKL
+	JMP	@(R4)+
+
+
+$WHILE::
+	CMP	(R4),R4
+	BPL	11$
+	MOV	#1,R2
+	MOV	R4,R1
+5$:	TST	(R1)+
+	CMP	STRREG,R1
+	BPL	6$
+	TRAP	1
+6$:	CMP	#$WEND,(R1)
+	BNE 	7$
+	DEC	R2
+	BEQ 	8$
+7$:	CMP	#$WHILE,(R1)	
+	BNE	5$
+	INC	R2
+	BR	5$
+8$:	MOV	(R4),2(R1)
+	CMP	(R1)+,(R1)+
+	MOV	R1,(R4)
+	
+11$:	TST	(SP)+
+	BNE	10$
+	MOV	(R4)+,R4
+	JMP	@(R4)+
+10$:	TST	(R4)+
+	JMP	@(R4)+
+	
+$WEND::	TST	(R4)
+	BNE	1$
+	TRAP	1
+1$:	MOV	(R4)+,R4
+	JMP	@(R4)+
+	
+
+	
+$GET::	
+	Pop	R5			; Адрес для сохранения образа
+	Pop	r2			; Координата Y2
+	Call	TsSc12
+	Mov	r2,r3			; Сохранить Y2 для вычисления высоты
+	Pop	r0			; Координата X2
+	Pop	R2			; Координата Y1
+	Call	TsSc12
+	Mov	r2,r1			; 
+	Pop	R2			; Координата X1
+	Sub	r1,r3			; Вычисление высоты в видео строках
+	Bhi	1$			; Если отрицательна - обмен координат
+	Neg	r3
+	Sub	r3,r1
+1$:	Sub	r2,r0			; Вычисление ширины в пикселах
+	Bmi	e5
+	Inc	r0
+	Inc	r3
+	Mov	r0,(r5)
+	Mov	r3,2(r5)
+	Push	r2			; Сохранение ширины в пикселах
+	Call	MulAdr			; Вычисление видео адреса строки
+	Pop	r2
+	Bic	#^C7,r2			; число пикселов сдвига
+	Neg	r2
+; Копирование в буффер.
+; входные параметры:
+; r1 - адрес ВОЗУ				
+; r5 - массив :0(r5) - ширина ; 2(r5) - высота
+; r2 - количество пикселов для выравнивания по границе байта
+
+	Mov	r1,@#176640
+	Push	r4
+	Mov	(r5)+,r3		; Ширина в точках
+	Dec	r3
+	Ash	#-3,r3			; Перевод в октеты
+	Inc	r3			; Для точности
+	Mov	(r5)+,4$		; Высота спрайта
+	Mov	#<Buf+260>/2,Work0	; Команда для ПП
+	Mov	r3,Work2
+	Inc	Work2
+6$:	Push	r3			; Сохранение ширины
+
+	
+	Push	r5
+	Inc	r3
+	Mov	#176640,r4		; Адрес регистра данных ВОЗУ
+	Mov	#Buf,r5
+	Mov	(r4),Work1
+	Mov	#10000+24.,CodP		; Паралельное заполнение буфера из ПП
+
+5$:	Movb	2(r4),130(r5)
+	Movb	3(r4),(r5)+
+	Inc	(r4)
+	Sob	r3,5$
+	Mov	2(Sp),r3
+	Clrb	DrvReg
+	Tstb	DrvReg			; Ждать ПП
+	Bpl	.-4
+	Call	Shift
+	Dec	(r4)
+
+	Pop	r5
+	Mov	(Sp),r3
+	Mov	#Buf,r4
+2$:	Movb	260(r4),(r5)+
+	Movb	130(r4),(r5)+
+	Movb	(r4)+,(r5)+
+	Sob	r3,2$
+	
+	Pop	r3			; Восстановление ширины в октетах
+3$:	Sub	r3,@#176640
+	Sub	RWidth,@#176640
+	Dec	(pc)+
+4$:	.Word	0
+	Bne	6$
+	Pop	r4
+	Jmp	@(r4)+
+
+Shift:
+	Tst	r2
+	Beq	4$
+	Asr	r3
+	Inc	r3
+	Mov	#Buf,r5
+	Push	r4
+	Mov	#3,r4
+1$:	Push	r5
+	Push	r3
+2$:	Mov	(r5)+,r1
+	Mov	(r5),r0
+	Ashc	r2,r0
+	Mov	r1,-2(r5)
+	Sob	r3,2$
+	Pop	r3
+	Pop	r5
+	Add	#130,r5
+	Sob	r4,1$
+	Pop	r4	
+4$:	Return
+
+E5:	TRAP 5
+
+
+MULADR:	Clrb	DrvReg
+1$:	Tstb	DrvReg
+	Bpl	1$
+	Ash	#-3,r2
+	Mul	@#RWidth,R1
+	Sub	R2,R1
+	Sub	RAdr,R1
+	Neg	R1
+	Return
+
+
+
+$PUT::	Mov	(SP)+,R5
+	Cmp	r5,#3
+	Bhi	e5
+	Movb	r5,Work2+1
+	Asl	R5
+	Mov	Rput(R5),RegPut
+
+	Mov	(SP)+,R5
+	Mov	(SP)+,R2
+	Call	TsSc12
+	Mov	r2,r1
+	Tst	Sc12Id
+	Beq	1$
+	Sub	2(r5),r1
+	
+1$:	Mov	(SP)+,R2
+	
+	
+	Cmp	r1,#263.
+	Bhi	e5
+	Mov	r1,r3
+	Add	2(r5),r3
+	Cmp	r3,#263.
+	Bhi	e5
+	
+	Push	r4
+	Push	r2
+	Call	MulAdr
+	Pop	r2
+	Bic	#^c7,r2
+	Movb	Bit1(r2),Bic1
+	Mov	r2,r3
+	Add	(r5),r3
+	Mov	r3,r4
+	Bic	#^c7,r4
+	Movb	Bit2(r4),Bic2
+	
+	Dec	r3
+	Ash	#-3,r3
+	Inc	r3
+	Push	r3
+	
+	Mov	r1,@#176640
+	Mov	(R5)+,r3
+	Dec	r3
+	Ash	#-3,r3
+	Inc	r3
+	Mov	(r5)+,10$
+	Mov	#<Buf+260>/2,Work0
+	Movb	(Sp),Work2
+	Clr	Work1
+	Mov	Bic1,Work3
+	Com	Work3
+	
+5$:	Push	r3
+
+	
+	Mov	#Buf+130,r4
+	Mov	#Buf,r0
+	Mov	#Buf+260,r1
+
+	Tst	Work1
+	Bne	.-4
+2$:	Movb	(r5)+,(r1)+
+	Movb	(r5)+,(r0)+
+	Movb	(r5)+,(r4)+
+	Sob	r3,2$
+
+	Mov	(Sp),r3
+	Push	r5
+	Call	Shift1
+	
+	Mov	4(Sp),r3
+	Add	#Buf-1,r3
+	Bicb	Bic2,(r3)
+	Bicb	Bic2,130(r3)
+	Bicb	Bic2,260(r3)
+	
+	
+	Mov	4(Sp),r3
+	
+	Mov	#176640,r4
+	Mov	(r4),Work1
+	Mov	#10000+25.,CodP
+	Mov	#Buf+130,r5
+
+	Call	@RegPut
+
+	
+	Pop	r5
+	Pop	r3
+	Sub	(Sp),(r4)
+	Sub	RWidth,(r4)
+	Dec	(pc)+
+10$:	.Word	0
+	Bne	5$
+	Tst	(Sp)+	
+	
+	Pop	r4
+	Clrb	DrvReg
+	Tstb	DrvReg
+	Bpl	.-4
+	
+	JMP	@(R4)+
+
+
+
+
+MovPut:	
+	Movb	Bic1,r0
+	Dec	r3
+	Beq	4$	
+	Comb	r0
+	Bicb	r0,2(r4)
+	Bicb	r0,3(r4)
+	Bisb	-130(r5),2(r4)
+	Bisb	(r5)+,3(r4)
+	Br	6$
+
+3$:	Movb	-130(r5),2(r4)
+	Movb	(r5)+,3(r4)
+6$:	Inc	(r4)
+	Sob	r3,3$
+	Clr	r0
+	
+4$:	Bisb	Bic2,r0
+	Comb	r0
+	Bicb	r0,2(r4)
+	Bicb	r0,3(r4)
+	Bisb	-130(r5),2(r4)
+	Bisb	(r5)+,3(r4)
+	Inc	(r4)
+	Return
+
+
+
+
+XorPut:
+	Mov	#Buf,r5
+1$:	Clr	r0
+	Bisb	130(r5),r0
+	Swab	r0
+	Bisb	(r5)+,r0
+	Xor	r0,2(r4)
+	Inc	(r4)
+	Sob	r3,1$
+	Return
+	
+BisPut:
+1$:	Bisb	-130(r5),3(r4)
+	Bisb	(r5)+,2(r4)
+	Inc	(r4)
+	Sob	r3,1$
+	Return
+	
+BicPut:
+1$:	Bicb	-130(r5),3(r4)
+	Bicb	(r5)+,2(r4)
+	Inc	(r4)
+	Sob	r3,1$
+	Return
+
+
+
+Shift1:
+	Tst	r2
+	Beq	4$
+	Mov	#Buf,r5
+	Push	r4
+	Mov	#3,r4
+2$:	Push	r5
+	Push	r3
+	
+	Add	r3,r5
+	Asr	r3
+	Inc	r3
+1$:	
+	Mov	(r5),r0
+	Mov	-(r5),r1
+	Ashc	r2,r0
+	Mov	r0,2(r5)
+	Sob	r3,1$
+	
+	Pop	r3
+	Pop	r5
+	Add	#130,r5
+	Sob	r4,2$
+	Pop	r4
+	Bicb	Bic1,Buf
+	Bicb	Bic1,Buf+130
+	Bicb	Bic1,Buf+260
+4$:	Return
+
+	
+
+Bit1:
+	.Byte	^B00000000
+	.Byte	^B00000001
+	.Byte	^B00000011
+	.Byte	^B00000111
+	.Byte	^B00001111
+	.Byte	^B00011111
+	.Byte	^B00111111
+	.Byte	^B01111111
+
+Bit2:
+	.Byte	^b00000000
+	.Byte	^b11111110
+	.Byte	^b11111100
+	.Byte	^b11111000
+	.Byte	^b11110000
+	.byte	^b11100000
+	.Byte	^b11000000
+	.Byte	^b10000000
+	
+	
+RPUT:
+	.Word	MovPut
+	.Word	XorPut
+	.Word	BisPut
+	.Word	BicPut
+
+Bic1:	.Byte	0
+Bic2:	.Byte	0
+RegPut:	.Word	0
+
+
+
+
+
+
+
+$PALET::
+	MOV	(SP)+,WORK0
+	MOV	(SP)+,WORK1
+	MOV	#5,CODP
+	CALL	PPEXE
+	JMP	@(R4)+
+
+
+$Delay::
+	Mov	r4,SavJmp
+	Jsr	R4,STAND
+	.Word	SConst
+	.Word	0,41510
+	.Word	Mlr
+	.Word	Ri
+	.Word	2$
+	
+2$:	Pop	r1
+	Mov	SavJmp,r4
+	Clr	SavJmp
+	Mov	@#100,Sav100
+	Mov	#Int100,@#100
+	Mfps	-(Sp)
+	Mtps	#0
+	Clr	r2
+1$:	Cmp	r2,r1
+	Bne	1$
+	Mtps	(Sp)+
+	
+Sav100	= .+2
+	Mov	#0,@#100
+	Jmp	@(4)+
+
+Int100:
+	Inc	r2
+	Rti
+
+.$Read::
+	.ReadW	#Param,6(Sp),4(Sp),2(Sp),(Sp)
+	Add	#10,Sp
+	Jmp	@(r4)+
+
+.$Write::
+	.WritW	#Param,6(Sp),4(Sp),2(Sp),(Sp)
+	Add	#10,Sp
+	Jmp	@(r4)+
+
+.$Purge::
+	.Purge	(Sp)+
+	Jmp	@(r4)+
+
+.$Close::
+	.Close	(Sp)+
+	Jmp	@(r4)+
+
+.$Open::
+	Mov	(Sp)+,r1
+	Mov	(Sp)+,r0
+	Call	GtFNam
+	.LookUp	#Param,(sp)+,#Buf+156
+	Jmp	@(r4)+
+
+.$Creat::
+	Mov	(Sp)+,r1
+	Mov	(Sp)+,r0
+	Call	GtFNam
+	.Enter	#Param,(sp)+,#Buf+156,#-1
+	Jmp	@(r4)+
+
+
+
+GtFNam::
+	Mov	#Buf,r2
+	Bic	#177760,r1
+	Beq	2$
+1$:	Movb	(r0)+,(r2)+
+	Sob	r1,1$
+	Clrb	(r2)+
+	Mov	Sp,R3
+	.CsiSpc	#Buf+120,#0,#Buf
+	Mov	R3,Sp
+2$:	Return
+
+
+;──────────────────────────────────────────────────────────────────────────────
+;	Оператор Fsave - запись текущего шрифта в файл
+;	Входные параметры :
+;	(Sp) - Номер последего символа
+;	2(Sp) - Номер начального символа
+;	4(Sp) - Дескриптор строки имени файла
+$Fsave::
+	Mov	r4,@#SavJmp		; Сохранить счетчик
+	Call	CloAll			; Закрыть все открытые файлы 
+	Mov	(Sp)+,r0		; Код последнего символа
+	Call	TstFnt			; Проверка кода на допустимость
+	Mov	r0,r4			;
+	Mov	(Sp)+,r0		; Код первого симола
+	Call	TstFnt			; Проверка на допустимость
+	Mov	r0,r5			; 
+	Sub	r4,r5			; Число образов для записи = Last-First
+	Blos	10$			; Оно положительно ?
+	Trap	5			; Нет - ошибка.
+10$:	Neg	r5
+	Inc	r5			; 
+	Mov	r0,Work0		; Код первого симола
+	Mov	r5,r1			; Вычисление длины файла.
+	Mul	#13,r1			; Len = (Last-First)*11+8 (Bytes)
+	Asr	r1
+	Cmp	(r1)+,(r1)+
+	Mov	EndCod,r2		; Адрес начала свободной памяти
+	Mov	#Mag,r0			; Адрес МП устройств
+	Mov	#Wr.*400,(r0)+		; Операция - запись
+	Mov	#11,(r0)+		; Тип устройства
+	Mov	r2,20(r0)		; Занесение в МП начального адреса 
+	Mov	r1,22(r0)		; - // - // длины (в словах)
+	Mov	r2,r3			; Памяти хватит
+	Asl	r1
+	Add	r1,r3
+	Cmp	r3,Cikl
+	Blo	1$			; ?
+	Trap	7			; Нет - ошибка.
+1$:	Mov	#"FN,(r2)+		; Идентификатор файла 
+	Movb	Work0,(r2)+		; Первый символ
+	Movb	r5,(r2)+		; Количество символов
+2$:	Mov	#Buf,r3
+	Mov	r3,Work1		; Адрес буфера для считывания из ПП
+	Mov	#22.,CodP		; Код команды для ПП (GetFont)
+	Call	PpExe			; Выполнение команды ПП
+3$:	Tstb	DrvReg			; Ожидание готовности ПП
+	Bpl	3$
+	Mov	#13,r1			; Копирование образа из буфера
+4$:	Movb	(r3)+,(r2)+
+	Inc	r3
+	Sob	r1,4$			; Цикл для 11. строк
+	Inc	Work0			; Увеличить номер текущего символа
+	Sob	r5,2$			; Цикл для всех образов
+	Mov	SavJmp,r4
+	Call	$Fnt			; Проверка имени файла на допустимость
+	Mov	r4,SavJmp
+	Call	Cas			; Выполнение записи
+	Mov	@#SavJmp,r4		; Востановление счетчика
+	Clr	@#SavJmp
+	Jmp	@(r4)+			; Конец оператора
+
+
+
+;──────────────────────────────────────────────────────────────────────────────
+;	Оператор Fload - чтение шрифта из файлa
+;	Входные параметры :
+;	(Sp) - адрес дескриптора строки имени файла
+
+$Fload::
+	Call	CloAll			; Закрыть все файлы
+	Mov	#Mag,r0			; Адрес МП устройств
+	Mov	#Rd.*400,(r0)+		; Операция - чтение
+	Mov	#11,(r0)+		; Код устройства
+	Mov	EndCod,r2		; Адрес начала свободной памяти
+	Mov	r2,20(r0)
+	Mov	Cikl,r1			; Вычисление длины свобоной памяти
+	Sub	r2,r1
+	Asr	r1
+	Mov	r1,22(r0)
+	Call	$Fnt			; Проверка имени файла
+	Call	Cas			; Выполнение операции ввода/вывода
+	Mov	EndCod,r2
+	Cmp	#"FN,(r2)+		; Файл "родной" 
+	Beq	1$			; - Да, продолжение .
+	Trap	5			; - Нет, ошибка.
+1$:	Clr	Work0
+	Movb	(r2)+,Work0		; Код первого образа
+	Clr	r5
+	Bisb	(r2)+,r5		; Число образов в файле
+2$:	Mov	#Buf,r3			; Адрес промежуточного буфера
+	Mov	r3,Work1
+	Mov	#13,r1			; Число строк в образе
+3$:	Movb	(r2)+,(r3)+		; Копирование в буфер
+	Clrb	(r3)+
+	Sob	r1,3$			; Следующая строка
+	Mov	#21.,CodP		; Запись образа в ПП
+	Call	PpExe
+4$:	Tstb	DrvReg
+	Bpl	4$	
+	Inc	Work0			; Следущий образ
+	Sob	r5,2$			; Цикл для всех образов
+	Jmp	@(r4)+			; Конец оператора
+;──────────────────────────────────────────────────────────────────────────────
+
+$Fnt:
+	MOV	(SP)+,R1
+	JSR	R1,FILNAM
+	MOV	#".F,(R0)+
+	MOV	#"NT,(R0)+
+FntEND:	MOV	#20040,(R0)+
+	MOV	#20040,(R0)+
+	MOV	#20040,(R0)+
+	RTS	PC
+
+
+$Cload::
+	Pop	R5
+	Pop	R3
+	Mov	#Buf,R2
+1$:	Movb	(r3)+,(r2)+
+	Sob	R5,1$
+	Clrb	(r2)+
+	Call	LdObj
+	Bcc	2$
+	Trap	50.
+2$:	Jmp	PRun
+	
+
+$SMode::
+	Mov	(Sp)+,Work0
+	Mov	#2,CodP
+	Call	PpExe
+	Jmp	@(r4)+
+
+Signal::
+	Push	#100.
+	Push	#100.
+;	Br	$Sound
+
+$Sound::
+	Clr	r0
+	Br	Cp2Pp
+
+
+$Fsoun::
+	Mov	#17,r0
+	Br	Cp2Pp
+	
+$NSoun::
+	Mov	#20,CODP
+	Call	PPEXE
+	Jmp	@(R4)+
+
+$Page::	
+	Mov	#22,r0
+	Br	Cp2Pp
+	
+$FPut::
+	Mov	2(sp),r0
+	Call	TstFnt
+	Mov	#21.,r0
+	Br	Cp2Pp
+
+$FGet::
+	Mov	2(Sp),r0
+	Call	TstFnt
+	Mov	#22.,r0
+	Mov	r4,SavJmp
+	Mov	#2$,r4
+	Br	Cp2pp
+1$:	Tstb	DrvReg
+	Bpl	1$
+	Mov	SavJmp,r4
+	Clr	SavJmp
+	Jmp	@(r4)+
+2$:	.Word	1$
+
+
+TstFnt:
+	Cmp	r0,#377
+	Bhi	1$
+	Cmp	r0,#40
+	Blo	1$
+	Return
+1$:	Trap	5
+	
+
+Cp2Pp:
+	Mov	(Sp)+,Work1
+	Mov	(Sp)+,Work0
+	Mov	r0,CodP
+	Call	PpExe
+	Jmp	@(r4)+
+	
+
+
+	.End
+                                                                                                                                                                                                                                                                                                                                                                  

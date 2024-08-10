@@ -1,0 +1,1008 @@
+; THE TURBO GRAPHICS HANDLER. 4..20 
+; THIS UNIT CAN USE WITH RT11 PROGRAMMS
+; HOW CAN YOU USE THIS UNIT, YOU CAN READ IN 'TGRAPH.LST'  
+; BY GERASIMOW OLEG IN 17.11.94
+
+
+;DRVREG == 374
+;-10(DRVREG) - €„…‘ €—€‹€ ‚ˆ„…Ž€ŒŸ’ˆ. (R)
+; -6(DRVREG) - ˜ˆˆ€ ‚ €‰’€• Š€€ (80/40) (R)
+; -4(DRVREG) - Ž‘‹…„ˆ‰ ŠŽ„ Ž‹“—…›‰ Ž’ Š‹€‚ˆ€’“›. (R)
+; -2(DRVREG) - Œ€‘Š€ €†€’›• “€‚‹Ÿž™ˆ• Š‹€‚ˆ˜. (R)
+;  0(DRVREG) - 7 ˆ’ : 1 - Ž–…‘‘ ‚›Ž‹…. 0 - Ž–…‘‘ ‚›Ž‹Ÿ…’‘Ÿ. (R/W)
+;  2(DRVREG) - ŠŽ„ Ž–…„“› (W)
+;  3(DRVREG) - €Ž‹œ : 10. Ž“‹Ÿ…’‘Ÿ ˆ Ž—’…ˆ… ŠŽŒ€„›. (R/W)
+;  4(DRVREG) - 
+;  ........  - €Ž—ˆ… Ÿ—…‰Šˆ „‹Ÿ Ž–…„“. (R/W)
+; 12(DRVREG) - 
+
+
+
+	.PSECT	TGRAPH
+
+TGINST::Mov	#176674,R1
+	Mov	#MP.PUT,R0;
+	Call	Put
+	Mov	#MP.EXE,R0
+	Jmp	Put
+	
+	
+
+PUT:	MOV	#4,R2
+	INC	R0
+	CLRB	(R1)
+1$:	TSTB	(R1)
+	BPL	1$
+	MOVB	R0,2(R1)
+	SWAB	R0
+	SOB	R2,1$
+2$:	TSTB	(R1)
+	BPL	2$
+	DEC	R0
+	RETURN
+
+MP.PUT:	.WORD	10000,32,1000,Inst,<EndInst-Inst>/2
+MP.EXE:	.WORD	14000,32,1000
+
+
+Inst:
+	Bis	#1,@#177026
+	Mov	#177010,R5
+	Mov	#<TGPut/2>,(R5)
+	Mov	#<TGEnd-TGPut>/2,R0
+	Mov	#170400,R1
+	Mtps	#340
+	Bis	#360,@#177054
+1$:	Mov	4(r5),(r1)+
+	Inc	(r5)
+	Sob	r0,1$
+	Bic	#360,@#177054
+	Mtps	#0
+	Return
+EndInst:
+	
+
+
+
+TGPUT::
+	Br	1$
+	Jmp	RstVct
+1$:	MOV	@#100,OLD100
+	MOV	PC,R0
+	ADD	#INT304-.,R0
+	MOV	R0,PTR304
+;	ADD	#MUSBUF-INT304,R0
+	
+	MOV	#MUSBUF,REDPTR
+	MOV	#MUSBUF,WRTPTR
+;	ADD	#END-MUSBUF,R0
+	MOV	#END,ENDPTR
+
+	ADD	#INT100-INT304,R0
+	MOV	R0,@#100
+	ADD	#INT300-INT100,R0
+	MOV	@#300,OLD300
+	MOV	R0,@#300
+	ADD	#INT330-INT300,R0
+	TST	@#7126
+	BMI	2$
+	MOV	@#7126,OLD330
+2$:	MOV	R0,@#7126
+	ADD	#CLS-INT330,R0
+	MOV	R0,@#13172
+	ADD	#F.RUN-CLS,R0
+	MOV	R0,@#14
+	CLR	@#36
+	RETURN
+
+
+
+INT304:	
+	Push	r0
+	Mov	#200,r0
+	Xor	r0,@#177716
+	MOV	NOTE1,@#177712
+	TST	@#177714
+	Pop	r0
+	RTI
+
+INT100:	MOV	#177777,TMID
+	BIC	#17400,@#177716
+	CLR	@#7046
+	TST	MCOUNT
+	BEQ	3$
+	DEC	MCOUNT
+	BR	1$
+3$:	CMP	PTR304,@#304
+	BEQ	2$
+	CMP	#174612,@#304
+	BNE	1$
+2$:	CMP	WRTPTR,REDPTR
+	BNE	6$
+	BIC	#100,@#177710
+	BR	1$
+6$:	MOV	R1,-(SP)
+	MOV	REDPTR,R1
+	MOVB	(R1)+,MCOUNT
+	MOVB	(R1)+,NOTE1
+5$:	CMP	R1,ENDPTR
+	BNE	4$
+ 	SUB	#END-MUSBUF,R1
+4$:	MOV	R1,REDPTR
+	MOV	(SP)+,R1
+	MOV	PTR304,@#304
+	MOV	#107,@#177710
+	MOV	#1,@#177712
+	TST	@#177714
+1$:	JMP	@(PC)+
+OLD100:	.WORD	0
+
+INT300:	PUSH	R1
+	MOV	@#7200,R1
+	MOVB	@#177702,(R1)
+	CMPB	(R1),#4
+	BNE	6$
+	POP	R1
+	MOV	#177777,@#16
+	RTI
+
+6$:
+	Tstb	(R1)
+	Bpl	60$
+	Mov	@#7202,@#7204
+	Mov	@#7206,@#7210
+
+60$:	INC	@#7200
+	BIC	#10,@#7200
+	INC	@#7060
+61$:	PUSH	@#177010
+	PUSH	R0
+	PUSH	R3
+	PUSH	R4
+	MOV	#<DRVREG-4>/2,@#177010
+	MOVB	(R1),R0
+	MOVB	(R1),@#177014
+	MOV	PC,R1
+	ADD	#KTAB-.,R1
+	MOV	#1,R3
+2$:	CMPB	R0,(R1)+
+	BNE	1$
+	BIS	R3,TOPK
+1$:	ASL	R3
+	BCC	2$
+	TSTB	R0
+	BPL	5$
+	MOV	#1,R3
+	BIC	#200,R0
+	SUB	#20,R1
+4$:	MOVB	(R1)+,R4
+	BIC	#177760,R4
+	CMPB	R4,R0
+	BNE	3$
+	BIC	R3,TOPK
+3$:	ASL	R3
+	BCC	4$	
+5$:	INC	@#177010
+	MOV	TOPK,@#177014
+	POP	R4
+	POP	R3
+	POP	R0
+	POP	@#177010
+	POP	R1
+	RTI
+
+KTAB:	.BYTE	154,134,116,133,113,153,46,105,107,66,6,10,11,12,14,15	
+TOPK:	.WORD	0
+
+INT330:	MOV	#177010,R5
+	MOV	#<DRVREG+2>/2,(R5)
+	CMPB	5(R5),#20
+	BNE	NOCALL
+$C:	MOV	R1,-(SP)
+	DEC	(R5)
+	CLRB	4(R5)
+	INC	(R5)
+	MOVB	4(R5),R0
+	INC	(R5)
+	MOV	4(R5),R1
+	INC	(R5)
+	MOV	4(R5),R2
+	INC	(R5)
+	MOV	4(R5),R3
+	INC	(R5)
+	MOV	4(R5),R4
+	SUB	#4,(R5) 
+	CLRB	5(R5)
+	
+	CALL	F.RUN
+
+
+EX:	MOV	(SP)+,R1
+NOCALL:	MOV	#177010,R5
+	MOV	#<DRVREG-10>/2,(R5)
+	MOV	VIDEO,4(R5)
+	INC	(R5)
+	MOV	WIDTH,4(R5)
+	MOV	#DRVREG/2,(R5)
+	BIS	#200,4(R5)
+	
+	
+	MOV	R1,@#7126
+	
+	
+	
+	
+	JMP	@(PC)+
+OLD330:	.WORD	174164
+
+F.RUN:	ASL	R0
+	CMP	#F0-DTAB-2,R0
+	BMI	EX
+	ADD	PC,R0
+	MOV	DTAB-.(R0),RN
+	.WORD	4767
+RN:	.+2
+	RETURN
+		
+
+
+
+AN=RN+2
+DTAB:	.WORD	F0-AN,F1-AN,F2-AN,F3-AN,F4-AN,F5-AN,F6-AN,F7-AN,F8-AN
+	.WORD	F9-AN,F10-AN,F11-AN,F12-AN,F13-AN,F14-AN,F15-AN,F16-AN
+	.WORD	F17-AN,F18-AN,F19-AN,F20-AN,F21-AN,F22-AN,F23-AN,F24-AN
+	.WORD	F25-AN
+
+F0:	MFPS	-(SP)
+	MTPS	#200
+	INC	R1		; ƒ……€–ˆŸ ‡‚“Š€ 
+	INC	R2		; ‚•Ž„ R1 = „‹ˆ’…‹œŽ‘’œ, R2 = —€‘’Ž’€
+3$:	MOV	R2,R3
+	BIC	#200,@#177716
+1$:	SOB	R3,1$
+	BIS	#200,@#177716
+	MOV	R2,R3
+2$:	SOB	R3,2$
+	SOB	R1,3$
+	MTPS	(SP)+
+	RETURN
+
+F1:				; ‘„‚ˆƒ Š€€. 
+	MOV	@#23150,R5	; ‚•Ž„ : R1< 0 ‚‹…‚Ž, R1>0 ‚€‚Ž
+	MOV	24(R5),R0
+	MOV	26(R5),R2
+	SUB	R0,R2
+	ASR	R2
+	ASR	R2
+	MOV	#5220,1$
+	TST	R1
+	BPL	1$
+	MOV	#5320,(PC)
+1$:	.+2
+	TST	(R0)+
+	SOB	R2,1$
+	RETURN
+
+F2:
+	Mov	r1,RPut
+	Return
+
+F3:
+F4:
+F5:	
+	PUSH	R1
+	PUSH	R2
+	CALL	2$
+	POP	R2
+	POP	R1
+	TST	@#177026
+	BEQ	4$
+	MOV	#1,R0
+	XOR	R0,R2
+	CALL	2$
+4$:	RETURN
+	
+	
+
+
+
+
+2$:	MOV	#2470,R5	; ‡€Œ…€ ‚ €‹ˆ’… –‚…’€1 € –‚…’2 
+	BIT	#4,R2		; ‚•Ž„ R1 = –‚…’2, R2 = –‚…’1
+	BEQ	1$
+	TST	(R5)+
+1$:	BIC	#177774,R2
+	BIC	#177760,R1
+	MOV	#17,R0
+	MOV	R2,R4
+	ASL	R2
+	ASL	R2
+	ASHC	R2,R0
+	BIC	R0,(R5)
+	BIS	R1,(R5)
+	MOV	(R5),4700-2470(R5)
+	RETURN
+	
+F6:	CALL	F9		; ˆ‘Ž‚€ˆ… ’Ž—Šˆ
+	CALL	CLCADR		; ‚•Ž„ : R2 = X , R1 = Y
+	MOV	@#23442,@#177016
+	MOV	#401,R4
+	ASH	R3,R4
+	Tst	RPut
+	Bne	2$
+	MOVB	R4,@#177024
+1$:	RETURN
+2$:	Xor	r4,@#177014
+	Return
+		
+
+
+CLCADR:	MOV	R2,R3
+	MUL	WIDTH,R1	; Ž–…„“€ ‚›—ˆ‘‹…Ÿ €„…‘€ 
+	ASH	#-3,R2		; ‚•Ž„ : R2 = X , R1 = Y
+	SUB	R2,R1		; ‚›•Ž„ : R1 = ADDRES
+	SUB	VIDEO,R1
+	NEG	R1
+	BIC	#177770,R3
+	MOV	R1,@#177010
+	RETURN
+
+TSTCRD:	CMP	R2,@#23412	; Ž‚…Š€ ŠŽŽ„ˆ€’ € ‚•Ž†„…ˆ…
+	BMI	1$		; ‚ Ž‹€‘’œ Š€€
+	MOV	@#23412,R2
+1$:	CMP	R1,#263.
+	BMI	2$
+	MOV	#263.,R1
+2$:	TST	R2
+	BPL	3$
+	CLR	R2
+3$:	TST	R1
+	BPL	4$
+	CLR	R1
+4$:	RETURN
+
+F7:	MOV	R1,@#23442	; “‘’€Ž‚Š€ –‚…’€ ‚…Š’Ž€
+	RETURN			; ‚•Ž„ : R1 = –‚…’
+
+F8:	MOV	#22656,R5	; “‘’€Ž‚Š€ –‚E’Ž‚ ’…Š‘’Ž‚ƒŽ 
+	ASL	R2		; …†ˆŒ€
+	ASL	R3		; ‚•Ž„ : R1 = ‘ˆŒ‚O‹
+	CALL	1$		; R2 = ‡€ŠŽŒ…‘’Ž , R3 = Š€
+	ADD	#76,R5
+1$:	MOV	R1,34(R5) 
+	MOV	113512(R2),40(R5)
+	MOV	113512(R3),44(R5)
+	RETURN
+
+F9:	CALL	TSTCRD		; “‘’€Ž‚Š€ ƒ€”ˆ—…‘ŠŽƒŽ “Š€‡€’…‹Ÿ
+	MOV	R2,@#23420	; ‚•Ž„ : R2 = X , R1 = Y 
+	MOV	R1,@#23422
+	RETURN
+
+
+F10:	
+	MOV	@#23420,R4	; Ž‘’Ž…ˆ… ‚…Š’Ž€ 
+	MOV	@#23422,R3	; ‚•Ž„ : R2 = X , R1 = Y
+	CALL	F9
+	CALL	SORTCR
+	MOV	@#23442,@#177016
+	CALL	CLCADR
+	Tst	Rput
+	Beq	100$
+	Jmp	XrLin
+100$:	MOV	#177010,R4
+	MOV	#177024,R5
+	TST	DX
+	BNE	660$
+
+	MOV	DY,R0		; ‚…’ˆŠ€‹œ›‰ DX=0
+	BEQ	666$
+	MOV	#1,R2
+	ASH	R3,R2
+	MOV	YADD,R1
+	TST	(R0)+
+	ASR	R0
+	BCC	4$
+2$:	MOVB	R2,(R5)
+	SUB	R1,(R4)
+4$:	MOVB	R2,(R5)
+	SUB	R1,(R4)
+	SOB	R0,2$
+	RETURN
+
+660$:	TST	DY		; ƒŽˆ‡Ž’€‹œ›‰  DY=0
+	BNE	661$
+	MOV	DX,-(SP)
+	MOV	R3,R2
+	MOV	#7,R0
+	XOR	R0,R2
+	SUB	R2,(SP)
+	BMI	8$
+	ADD	PC,R3
+	MOVB	BITMP0-.(R3),(R5)
+	TST	(SP)
+	BEQ	667$
+	INC	(R4)
+	MOV	(SP),R0
+	ASH	#-3,R0
+	BEQ	3$
+	MOV	#377,R2
+1$:	MOVB	R2,(R5)
+	INC	(R4)
+	SOB	R0,1$
+3$:	MOV	(SP),R3
+	BIC	#177770,R3
+	ADD	PC,R3
+	MOVB	BITMP1-.(R3),(R5)
+	BR	667$
+8$:	ADD	PC,R3
+	MOVB	BITMP0-.(R3),R1
+	MOV	(SP),R3
+	NEG	R3
+	XOR	R0,R3
+	ADD	PC,R3
+	BICB	BITMP0+1-.(R3),R1
+	MOVB	R1,(R5)
+667$:	TST	(SP)+
+	BR	666$
+
+661$:	CMP	DY,DX		; €Š‹Ž›‰ DY>DX 
+	BMI	662$		; €‹ƒŽˆ’Œ …‡…•…Œ€ „‹Ÿ 8 ‘‚Ÿ‡Ž‰ 
+	MOV	DY,R0		; €‡‚…’Šˆ ‚…Š’Ž€.
+	MOV	DY,-(SP)
+	ASL	(SP)
+	MOV	DX,-(SP)
+	ASL	(SP)
+	MOV	(SP),R2
+	SUB	R0,R2
+	INC	R0
+	MOV	#1,R1
+	ASH	R3,R1
+	MOV	YADD,R3
+9$:	MOVB	R1,(R5)
+	TST	R2
+	BMI	6$
+	ASLB	R1
+	BCC	7$
+	INC	R1
+	INC	(R4)
+7$:	SUB	2(SP),R2
+6$:	ADD	(SP),R2	
+	SUB	R3,(R4)
+	SOB	R0,9$
+10$:	CMP	(SP)+,(SP)+
+666$:	RETURN
+
+
+662$:	MOV	DX,R0		; €Š‹Ž›‰ DY<DX
+	MOV	DX,-(SP)
+	ASL	(SP)
+	MOV	DY,-(SP)
+	ASL	(SP)
+	MOV	(SP),R2
+	SUB	R0,R2
+	INC	R0
+	MOV	#1,R1
+	ASH	R3,R1
+	MOV	YADD,R3
+19$:	MOVB	R1,(R5)
+	TST	R2
+	BMI	16$
+	SUB	R3,(R4)
+	SUB	2(SP),R2
+16$:	ADD	(SP),R2
+	ASLB	R1
+	BCC	17$
+	INC	R1
+	INC	(R4)
+17$:	SOB	R0,19$
+	BR	10$
+
+
+
+SORTCR:	MOV	@#22666,YADD	; Ž–…„“€ ‘Ž’ˆŽ‚Šˆ „‚“• € ŠŽŽ„ˆ€’
+	MOV	R3,DY
+	SUB	R1,DY
+	BPL	2$
+	NEG	DY
+	NEG	YADD
+2$:	MOV	R4,DX
+	SUB	R2,DX
+	BPL	1$
+	NEG	DX
+	MOV	R3,R1
+	MOV	R4,R2
+	NEG	YADD
+1$:	RETURN
+
+
+
+XrLin:
+	Mov	#177010,r4
+	Mov	#177014,r5
+	CMP	DY,DX		; €Š‹Ž›‰ DY>DX 
+	BMI	662$		; €‹ƒŽˆ’Œ …‡…•…Œ€ „‹Ÿ 8 ‘‚Ÿ‡Ž‰ 
+	MOV	DY,R0		; €‡‚…’Šˆ ‚…Š’Ž€.
+	MOV	DY,-(SP)
+	ASL	(SP)
+	MOV	DX,-(SP)
+	ASL	(SP)
+	MOV	(SP),R2
+	SUB	R0,R2
+	INC	R0
+	Mov	#401,r1
+	ASH	R3,R1
+	MOV	YADD,R3
+9$:	Xor	r1,(r5)
+	TST	R2
+	BMI	6$
+	ASL	R1
+	BCC	7$
+	Mov	#401,R1
+	INC	(R4)
+7$:	SUB	2(SP),R2
+6$:	ADD	(SP),R2	
+	SUB	R3,(R4)
+	SOB	R0,9$
+10$:	CMP	(SP)+,(SP)+
+666$:	RETURN
+
+
+662$:	MOV	DX,R0		; €Š‹Ž›‰ DY<DX
+	MOV	DX,-(SP)
+	ASL	(SP)
+	MOV	DY,-(SP)
+	ASL	(SP)
+	MOV	(SP),R2
+	SUB	R0,R2
+	INC	R0
+	MOV	#401,R1
+	ASH	R3,R1
+	MOV	YADD,R3
+19$:	Xor	r1,(r5)
+	TST	R2
+	BMI	16$
+	SUB	R3,(R4)
+	SUB	2(SP),R2
+16$:	ADD	(SP),R2
+	ASL	R1
+	BCC	17$
+	Mov	#401,R1
+	INC	(R4)
+17$:	SOB	R0,19$
+	BR	10$
+	
+	
+	
+
+F11:	CALL	TSTCRD		; ˆ‘Ž‚€ˆ… ‡€Š€˜…ŽƒŽ ŸŒŽ“ƒŽ‹œˆŠ€
+	MOV	R1,@#23416	; ‚•Ž„ : (R2,R1)-(R4,R3)
+	MOV	R2,@#23414
+	MOV	R3,R1
+	MOV	R4,R2
+	CALL	F9
+	MOV	R1,R3
+	MOV	R2,R4
+	MOV	@#23416,R1
+	MOV	@#23414,R2
+	CALL	SORTCR
+	MOV	DX,-(SP)
+	CALL	CLCADR
+	MOV	#FILBUF,R1
+	MOV	R1,TMP
+	MOV	R3,R2
+	MOV	#7,R5
+	XOR	R5,R2
+	ADD	PC,R3
+	MOVB	BITMP0-.(R3),(R1)+
+	SUB	R2,(SP)
+	BMI	5$
+	MOV	(SP),R4
+	ASH	#-3.,R4
+	BEQ	1$
+2$:	MOVB	#377,(R1)+
+	SOB	R4,2$
+1$:	BIC	#177770,(SP)
+	MOV	(SP),R3
+	ADD	PC,R3
+	MOVB	BITMP1-.(R3),(R1)+
+	BR	4$
+5$:	NEG	(SP)
+	MOV	(SP),R3
+	XOR	R5,R3
+	ADD	PC,R3
+	BICB	BITMP0+1-.(R3),-1(R1)
+4$:	TST	(SP)+
+	SUB	R1,TMP
+	NEG	TMP
+	INC	DY
+
+BARPUT:	MOV	@#23442,@#177016
+	MOV	#FILBUF,R1
+	MOV	#177010,R4
+	MOV	#177024,R5
+	MOV	YADD,R0
+	ADD	TMP,R0
+	MOV	TMP,-(SP)
+	MOV	DY,R2
+2$:	MOV	(SP),R3
+1$:	MOVB	(R1)+,(R5)
+	INC	(R4)
+	SOB	R3,1$
+	SUB	R0,(R4)
+	SUB	(SP),R1
+	SOB	R2,2$
+	TST	(SP)+
+EXT:	RETURN
+
+F12:	CALL	CLCADR		; —’…ˆ… –‚…’€ ’Ž—Šˆ
+	INC	R3
+	NEG	R3
+	MOVB	2(R5),R1
+	MOVB	4(R5),R2
+	MOVB	5(R5),R4
+	CLR	R0
+	ASH	R3,R4
+	ROL	R0
+	ASH	R3,R2
+	ROL	R0
+	ASH	R3,R1
+	ROL	R0
+	BIC	@#177026,R0
+	MOV	#<DRVREG+4>/2,(R5)
+	MOV	R0,4(R5)
+	RETURN
+
+F13:	MOV	#<DRVREG+4>/2,(R5)	; —’…ˆ… ŠŽŽˆ€’ ƒ€”ˆ—…‘ŠŽƒŽ Š“‘Ž€ 
+	MOV	@#23422,4(R5)
+	INC	(R5)
+	MOV	@#23420,4(R5)
+	RETURN
+
+F14:	MOV	@#23422,@#23414	; ‡€‹ˆ‚Š€ Žƒ€ˆ—…Ž‰ ”ˆƒ“›
+	MOV	@#23420,@#23416	; ‚•Ž„ : R1 = –‚…’ ‡€‹ˆ‚Šˆ  
+	MOV	R1,@#23450
+	CALL	@#151714	; €ƒ‹Ž… ˆ‘Ž‹œ‡Ž‚€… "‡“˜Ž‰" Ž–…„“›.
+	RETURN
+
+F15:	MOV	WRTPTR,R5	; „Ž€‚ˆ’œ ‹…Œ…’ ‚ Ž—……„œ Žˆƒ›‚€’…‹Ÿ.
+	TST	(R5)+		; ‚•Ž„ : R1 - „‹ˆ’…‹œŽ‘’œ, R2 -  
+	CMP	R5,ENDPTR
+	BNE	2$
+	SUB	#END-MUSBUF,R5
+2$:	CMP	R5,REDPTR
+	BEQ	1$
+	MOV	R5,WRTPTR
+	MOVB	R2,-(R5)
+	MOVB	R1,-(R5)
+1$:	RETURN
+
+F16:	MOV	ENDPTR,WRTPTR	; ‚›Š‹ž—ˆ’œ Žˆƒ›‚€’…‹œ
+	SUB	#END-MUSBUF,WRTPTR
+	MOV	WRTPTR,REDPTR
+	RETURN
+
+F17:	MOV	#22656,R5
+	MOV	#2,74(R5)
+	MOV	R1,-(SP)
+	CALL	CLS
+	MOV	(SP)+,R1
+	MOV	#4534,@#23432
+	MOV	#1,@#22744
+	CLR	@#2462
+	MOV	#1200,@#23412
+	MOV	#120,R4		; “‘’€Ž‚ˆ’œ ‚ˆ„…Ž…†ˆŒ
+	TST	R1		; ‚•Ž„ R1 - …†ˆŒ (0 - 80 ‘ˆŒ‚.,1 - 40 ‘ˆŒ‚.) 
+	BEQ	1$
+	MOV	#20,@#2462
+	ASR	R4
+	ASL	@#22744
+	MOV	#500,@#23412
+1$:	MOV	R4,@#22666
+	MOV	R4,@#22662
+	MOV	#100000,R0
+	MOV	R0,@#22660
+	MOV	#2500,R1
+	MOV	R1,-2(R1)
+	MOV	#436,R3
+	MOV	R4,WIDTH
+	CALL	3$
+	MOV	@#4534,VIDEO
+	CALL	@#110210
+	CMP	#120,R4
+	BEQ	2$
+	MOV	#410,R3
+	MOV	#4704,R1
+	MOV	R0,@#4674
+	MOV	R0,@#22754+2
+	MOV	R3,@#22754+6
+	MOV	#30,@#22754+12
+	MOV	R3,@#22754+14
+	MOV	R3,@#22754+16
+	MOV	R1,@#22754+24
+	MOV	R1,@#22754+30
+	ADD	R4,R0
+	CALL	3$
+2$:	CALL	CLS
+	CMP	#120,@#22666
+	BEQ	4$
+	CLR	@#22656+74
+4$:	RETURN
+
+3$:	MOV	R0,(R1)+
+	TST	(R1)+
+	ADD	R4,R0
+	SOB	R3,3$
+	RETURN
+
+
+F18:	CMP	#120,@#22666	; “‘’€Ž‚Š€ ‚ˆ„…Ž‘’€ˆ–
+	BEQ	5$		; ‚•Ž„ R1 = VISUAL , R2 = ACTIVE
+	MOV	#2500,R3
+	TST	R1
+	BMI	2$
+	BEQ	1$
+	MOV	#4672,R3
+1$:	MOV	R3,@#2476
+2$:	MOV	#22656,R5
+	MOV	#4534,@#23432
+	TST	R2
+	BMI	5$
+	BEQ	3$
+	MOV	#6734,@#23432
+	MOV	#22754,R5
+3$:	CALL	@#110210
+	MOV	2(R5),VIDEO
+	ADD	#51060/2,VIDEO
+	MOV	#76,R4
+	CMP	#22656,R5
+	BEQ	6$
+	NEG	R4
+6$:	ADD	R4,R5
+	MOV	60(R5),R1
+	MOV	#13,R2
+7$:	TST	(R1)+
+	BIC	#1,(R1)+
+	SOB	R2,7$ 
+5$:	RETURN
+
+
+F19:	MOV	R1,@#22656+70	; “‘’€Ž‚Š€ –‚…’€ Š“‘Ž€ 
+	MOV	R1,@#22754+70	; ‚•Ž„ R1 = –‚…’ 
+	RETURN
+
+
+
+RstVct:	Mov	OLD100,@#100	; REMOVE FROM PP
+	Mov	#174612,@#304
+	Mov	OLD300,@#300
+	Mov	#113236,@#13172
+	Mov	#200,@#36
+	Mov	OLD330,R1
+	Bpl	1$
+	Mov	#174222,R1
+1$:	Mov	R1,@#7126
+	Return
+	
+	
+f20:	Call	RstVct
+	CMP	(SP)+,(SP)+
+	JMP	(R1)	
+	
+	
+F21:
+	Bic	#177400,r1
+	Mov	r1,r3
+	Asl	r3
+	Mul	#13,r1
+	Ror	r2
+	Mov	r2,(r5)
+	Add	#15602-<13*40>,r1
+	Mov	r1,14142(r3)
+	Mov	#13,r2
+1$:	Movb	4(r5),(r1)+
+	Inc	(r5)
+	Sob	r2,1$
+	Return
+	
+F22:
+	Bic	#177400,r1
+	Asl	r1
+	Mov	14142(r1),r1
+	Ror	r2
+	Mov	r2,(r5)
+	Mov	#13,r2
+1$:	Movb	(r1)+,4(r5)
+	Clrb	5(r5)
+	Inc	(r5)
+	Sob	r2,1$
+	Return
+	
+	
+F23:	Mov	#<DrvReg+4>/2,(r5)
+	Mov	@#23150,r0
+	Mov	16(r0),4(r5)
+	Inc	(r5)
+	Mov	20(r0),4(r5)
+	Return
+
+
+F24:				; Get Support for plan 0
+	Mov	r2,(r5)
+	Mov	#1000,r0
+	Mov	r3,r4
+	Bit	#1,@#177026
+	Bne	2$
+1$:	Movb	2(r5),(r0)+
+	Inc	(r5)
+	Sob	r4,1$
+	Br	3$
+2$:	Clrb	(r0)+
+	Sob	r4,2$
+3$:	Asr	r3
+	Inc	r3
+	Mov	r1,(r5)
+	Mov	#1000,r0
+4$:	Mov	(r0)+,4(r5)
+	Inc	(r5)
+	Sob	r3,4$
+	Return
+
+
+
+F25:	
+	Bit	#1,@#177026
+	Bne	F251
+	Mov	r1,(r5)
+	Mov	#1000,r1
+	Movb	r3,r0
+	Asr	r0
+	Inc	r0
+
+1$:	Mov	4(r5),(r1)+
+	Inc	(r5)
+	Sob	r0,1$
+	Mov	#<DrvReg+6>/2,(r5)
+	Clr	4(r5)
+	
+	Mov	r2,(r5)
+	Movb	r3,r0
+	Mov	#1000,r1
+	Swab	r3
+	Bic	#^C3,r3
+	Asl	r3
+	Add	PC,R3
+	MOV	RpTAB-.(R3),PN
+	.WORD	167
+PN:	.+2
+XN	= PN + 2
+RpTab:	.Word	MovPut-XN,XorPut-XN,BisPut-XN,BicPut-XN
+	
+F251:
+	Mov	#<DrvReg+6>/2,(r5)
+	Clr	4(r5)
+	Return	
+	
+
+MovPut:
+	Movb	r4,r3
+	Dec	r0
+	Beq	4$	
+	Bicb	r3,2(r5)
+	Bisb	(r1)+,2(r5)
+	Br	6$
+
+3$:	Movb	(r1)+,2(r5)
+6$:	Inc	(r5)
+	Sob	r0,3$
+	Clr	r3
+4$:
+	Swab	r4
+	Bisb	r4,r3
+	Bicb	r3,2(r5)
+	Bisb	(r1)+,2(r5)
+	Return
+
+
+XorPut:
+1$:	Movb	(r1)+,r3
+	Xor	r3,2(r5)
+	Inc	(r5)
+	Sob	r0,1$
+	Return
+	
+BisPut:
+1$:	Bisb	(r1)+,2(r5)
+	Inc	(r5)
+	Sob	r0,1$
+	Return
+	
+BicPut:
+1$:	Bicb	(r1)+,2(r5)
+	Inc	(r5)
+	Sob	r0,1$
+	Return
+	
+
+
+
+	
+10$:	Return
+
+
+
+TWAIT:	CLR	TMID		; Ž†ˆ„€ˆ… …›‚€ˆŸ Ž’ ‘…’…‚ŽƒŽ ’€‰Œ…€
+1$:	TST	TMID
+	BEQ	1$
+	RETURN
+
+CLS:	
+	PUSH	@50(R5)
+	PUSH	@52(R5)
+	MOV	#8.,R0
+	MOV	#113512,R1
+1$:	CMP	44(R5),(R1)+
+	BEQ	2$
+	SOB	R0,1$
+	MOV	#113514,R1
+2$: 	SUB	#113514,R1
+	CLR	R0
+	ASR	R1
+	ASR	R1
+	BCC	3$
+	MOV	#-4,R0
+3$:	ADD	50(R5),R1
+	MOVB	(R1),R2
+	ASH	R0,R2
+	BIC	#177770,R2
+	ASL	R2
+	MOV	113512(R2),R2
+	MOV	R2,@50(R5)
+	MOV	R2,@52(R5)
+	JMP	@#113262
+
+	
+
+
+BITMP0:	.BYTE	^B11111111
+	.BYTE	^B11111110
+	.BYTE	^B11111100
+	.BYTE	^B11111000
+	.BYTE	^B11110000
+	.BYTE	^B11100000
+	.BYTE	^B11000000
+	.BYTE	^B10000000
+BITMP1:	.BYTE	^B00000000
+	.BYTE	^B00000001
+	.BYTE	^B00000011
+	.BYTE	^B00000111
+	.BYTE	^B00001111
+	.BYTE	^B00011111
+	.BYTE	^B00111111
+	.BYTE	^B01111111
+
+
+OLD300:	.WORD	0
+VIDEO:	.WORD	151060
+WIDTH:	.WORD	120
+TMID:	.WORD	0
+DX:	.WORD	0
+DY:	.WORD	0
+TMP:	.WORD	0
+YADD:	.WORD	0
+PTR304:	.WORD	0
+ENDPTR:	.WORD	0
+REDPTR:	.WORD	0
+WRTPTR:	.WORD	0
+MCOUNT:	.WORD	0
+NOTE1:	.WORD	0
+Rput:	.Word	0
+
+TGEND::
+	FILBUF	=   1000
+	MUSBUF	=   FILBUF + 122
+	END	=   MUSBUF + 2*100.
+
+	.END
+
+                                                                                                                                                                                                                                                                                                                                                                                                 
