@@ -1,0 +1,3 @@
+*.MAC linguist-detectable=true
+*.MAC linguist-language=Assembly
+*.MAC text working-tree-encoding=utf8 eol=crlf
