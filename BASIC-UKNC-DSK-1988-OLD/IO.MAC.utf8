@@ -1,0 +1,1082 @@
+﻿	.INCLUDE /GENUKD.MAC/
+	.SBTTL	INOUT
+	.ENABLE	LC
+
+
+		; =========================
+		; ****БЛОК ВВОДА-ВЫВОДА****
+		; =========================
+
+		; ------------------------------------
+		; ####КОНСТАНТЫ БЛОКА ВВОДА-ВЫВОДА####
+		; ------------------------------------
+
+		LF==12
+		CR==15
+		FF==14
+		ESC==33
+
+		ERRBYT==52
+
+		MCSR	=176674
+		MDBR	=176676
+		AWPM	=474
+
+	        ARSK	==177560
+		ARDK	=177562
+		ARSTV	=177564
+		ARDTV	=177566
+		AVPK	==60
+		LN	==23.		; КОЛИЧЕСТВО СТРОК ЭКРАНА
+		MAXLL	==80.		; ШИРИНА ЭКРАНА В СИМВОЛАХ
+
+
+		IRPR=176664
+
+		AWPKL==60
+
+	DEVEXT==0
+
+		; ========================
+		; ****МАКРООПРЕДЕЛЕНИЯ****
+		; ========================
+
+	.MCALL	.HRESET
+
+
+	.MACRO	.BJSR	N
+	.IF EQ,MASINA-BK0011
+		MOV	#PAG2,-(SP)
+		MOV	#N,-(SP)
+		.BJSR0
+	.IFF
+		CALL	N
+	.ENDC
+	.ENDM	.BJSR
+
+		; ---------------------------------------
+		; ## ИНИЦИАЛИЗАЦИЯ БЛОКА ВВОДА-ВЫВОДА ###
+		; ---------------------------------------
+
+	.GLOBL	TEXT,BUF,BEND,IODEV,BUFOUT,LPTPOS,FCB,LPLCFL
+	.GLOBL	BC,CASCII,BLOCKN,FNDBUF,TRTOPL,BREAK,LYGIS
+	.GLOBL	TOINT,SETST,CAS,NEXINT,NEXJMP,JMP,RTS,LNUM,ISVARD
+	.GLOBL	STAR,STEP,SEPAP,NOUSR,CTRLC
+	.GLOBL	RTIO,BRKO,BREAKW,NAMEW,NAMER,ADRR,ADRW,RD.,WR.,FR.,RER.,MER.
+	.GLOBL	TIMER
+
+	.GLOBL	SYSPTR,USRLOC
+
+	.GLOBL	PARAM
+
+	.GLOBL	SCR0,SCR3,RSCR,CSCR,CRTGRP
+
+
+	.GLOBL	FILTYP,CURS,TABX,TABY,MIDLE,LL,LN,EBUF,LAST,FIRST
+	.GLOBL	DFCB,RUSLAT,SCRL,ENDBUF,KOM2P
+
+	MIDM::
+		.HRESET
+		CALL	NOSTOP
+		MOV	#5007,@#BUF
+	;	MOV	#BUF,R0
+	;1$:	MOV	#5012,(R0)+
+	;	CMP	R0,#BEND
+	;	BLO	1$
+		CLR	@#IODEV
+	;
+		MOV	#MAXLL,R2
+		CALL	SETWDT
+
+	.BJSR	GRINIT
+
+		MOV	#FF,R0
+		CALL	ISV
+		MOV	#100,R2
+		CALL	SETWDT
+	;
+		CLRB	@#KOM2P
+	;
+		CALL	STOPEN
+		RETURN
+	;
+	SETWDT::
+		MOV	R2,LL
+		MOV	#LN+1,R1
+		MUL	R2,R1
+		ADD	#EBUF,R1
+		MOV	R1,ENDBUF
+		ASR	R2
+		SUB	#MAXLL/2,R2
+		NEG	R2
+		MOV	R2,MIDLE
+		RETURN
+	;
+		;
+		; -------------------
+		; ## ЧТЕНИЕ СТРОКИ ##
+		; -------------------
+		;
+	ISVTO::	TST	IODEV
+		BEQ	ISV
+		MOV	#BUFOUT,R1
+		MOV	#1,R2
+
+		CMPB	R0,#LF
+		BNE	1$
+		INC	R2
+		MOVB	R0,1(R1)
+		MOV	#CR,R0
+	1$:
+		MOVB	R0,@R1
+		JMP	ISVETO
+
+	;---------------------------
+	;	FULL SCREEN EDITOR
+	;---------------------------
+
+	;-------------------------------------------
+	;
+	;	ВВОД СТРОКИ
+	;		ВЫХОД:	R1-КОНЕЧНЫЙ АДРЕС
+	;			#BUF-НАЧАЛЬНЫЙ АДРЕС
+	;
+	;-------------------------------------------
+	IVEIL::
+		MOV	R0,-(SP)
+		MOV	R3,-(SP)
+		MOV	CURS,R1
+	1$:	CALL	IV
+		CMP	R0,#CR
+		BEQ	3$
+		CMP	R0,#3
+		BEQ	4$
+		CMP	R0,#1
+		BNE	2$
+		CALL	STEP
+	2$:	CALL	PROC
+		BR	1$
+	3$:
+		CALL	PROC
+		MOV	R1,CURS
+		MOV	(SP)+,R3
+		MOV	(SP)+,R0
+		RETURN
+	;
+	4$:	MOV	R1,CURS
+		JMP	CTRLC
+	;
+	;--------------------------------
+	;	ПЕРЕПИСКА СТРОКИ В БУФЕР
+	;---------------------------------
+	;
+
+	INBF0::	MOV	R3,-(SP)	;ДЛЯ INPUT
+		MOV	CURS,R1
+		MOV	TABX,-(SP)
+		SUB	@SP,R1
+		CMP	R1,#EBUF
+		BEQ	4$
+		MOVB	#LF,-1(R1)
+	4$:	MOV	R1,-(SP)
+		CLRB	SCRL
+		CALL	IVEIL
+		MOVB	SCRL,R3
+		BEQ	2$
+	1$:	SUB	LL,@SP
+		CMP	@SP,#EBUF
+		BEQ	2$
+		SOB	R3,1$
+	2$:	SUB	LL,R1
+		CALL	EPR
+		CMP	R3,(SP)+
+		BNE	3$
+		ADD	@SP,R3
+	3$:	CLR	(SP)+
+		BR	INBF2
+	;
+	INBF1::	MOV	R3,-(SP)	;ДЛЯ ANALIZ
+		SUB	LL,R1
+		CALL	EPR
+	;
+	INBF2:	MOV	R2,-(SP)
+		MOV	R3,R2
+		CALL	EPB
+		SUB	R2,R3
+		BLE	3$
+		CMP	R3,#400
+		BGE	5$
+		INC	R3
+		MOV	#BUF,R1
+	2$:	MOVB	(R2)+,(R1)+
+		SOB	R3,2$
+		SEC
+		BR	4$
+	3$:	CLC
+	4$:	MOV	(SP)+,R2
+		MOV	(SP)+,R3
+		RETURN
+	5$:	TRAP	25.
+	;
+	;----------------------------------------------
+	;	ВЫВОД СИМВОЛА
+	;		ВХОД:	РО-КОД СИМВОЛА
+	;----------------------------------------------
+	;
+	ISV::
+		MOV	R0,-(SP)
+		MOV	R1,-(SP)
+		MFPS	-(SP)
+		MTPS	#340
+
+		CALL	NOSTOP
+		CALL	CSCR
+
+		MOV	CURS,R1
+		CALL	PROCLF
+		MOV	R1,CURS
+
+		CALL	RSCR
+		CALL	STOPEN
+		MTPS	(SP)+
+		MOV	(SP)+,R1
+	ENDISV:
+		MOV	(SP)+,R0
+		CALL	SETALF
+		RETURN
+	;
+	;--------------------------------------------
+	;	ВЫВОД СТРОКИ
+	;		ВХОД:	R1-НАЧАЛЬНЫЙ АДРЕС
+	;			R2-ДЛИНА (МЛАДШИЙ БАЙТ)
+	;			  -ПРИЗНАК КОНЦА (СТАРШИЙ БАЙТ)
+	;--------------------------------------------
+	;
+	ISVEIL::
+		MOV	R0,-(SP)
+		MOV	R3,-(SP)
+		MOV	R5,-(SP)
+		MFPS	-(SP)
+		MTPS	#340
+		CALL	NOSTOP
+
+		MOV	R1,R5
+		CALL	CSCR
+		MOV	CURS,R1
+		MOV	R2,R3
+		SWAB	R3
+	1$:	MOVB	(R5)+,R0
+		CMPB	R0,R3
+		BEQ	2$
+		CALL	PROCLF
+		SOB	R2,1$
+		BR	3$
+	2$:	CALL	PROCLF
+	3$:	MOV	R1,CURS
+
+		CALL	RSCR
+		CALL	STOPEN
+		MTPS	(SP)+
+		MOV	(SP)+,R5
+		MOV	(SP)+,R3
+		BR	ENDISV
+	;
+	;------------------------------------------
+	;	ОБРАБОТКА СИМВОЛА
+	;		R0-СИМВОЛ
+	;		R1-МЕСТО КУРСОРА В БУФЕРЕ
+	;------------------------------------------
+
+	PROCLF:	CMPB	R0,#LF	;- ПРИ ВЫВОДЕ LF=CTRL/U
+		BNE	1$
+		MOV	#25,R0
+	1$:	CMPB	R0,#CR	; CR=CTRL/V
+		BNE	PROC
+		MOV	#26,R0
+	;
+	PROC:
+		MOV	R2,-(SP)
+		MOV	R3,-(SP)
+
+		MOV	#KOD,R2
+		TSTB	KOM2P
+		BEQ	1$
+		ADD	#15,R2
+		BIC	#200,R0
+		CLRB	KOM2P
+		BR	2$
+	1$:	CMPB	R0,(R2)+
+		BHIS	3$
+	2$:	TSTB	@R2
+		BEQ	4$
+		CMPB	R0,(R2)+
+		BNE	2$
+	3$:	SUB	#KOD+1,R2
+		ASL	R2
+		CALL	@KOM(R2)
+	4$:
+		MOV	(SP)+,R3
+		MOV	(SP)+,R2
+		RETURN
+	;
+					;------  ДЛЯ 2-ОЙ КОМ.СИСТ.
+	K33:	INCB	KOM2P
+		RETURN
+	;
+					;------ БУКВА
+	K40:	CMP	R0,#177
+		BEQ	K177
+	;
+		MOV	ENDBUF,R2
+		DEC	R2
+		CMP	R1,R2
+		BNE	1$
+
+		TST	CRTGRP
+		BEQ	10$
+		MOV	R0,-(SP)
+		CALL	K10
+		MOV	(SP)+,R0
+		BR	1$
+
+	10$:	CALL	ROLL
+	;
+	1$:	CMPB	-1(R1),#LF
+		BNE	3$
+		MOV	R1,R3
+
+		MOV	TABX,R2
+		BEQ	3$
+	2$:	CMPB	-(R3),#LF
+		BNE	3$
+		MOVB	#40,@R3
+		SOB	R2,2$
+	;
+	3$:	MOVB	R0,(R1)+
+		INC	TABX
+		CALL	ISV0
+		CMP	TABX,LL
+		BNE	KKK
+		JMP	CRLF
+	;
+	KL:	CLR	RUSLAT
+		BR	KK
+	;
+	KR:	MOV	#-1,RUSLAT
+	KK:	CALL	ISV1
+	KKK: 	RETURN
+					;------ ЗАБОЙ
+	K177:	CALL	EPR
+		CMP	R1,R3
+		BEQ	2$
+		MOVB	#104,R0
+		CMPB	-1(R1),#LF
+		BEQ	K104
+		CALL	K104
+	2$:	CALL	K24
+	1$:	RETURN
+	;
+					;------ ГТ
+	K11:
+		MOVB	#40,R0
+	1$:	CALL	K40
+		BIT	#7,TABX
+		BNE	1$
+		RETURN
+	;
+	;
+					;------- СТР -СБРОС СТРОКИ
+	K37:
+		CALL	EPR
+		SUB	TABX,R1
+		CLR	TABX
+	1$:	CMP	R1,R3
+		BEQ	2$
+		SUB	LL,R1
+		DEC	TABY
+		BR	1$
+	2$:	CALL	LOK
+					;------ СТС -СБРОС КОНЦА СТРОКИ
+	K13:
+		CMPB	@R1,#LF
+		BEQ	4$
+		CALL	EPB
+		MOV	R1,R2
+
+		SUB	TABX,R2
+	1$:	MOVB	#113,R0
+		CALL	ISV2
+		ADD	LL,R2
+		CMP	R2,R3
+		BHI	2$
+		MOV	#LF,R0
+		CALL	ISV1
+		MOV	#CR,R0
+		CALL	ISV1
+		BR	1$
+	2$:	CALL	LOK
+		MOV	R3,R2
+		SUB	R1,R2
+	3$:	MOVB	#LF,-(R3)
+		SOB	R2,3$
+	4$: 	RETURN
+	;
+					;-------- СБР -СБРОС ЭКРАНА
+	K14::
+		MOV	#FF,R0
+		CALL	ISV1
+		CALL	K10
+		MOV	ENDBUF,R2
+		SUB	R1,R2
+		MOV	R1,R3
+	1$:	MOVB	#LF,(R3)+
+		SOB	R2,1$
+		RETURN
+	;
+	;
+					;----- ВК -ВВОД СТРОКИ
+	K15:
+		CALL	EPB
+		CALL	KC
+		CALL	CRLF
+		RETURN
+	;
+					;------ КУРСОР ВВЕРХ
+	K101:	TST 	TABY
+		BEQ	1$
+		DEC 	TABY
+		SUB	LL,R1
+		CALL	ISV2
+	1$:	RETURN
+	;
+					;------ КУРСОР ВНИЗ
+	K102:	CMP 	TABY,#LN
+		BEQ	1$
+		INC  	TABY
+		ADD	LL,R1
+		CALL	ISV2
+	1$:	RETURN
+	;
+					;------ КУРСОР НАПРАВО
+	K103:
+		INC	TABX
+
+		CMP	TABX,LL
+		BNE	1$
+		DEC	TABX
+	   	CMP	TABY,#LN
+		BEQ	3$
+		CLR	TABX
+		INC	TABY
+		CALL	LOK
+		BR	2$
+	1$: 	CALL	ISV2
+	2$:	INC	R1
+	3$:   	RETURN
+	;
+					;------ КУРСОР НАЛЕВО
+	K104:	TST	TABX
+		BNE	1$
+		TST	TABY
+		BEQ	4$
+		MOV	LL,TABX
+		DEC	TABX
+		DEC	TABY
+		CALL	LOK
+		BR	3$
+	1$:	DEC	TABX
+		CALL	ISV2
+	3$:	DEC	R1
+	4$: 	RETURN
+	;
+					;--- R3- НАЧАЛО СТРОКИ
+	EPR:
+		MOV	R1,R3
+		SUB	TABX,R3
+	1$:	CMP	R3,#EBUF
+		BEQ	2$
+		CMPB	-1(R3),#LF
+		BEQ	2$
+		SUB	LL,R3
+		BR	1$
+	2$:	RETURN
+	;
+					;---- R3- КОНЕЦ СТРОКИ
+	EPB:	MOV	R1,R3
+		CMPB	@R3,#LF
+		BNE	1$
+		TST	TABX
+		BEQ	3$
+		SUB	TABX,R3
+	1$:	CMPB	(R3)+,#LF
+		BNE	1$
+		DEC	R3
+	2$:	CMPB	-1(R3),#40
+		BNE	3$
+		MOVB	#LF,-(R3)
+		BR	2$
+	3$:	RETURN
+	;
+					;----- РАЗДВИЖКА СИМВОЛОВ
+
+	K23:
+		CMPB	@R1,#LF
+		BEQ	4$
+		CALL	EPB
+		INC	R3
+		CMP	R3,ENDBUF
+		BNE	1$
+
+		TST	CRTGRP
+		BEQ	10$
+		MOV	#7,R0
+		JMP	KK
+
+	10$:	CALL	ROLL
+		SUB	LL,R3
+		BR	2$
+	1$:	CMPB	@R3,#LF
+		BEQ	2$
+		CALL	ROLL2
+	2$:	MOV	R3,R2
+		SUB	R1,R2
+	3$:	MOVB	-(R3),1(R3)
+		SOB	R2,3$
+		MOVB	#40,@R3
+		CALL	EISV
+		CALL	LOK
+	4$:	RETURN
+	;
+					;---- СДВИЖКА СИМВОЛОВ
+	K24:	CMPB	@R1,#LF
+		BEQ	2$
+		MOV	R1,R3
+	1$:    	MOVB	1(R3),(R3)+
+		CMPB	@R3,#LF
+		BNE	1$
+		MOV	R1,R3
+		CALL	EISV
+		MOV	#40,R0
+		CALL	ISV1
+		CALL	LOK
+	2$:	RETURN
+	;
+					;---- КУРСОР В КОНЕЦ СТРОКИ
+	KC:
+		SUB	R1,R3
+		BEQ	3$
+		ADD	R3,R1
+	1$:	SUB	LL,R3
+		BMI	2$
+		INC	TABY
+		BR	1$
+	2$:	ADD	LL,R3
+		ADD	R3,TABX
+		CMP	TABX,LL
+		BLT	3$
+		INC	TABY
+		SUB	LL,TABX
+
+	3$:	RETURN
+	;
+					;------- СДВИГ БУФЕРА ВВЕРХ
+	ROLL:
+		MOV	R2,-(SP)
+		MOV	R3,-(SP)
+		MOV	R1,-(SP)
+		MOV	#EBUF,R3
+		MOV	ENDBUF,R2
+		SUB	LL,R2
+		SUB	R3,R2
+		MOV	R3,R1
+		ADD	LL,R1
+	1$:	MOVB	(R1)+,(R3)+
+		SOB	R2,1$
+		MOV	LL,R2
+	2$:	MOVB	#LF,(R3)+
+		SOB	R2,2$
+		MOV	(SP)+,R1
+		MOV	(SP)+,R3
+		MOV	(SP)+,R2
+		SUB	LL,R1
+		DEC	TABY
+		INCB	SCRL
+
+		MOV	R0,-(SP)
+		MOV	TABY,-(SP)
+		MOV	#LN,TABY
+		CALL	LOK
+		MOV	#LF,R0
+		CALL	ISV1
+		MOV	(SP)+,TABY
+		CALL	LOK
+		MOV	(SP)+,R0
+
+		RETURN
+	;
+					;------- СДВИГ ЧАСТИ БУФЕРА И ЭКРАНА ВНИЗ
+	ROLL2:
+		MOV	R1,-(SP)
+		MOV	TABX,-(SP)
+		MOV	TABY,-(SP)
+		MOV	R3,-(SP)
+		CALL	KC
+		CALL	LOK
+		MOV	ENDBUF,R3
+		MOV	R3,R2
+		SUB	R1,R2
+		SUB	LL,R2
+		BEQ	2$
+		MOV	R1,-(SP)
+		MOV	R3,R1
+		SUB	LL,R1
+	1$:	MOVB	-(R1),-(R3)
+		SOB	R2,1$
+		MOV	(SP)+,R1
+	2$:	MOV	LL,R2
+
+	3$:	MOVB	#LF,-(R3)
+		SOB	R2,3$
+		MOV	ENDBUF,R2
+		DEC	R2
+		MOVB	#LF,@R2
+		INC	R2
+		SUB	LL,R2
+	4$:	MOV	R1,R3
+		MOV	R2,-(SP)
+		CALL	EISV
+		MOV	#113,R0
+		CALL	ISV2
+		CALL	KC
+		MOV	(SP)+,R2
+		CMP	R1,R2
+		BGE	5$
+		CALL	CRLF
+		BR	4$
+	5$:
+		MOV	(SP)+,R3
+		MOV	(SP)+,TABY
+		MOV	(SP)+,TABX
+		MOV	(SP)+,R1
+		CALL	LOK
+		RETURN
+					;------ КУРСОР В НАЧАЛО ЭКРАНА
+	K10:
+		CLR 	TABX
+		CLR 	TABY
+		CALL	LOK
+		MOV	#EBUF,R1
+		RETURN
+	;
+
+	K25:				;-------- КУРСОР В НАЧАЛО СЛЕДУЮЩЕЙ СТРОКИ
+	CRLF:				;	(ФИЗИЧЕСКОЙ)
+		CMP	TABY,#LN
+		BNE	1$
+
+		TST	CRTGRP
+		BNE	K10
+
+		CALL	ROLL
+	1$:	INC	TABY
+		ADD	LL,R1
+
+	K26:	SUB	TABX,R1
+		CLR	TABX
+	;
+					;------ КУРСОР В ПОЛОЖЕНИЕ TABX,TABY
+	LOK::
+;		MOV	BRKFLG,-(SP)	; //////////
+		CALL	NOSTOP
+		MOV	#131,R0
+		CALL	ISV2
+		MOV	TABY,R0
+		ADD	#40,R0
+
+		CALL	ISV1
+		MOV	TABX,R0
+		ADD	MIDLE,R0
+		ADD	#40,R0
+		CALL	ISV1
+;		TSTB	(SP)+	; //////////
+;		BEQ	1$	; //////////
+		CALL	STOPEN
+	1$:	RETURN
+	;
+	K12::				;------ПС -ПЕРЕВОД СТРОКИ
+		CMP	TABY,#LN
+		BNE	1$
+		CALL	ROLL
+	1$:	INC	TABY
+		ADD	LL,R1
+		BR	ISV1
+	;
+					;----- ВЫВОД ПАРЫ  ESC, R0
+	ISV2:	TST	R0
+		BEQ	2$
+;		MOV	BRKFLG,-(SP)	; //////////
+		CALL	NOSTOP
+	1$:	TSTB	@#ARSTV
+		BPL	1$
+		MOV	#ESC,@#ARDTV
+		CALL	ISV1
+;		TSTB	(SP)+	; //////////
+;		BEQ	2$	; //////////
+		CALL	STOPEN
+	2$:
+		RETURN
+	;
+					;------ ВЫВОД R0
+	ISV0::	CMPB	R0,#100
+		BLO	ISV1
+		CMPB	R0,#300
+		BLO	2$
+		BICB	#200,R0
+		TSTB	RUSLAT
+		BNE	ISV1
+	1$:	TSTB	@#ARSTV
+		BPL	1$
+		MOVB	#16,@#ARDTV
+		BR	4$
+	2$:	TSTB	RUSLAT
+		BEQ	ISV1
+	3$:	TSTB	@#ARSTV
+		BPL	3$
+		MOVB	#17,@#ARDTV
+	4$:	COMB	RUSLAT
+	ISV1::
+		TSTB	@#ARSTV
+		BPL	ISV1
+		MOVB	R0,@#ARDTV
+
+	;!	CMPB	R0,#LF
+
+	;	BNE	6$
+	;	MOVB	#CR,R0
+	;	BR	ISV1
+	;6$:
+		RETURN
+	;
+					;------ ВЫВОД СТРОКИ (АДРЕС-R3)
+	EISV:	MOV	TABX,-(SP)
+		MOV	TABY,-(SP)
+		MOV	R1,-(SP)
+	1$:	CMPB	@R3,#LF
+		BEQ	2$
+		MOVB	(R3)+,R0
+		MOV	R3,-(SP)
+		CALL	K40
+		MOV	(SP)+,R3
+		BR	1$
+	2$:	MOV	(SP)+,R1
+		MOV	(SP)+,TABY
+		MOV	(SP)+,TABX
+		CALL	SETALF
+		RETURN
+	;
+	SETALF:	CMPB	RUSLAT+1,RUSLAT		;-----ВОССТАНОВЛЕНИЕ РУС/ЛАТ
+		BEQ	1$
+		MOV	#16,-(SP)
+		MOVB	RUSLAT+1,RUSLAT
+		BNE	3$
+		INC	@SP
+	3$:	TSTB	@#ARSTV
+		BPL	3$
+		MOV	(SP)+,@#ARDTV
+	1$:	RETURN
+	;
+					;----- ВВОД СИМВОЛА С КЛАВИАТУРЫ В R0
+	IV::
+		MFPS	-(SP)
+		MTPS	#0
+	1$:	CMP	FIRST,LAST
+		BEQ	1$
+		MTPS	(SP)+
+	NIM::
+		MOVB	@FIRST,R0
+		CMPB	R0,#100
+		BLO	MOVFRS
+		CMPB	R0,#177
+		BEQ	MOVFRS
+		TSTB	RUSLAT
+		BEQ	MOVFRS
+		BISB	#200,R0
+	MOVFRS:	INC	FIRST
+		CMP	FIRST,DFCB
+		BNE	1$
+		MOV	FCB,FIRST
+	1$:	RETURN
+	;
+	;----- АДРЕСА ПОДПРОГРАММ
+
+	;
+	KOM: 	.WORD	K40,KK,K11,K12,K13,K14,K15,KR,KL,K25,K26,KK,K37,K33,K101,K102
+		.WORD	K103,K104,K10,K23,K24
+		.WORD	K14
+	;
+	;------ КОДЫ КЛАВИШ
+	;
+	KOD:	.BYTE	40,7,11,LF,13,FF,CR,16,17,25,26,27,37,ESC,101,102,103,104
+		.BYTE	110
+		.BYTE	23,24
+		.BYTE	112
+		.BYTE	0
+	;
+		.EVEN
+		;
+		;
+		; --------------------------
+		; ### ОТОБРАЖЕНИЕ СТРОКИ ###
+		; --------------------------
+		; ВХОД:	R1- АДРЕС СТРОКИ
+		;		R2- ДЛИНА СТРОКИ (МЛ. БАИТ)
+		;		  - СИМВОЛ ОГРАНИЧИТЕЛЬ (СТ. БАИТ)
+		;
+	ISVETO::
+		TST	IODEV
+		BNE	LP
+		JMP	ISVEIL
+	LP:	MOV	R0,-(SP)
+		MOV	R3,-(SP)
+		MOV	R2,R3
+		SWAB	R3
+		CMPB	R3,#LF
+		BNE	7$
+		MOVB	#CR,R3
+	7$:	BIC	#177400,R2
+		MOV	@#IODEV,R0
+		BPL	FILOUT
+
+	1$:	CMPB	@R1,#'@
+		BLO	2$
+		CMPB	@R1,#200+'@
+		BLO	3$
+
+		TST	@#LPLCFL
+		BNE	4$
+		MOV	SP,@#LPLCFL
+		MOV	#16,R0
+		CALL	LPISV
+		BR	4$
+	3$:
+		TST	@#LPLCFL
+		BEQ	4$
+		CLR	@#LPLCFL
+		MOV	#17,R0
+		CALL	LPISV
+		BR	4$
+	2$:
+
+		CMPB	@R1,#LF
+		BNE	9$
+		MOVB	@R1,R0
+		MOVB	#CR,@R1
+		INC	R2
+		BR	10$
+
+	9$:	CMPB	@R1,#CR
+		BEQ	6$
+		CMPB	@R1,#FF
+		BNE	4$
+
+	6$:	MOV	#-1,@#LPTPOS
+	4$:	INC	@#LPTPOS
+		MOVB	(R1)+,R0
+	10$:	CALL	LPISV
+
+		CMPB	R0,R3
+		BEQ	8$
+		SOB	R2,1$
+		BR	5$
+
+	8$:	DEC	R2
+	5$:	MOV	(SP)+,R3
+		MOV	(SP)+,R0
+		RETURN
+
+	LPISV:
+		TSTB	@#IRPR
+		BPL	LPISV
+		MOV	R0,@#IRPR+2
+		RETURN
+	;
+	FILOUT:
+		TST	(SP)+
+		MOV	R0,R3
+		.BJSR	FNDBUF
+		TST	@R0
+		BEQ	NOTOP
+		BIT	#4000,@R0
+		BNE	NOTOUT
+		CLR	R3
+		BISB	@R0,R3
+		ADD	R0,R3
+		ADD	#22,R3
+		CALL	COPOUT
+		MOV	(SP)+,R0
+		RETURN
+
+	COPOUT::DEC	R2
+		BMI	1$
+		MOVB	(R1)+,(R3)+
+		INCB	@R0
+		BNE	COPOUT
+		MOV	R1,-(SP)
+		CALL	CASCII
+		CALL	CAS
+
+	BIS	#400,@R0
+		.BJSR	BLOCKN
+		MOV	(SP)+,R1
+		SUB	#400,R3
+		BR	COPOUT
+	1$:	RETURN
+	NOTOUT:	TRAP	52.
+	NOTOP:	TRAP	59.
+
+	WAIT:
+		MFPS	-(SP)
+		MTPS	#340
+		CLR	@#ARSK
+		MTPS	(SP)+
+	1$:	TSTB	@#ARSK
+		BPL	1$
+		MOV	#100,@#ARSK
+		RTI
+
+	IVS::	MOVB	@#ARDK,@LAST
+		BEQ	WAIT
+		INC	LAST
+		CMP	LAST,DFCB
+		BNE	1$
+		MOV	FCB,LAST
+	1$:	CMP	LAST,FIRST
+		BNE	DEJA
+		CALL	MOVFRS
+	DEJA:	RTI
+	;
+	BRUK::
+		MOV	R5,-(SP)
+		TST	CRTGRP
+		BEQ	10$
+		MOV	R0,-(SP)
+		MOV	R1,-(SP)
+		MOV	#15,R1
+	15$:	CLR	R0
+		CALL	@#172632
+		SOB	R1,15$
+		JSR	R4,@#163006
+		.WORD	SCR3
+		CALL	@160272		;BREAK ПОЙМАН - СНЯТЬ ПРЕРЫВАНИЕ
+		JSR	R4,@#163006
+		.WORD	SCR0
+		MOV	(SP)+,R1
+		MOV	(SP)+,R0
+		BR	11$
+	10$:	CALL	@160272		;BREAK ПОЙМАН - СНЯТЬ ПРЕРЫВАНИЕ
+	11$:	MOV	(SP)+,R5
+		TSTB	BRKFLG		;BREAK РАЗРЕШЕН?
+		BNE	1$		;ДА - ВЫПОЛНЯТЬ
+		INCB	BRKFLG+1	;НЕТ - ЗАПОМНИТЬ
+		BR	2$
+	1$:	MOV	#BREAKD,R0	;СМЕНИТЬ КОПИЮ СЧЕТЧИКА КОМАНД
+		.WORD	33		;ИЛИ 32
+	2$:	.WORD	12		;ВЫЙТИ ИЗ ПРЕРЫВАНИЯ
+
+	;
+	;
+	BREAKD:				;ВЫПОЛНЕНИЕ BREAK
+		CALL	NOSTOP
+		CLR	BRKFLG		;ЗАПРЕТИТЬ BREAK И ОЧИСТИТЬ ЗАПОМНЕННЫЙ
+		MOV	#EBUF,R0
+		MOV	TABY,R1
+		BEQ	2$
+	1$:	ADD	LL,R0
+		SOB	R1,1$
+	2$:	ADD	TABX,R0
+		MOV	R0,CURS
+		JMP	BREAK
+
+	NOSTOP::CLRB	BRKFLG
+		RETURN
+
+	STOPEN::
+		TSTB	BRKFLG+1
+		BNE	BREAKD
+		INCB	BRKFLG
+		RETURN
+
+
+	SIGNAL::MOV	#7,R0
+		CALL	ISV
+		RETURN
+	;
+	USEROM::TRAP	5
+
+	;-------------------
+	KOMDEV::.BYTE	RD.,16,WR.,21,FR.,0
+	;--------------------
+
+	MOUT:	TSTB	@#MCSR
+		BPL	MOUT
+		MOVB	R1,@#MDBR
+		RETURN
+
+	MAGNIT::
+		MOV	R0,-(SP)
+		MOV	R1,-(SP)
+		CMP	2(R1),#12
+		BNE	2$
+		CMP	LENW(R1),#1
+		BNE	10$
+		CLRB	@R1
+		CMP	@R1,#FR.*400
+		BNE	8$
+	10$:	CMP	NAMEW+6(R1),#401*352
+		BEQ	2$
+
+	6$:	ADD	#NAMEW,R1
+		MOV	#3,R0
+	3$:	MOV	@R1,12(R1)
+		MOV	#401*352,(R1)+
+		SOB	R0,3$
+
+		MOV	#401*352,(R1)+
+		MOV	#401*352,(R1)+
+		MOV	@SP,R1
+	2$:
+		CALL	NOSTOP
+		CALL	MOUT
+		SWAB	R1
+		CALL	MOUT
+		MOV	#377,R1
+		CALL	MOUT
+		CALL	MOUT
+		CALL	STOPEN
+	1$:	TSTB	@#MCSR
+		BPL	1$
+	8$:	MOV	(SP)+,R1
+		MOV	(SP)+,R0
+		TSTB	@R1
+		BEQ	9$
+		SEC
+	9$:
+		RETURN
+
+	CURON::
+		MOV	CHAR,R1
+		DEC	R1
+		MOV	#-1,R2
+		CALL	MIG
+	;!	CALL	STOPEN
+		RETURN
+	CUROFF::
+		MOV	#-1,R1
+		MOV	R1,R2
+		CALL	MIG
+	;!	CALL	STOPEN
+	ISVSS::
+		RETURN
+		.END
+
+                                                                                  

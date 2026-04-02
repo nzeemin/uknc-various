@@ -1,4 +1,4 @@
-О╩©		.INCLUDE /GENUKD.MAC/
+﻿		.INCLUDE /GENUKD.MAC/
 		.SBTTL	MONIT
 		.ENABLE LC
 
@@ -1494,13 +1494,13 @@
 		.END	START
 
 oN8;F~	R4,SAVJMP
-		MOV	22(SP),R1		; п п·п■ п╕п▓п∙п╒п░
+		MOV	22(SP),R1		; КОД ЦВЕТА
 		BEQ	10$
-		CALL	COLSET       		; пёп║п╒п░п²п░п▓п⌡п≤п▓п░п∙п° п╕п▓п∙п╒ п·п╒п═п≤п║п·п▓п п≤
+		CALL	COLSET       		; УСТАНАВЛИВАЕМ ЦВЕТ ОТРИСОВКИ
 	10$:
 		MOV	20(SP),R1		; XS < 0 ?
-		BGE	12$			; п²п∙п╒
+		BGE	12$			; НЕТ
 		NEG	R1
 		NEG	20(SP)			; XS = -XS
 		MOV	16(SP),R2		; YS
-		CMP	10(SP),6(SP)		; п∙п║п╒п╛ п║п√п░п╒п≤п∙ п÷п· п·п■п²п·п≥ п≤п≈ 
+		CMP	10(SP),6(SP)		; ЕСТЬ СЖАТИЕ ПО ОДНОЙ ИЗ 
